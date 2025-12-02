@@ -1,0 +1,16 @@
+[
+  {
+    "username": "chathucj",
+    "email": "chathucj@gmail.com",
+    "password_hash": "$2a$10$Q1RDUrZkGbLC3HI5WAd/xOmdg.M25nsBuU4R7obaDeB5B1K2ZUuCK",
+    "id": "b2640315-014d-4874-a219-f2b428927a3a",
+    "created_at": "2025-12-02T04:20:00.609Z"
+  },
+  {
+    "username": "chathucj@gmail.com",
+    "email": "sdgfdg@wqetr.com",
+    "password_hash": "$2a$10$d/TtPooAQdacHHgVMf2uVuohAmzjZBQxQZikSgrWuTq.PaAkCS3Lq",
+    "id": "20582807-adcd-4318-82fb-0d1bcbbcf3d6",
+    "created_at": "2025-12-02T14:11:19.042Z"
+  }
+]

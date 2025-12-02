@@ -1,0 +1,87 @@
+import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { db } from "@/lib/db";
+import crypto from "crypto";
+
+function generateShortCode(length = 6) {
+    return crypto.randomBytes(length).toString("base64url").substring(0, length);
+}
+
+export async function POST(req: Request) {
+    try {
+        const session = await getServerSession(authOptions);
+        const { originalUrl, customAlias } = await req.json();
+
+        if (!originalUrl) {
+            return NextResponse.json(
+                { message: "URL is required" },
+                { status: 400 }
+            );
+        }
+
+        // Basic URL validation
+        try {
+            new URL(originalUrl);
+        } catch (e) {
+            return NextResponse.json(
+                { message: "Invalid URL format" },
+                { status: 400 }
+            );
+        }
+
+        let shortCode;
+
+        if (customAlias) {
+            // Validate alias format (alphanumeric, hyphens, underscores)
+            if (!/^[a-zA-Z0-9-_]+$/.test(customAlias)) {
+                return NextResponse.json(
+                    { message: "Invalid alias format. Use letters, numbers, hyphens, and underscores only." },
+                    { status: 400 }
+                );
+            }
+
+            // Check if alias exists
+            const existingUrl = db.findUrlByShortCode(customAlias);
+            if (existingUrl) {
+                return NextResponse.json(
+                    { message: "Alias already taken" },
+                    { status: 409 }
+                );
+            }
+            shortCode = customAlias;
+        } else {
+            shortCode = generateShortCode();
+            // Ensure generated code is unique (simple retry logic could be added here)
+            while (db.findUrlByShortCode(shortCode)) {
+                shortCode = generateShortCode();
+            }
+        }
+
+        // @ts-ignore
+        const userId = session?.user?.id || null;
+
+        const newUrl = db.createUrl({
+            short_code: shortCode,
+            original_url: originalUrl,
+            user_id: userId,
+        });
+
+        // Construct the full short URL (assuming localhost for now, or use req.headers.host)
+        // In production, use an environment variable for BASE_URL
+        const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+        const shortUrl = `${baseUrl}/${shortCode}`;
+
+        return NextResponse.json({
+            shortCode,
+            shortUrl,
+            originalUrl,
+        });
+    } catch (error) {
+        console.error("Shorten error:", error);
+        return NextResponse.json(
+            { message: "Internal server error" },
+            { status: 500 }
+        );
+    }
+}
