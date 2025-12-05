@@ -4,7 +4,7 @@
     "original_url": "https://wwww.google.com",
     "user_id": null,
     "id": "dc050f21-1633-475f-8c73-a593f536ab4c",
-    "clicks": 0,
+    "clicks": 1,
     "created_at": "2025-12-01T18:11:56.908Z"
   },
   {
@@ -102,5 +102,477 @@
     "id": "07c74fd2-341c-4f00-ac81-87e89cdd8a39",
     "clicks": 0,
     "created_at": "2025-12-02T14:05:44.648Z"
+  },
+  {
+    "short_code": "UArIa9",
+    "original_url": "https://wwww.google.com",
+    "user_id": null,
+    "id": "245af994-1583-4294-a6c2-4add90a93b51",
+    "clicks": 0,
+    "created_at": "2025-12-02T14:28:49.267Z"
+  },
+  {
+    "short_code": "L4Hz-S",
+    "original_url": "https://wwww.google.com",
+    "user_id": null,
+    "id": "68d4cac6-c998-4d93-8ca8-c14cd34154b0",
+    "clicks": 0,
+    "created_at": "2025-12-02T14:51:09.150Z"
+  },
+  {
+    "short_code": "ySRstK",
+    "original_url": "https://wwww.google.com",
+    "user_id": null,
+    "id": "8bdfe43f-43a1-45af-adfb-88908d7a72a3",
+    "clicks": 0,
+    "created_at": "2025-12-02T14:59:08.811Z"
+  },
+  {
+    "short_code": "cxbgsdfg",
+    "original_url": "https://wwww.google.com",
+    "user_id": null,
+    "id": "43de70d0-55d4-4b2a-b7a7-57a8b89ffe0f",
+    "clicks": 0,
+    "created_at": "2025-12-02T16:27:03.606Z"
+  },
+  {
+    "short_code": "NqtaBQ",
+    "original_url": "https://polite-ground-026aa0800.3.azurestaticapps.net/",
+    "user_id": null,
+    "id": "2c0ca984-3249-411a-bf35-8744ea1ebaa2",
+    "clicks": 0,
+    "created_at": "2025-12-02T16:44:28.610Z"
+  },
+  {
+    "short_code": "1EmypN",
+    "original_url": "http://www.google.com",
+    "user_id": null,
+    "id": "df0acd4f-aaad-4863-b94e-512aceb0a0a4",
+    "clicks": 0,
+    "created_at": "2025-12-03T03:22:48.284Z"
+  },
+  {
+    "short_code": "3dvhbq",
+    "original_url": "http://www.google.com",
+    "user_id": null,
+    "id": "39d09dd9-7148-4455-bcd5-3656661db7b6",
+    "clicks": 0,
+    "created_at": "2025-12-03T04:31:49.171Z"
+  },
+  {
+    "short_code": "k8grAg",
+    "original_url": "http://www.google.com",
+    "user_id": null,
+    "id": "d5103c8d-566e-48bd-b6dd-59ae58fbc259",
+    "clicks": 0,
+    "created_at": "2025-12-03T06:19:11.080Z"
+  },
+  {
+    "short_code": "tytty",
+    "original_url": "http://www.google.com",
+    "user_id": null,
+    "id": "8fa1eeb0-70d6-4ff7-858f-8ffa5cf3a330",
+    "clicks": 0,
+    "created_at": "2025-12-03T06:19:49.000Z"
+  },
+  {
+    "short_code": "yuytryy",
+    "original_url": "http://www.google.com",
+    "user_id": null,
+    "id": "631a7552-8a7e-4a35-bfd6-e8c73dd3513c",
+    "clicks": 0,
+    "created_at": "2025-12-03T06:42:43.608Z"
+  },
+  {
+    "short_code": "1dqSKD",
+    "original_url": "http://www.google.com",
+    "user_id": "6e41e83d-bae9-4b57-8c18-a1aa39d9843b",
+    "id": "f003904b-9c89-433d-8a1e-81a9cfd4a2ab",
+    "clicks": 1,
+    "created_at": "2025-12-03T10:37:11.121Z"
+  },
+  {
+    "short_code": "OsJ-KL",
+    "original_url": "http://www.google.com",
+    "user_id": "6e41e83d-bae9-4b57-8c18-a1aa39d9843b",
+    "id": "fe1cf74d-d05c-42db-9ca6-cd4df986c4ca",
+    "clicks": 0,
+    "created_at": "2025-12-03T11:01:58.237Z"
+  },
+  {
+    "short_code": "eQiDFw",
+    "original_url": "http://www.goodgfggle.com",
+    "user_id": null,
+    "id": "c34c1d9e-b1dd-47f6-ba5f-b9b32e9b4f37",
+    "clicks": 0,
+    "created_at": "2025-12-03T11:03:37.701Z"
+  },
+  {
+    "short_code": "1qyQ5S",
+    "original_url": "http://www.goodgfggle.com",
+    "user_id": null,
+    "id": "17784440-1575-47f0-9629-c75fe02b17c2",
+    "clicks": 0,
+    "created_at": "2025-12-03T11:03:43.030Z"
+  },
+  {
+    "short_code": "FzuVN-",
+    "original_url": "http://www.goodgfggle.com",
+    "user_id": null,
+    "id": "1809e573-15a4-4bfb-8c7e-73effba5eadd",
+    "clicks": 0,
+    "created_at": "2025-12-03T11:03:44.239Z"
+  },
+  {
+    "short_code": "Xdnqh-",
+    "original_url": "http://www.goodgfggle.com",
+    "user_id": null,
+    "id": "d537a13c-47a1-452c-8471-da8c3a84e034",
+    "clicks": 0,
+    "created_at": "2025-12-03T11:03:45.203Z"
+  },
+  {
+    "short_code": "oOSdXx",
+    "original_url": "http://www.google.com",
+    "user_id": "6e41e83d-bae9-4b57-8c18-a1aa39d9843b",
+    "id": "4b6c74f2-0e74-4f79-a658-d9ea098f95fa",
+    "clicks": 1,
+    "created_at": "2025-12-03T11:08:40.112Z"
+  },
+  {
+    "short_code": "neb7ti",
+    "original_url": "https://www.google.com/search?q=coinmarketcap&rlz=1C1GCEU_enLK1083LK1083&oq=&gs_lcrp=EgZjaHJvbWUqCQgDECMYJxjqAjIJCAAQIxgnGOoCMgkIARAjGCcY6gIyCQgCECMYJxjqAjIJCAMQIxgnGOoCMgkIBBAjGCcY6gIyCQgFECMYJxjqAjIJCAYQIxgnGOoCMgkIBxAjGCcY6gLSAQkyNTIxajBqMTWoAgiwAgHxBfifmysMpWt7&sourceid=chrome&ie=UTF-8",
+    "user_id": "6e41e83d-bae9-4b57-8c18-a1aa39d9843b",
+    "id": "dd288b1d-f96d-44e5-a066-2e92253d56ac",
+    "clicks": 0,
+    "created_at": "2025-12-03T11:10:41.235Z"
+  },
+  {
+    "short_code": "yEJIO9",
+    "original_url": "http://www.google.com",
+    "user_id": "6e41e83d-bae9-4b57-8c18-a1aa39d9843b",
+    "id": "81b8d21d-340e-466f-9c77-46f54b0f9f93",
+    "clicks": 0,
+    "created_at": "2025-12-03T12:09:11.508Z"
+  },
+  {
+    "short_code": "HnqeMB",
+    "original_url": "http://www.google.com",
+    "user_id": "6e41e83d-bae9-4b57-8c18-a1aa39d9843b",
+    "id": "67388f97-e6fe-4dd1-8a8f-85531d6ba0be",
+    "clicks": 0,
+    "created_at": "2025-12-03T12:09:12.353Z"
+  },
+  {
+    "short_code": "-yy2vc",
+    "original_url": "http://www.google.com",
+    "user_id": "6e41e83d-bae9-4b57-8c18-a1aa39d9843b",
+    "id": "8f017582-ec15-45ef-b2c3-bda9cc008266",
+    "clicks": 11,
+    "created_at": "2025-12-03T12:09:14.077Z"
+  },
+  {
+    "short_code": "HoySwg",
+    "original_url": "http://www.goodgfggle.com",
+    "user_id": null,
+    "id": "82c0753a-6004-4419-a522-49a543190f96",
+    "clicks": 0,
+    "created_at": "2025-12-03T13:45:57.334Z",
+    "status": "active"
+  },
+  {
+    "short_code": "Ju4RZF",
+    "original_url": "http://www.google.com",
+    "user_id": "c2d57f1e-2170-4b5e-b2e2-26c567e7f74e",
+    "id": "d596ef81-909c-44aa-a7df-dfadc51ce9d2",
+    "clicks": 0,
+    "created_at": "2025-12-03T14:14:17.429Z",
+    "status": "active"
+  },
+  {
+    "short_code": "5TVbiz",
+    "original_url": "http://www.google.com",
+    "user_id": null,
+    "id": "b5abc14a-d9f6-4775-a17a-c9a7a6301907",
+    "clicks": 0,
+    "created_at": "2025-12-03T15:27:25.610Z",
+    "status": "active"
+  },
+  {
+    "short_code": "L0S_8t",
+    "original_url": "http://www.google.com",
+    "user_id": null,
+    "id": "8e314e7f-25ed-4c6d-8b00-0dbaf5019eda",
+    "clicks": 0,
+    "created_at": "2025-12-03T16:19:35.464Z",
+    "status": "active"
+  },
+  {
+    "short_code": "JYFKz_",
+    "original_url": "https://www.google.com/search?q=coinmarketcap&rlz=1C1GCEU_enLK1083LK1083&oq=&gs_lcrp=EgZjaHJvbWUqCQgDECMYJxjqAjIJCAAQIxgnGOoCMgkIARAjGCcY6gIyCQgCECMYJxjqAjIJCAMQIxgnGOoCMgkIBBAjGCcY6gIyCQgFECMYJxjqAjIJCAYQIxgnGOoCMgkIBxAjGCcY6gLSAQkyNTIxajBqMTWoAgiwAgHxBfifmysMpWt7&sourceid=chrome&ie=UTF-8",
+    "user_id": "6e41e83d-bae9-4b57-8c18-a1aa39d9843b",
+    "id": "b6ddabf6-5711-40b7-9320-d80ffbd9e253",
+    "clicks": 0,
+    "created_at": "2025-12-03T20:06:10.468Z",
+    "status": "active"
+  },
+  {
+    "short_code": "1_P_0q",
+    "original_url": "http://www.google.com",
+    "user_id": "6e41e83d-bae9-4b57-8c18-a1aa39d9843b",
+    "id": "9a095675-4627-445b-ab24-847d7760f423",
+    "clicks": 0,
+    "created_at": "2025-12-03T20:06:23.243Z",
+    "status": "active"
+  },
+  {
+    "short_code": "ETXHvj",
+    "original_url": "http://www.google.com",
+    "user_id": null,
+    "id": "be039389-5f06-476f-8d12-e90eb4d06f55",
+    "clicks": 0,
+    "created_at": "2025-12-04T04:30:38.807Z",
+    "status": "active"
+  },
+  {
+    "short_code": "2YcO82",
+    "original_url": "http://www.google.com",
+    "user_id": null,
+    "id": "0a918c4e-b1aa-4078-8817-8d0717ccf8c0",
+    "clicks": 0,
+    "created_at": "2025-12-04T04:47:07.716Z",
+    "status": "active"
+  },
+  {
+    "short_code": "xvDSI3",
+    "original_url": "http://www.google.com",
+    "user_id": null,
+    "id": "d9ffd462-0f7c-4c66-8646-47698c6408bb",
+    "clicks": 0,
+    "created_at": "2025-12-04T06:49:10.233Z",
+    "status": "active"
+  },
+  {
+    "short_code": "5WaDXx",
+    "original_url": "http://www.google.com/?utm_source=google&utm_medium=cpc&utm_campaign=campaing&utm_term=running%2Bshorts&utm_content=logo",
+    "user_id": "6e41e83d-bae9-4b57-8c18-a1aa39d9843b",
+    "id": "67450733-9532-4b6e-b111-d04d813bfc70",
+    "clicks": 1,
+    "created_at": "2025-12-04T06:50:13.608Z",
+    "status": "active"
+  },
+  {
+    "short_code": "iGwi7D",
+    "original_url": "http://www.google.com",
+    "user_id": null,
+    "id": "350fa246-264c-40fd-8a6c-117851b9afd1",
+    "clicks": 0,
+    "created_at": "2025-12-04T07:20:16.302Z",
+    "status": "active"
+  },
+  {
+    "short_code": "zAtcxy",
+    "original_url": "http://www.google.com",
+    "user_id": null,
+    "id": "d598b4f4-8d49-4208-a49e-f7076281f676",
+    "clicks": 1,
+    "created_at": "2025-12-04T07:20:39.362Z",
+    "status": "active"
+  },
+  {
+    "short_code": "ETMQrB",
+    "original_url": "http://www.google.com",
+    "user_id": null,
+    "id": "36d45b1a-fc03-485c-b3ec-41c337f28df1",
+    "clicks": 0,
+    "created_at": "2025-12-04T12:32:08.719Z",
+    "status": "active"
+  },
+  {
+    "short_code": "Ifdvd1",
+    "original_url": "http://www.google.com",
+    "user_id": "6e41e83d-bae9-4b57-8c18-a1aa39d9843b",
+    "id": "a7984bac-37f5-4951-92ee-b063a01e5cbe",
+    "clicks": 0,
+    "created_at": "2025-12-04T12:37:29.104Z",
+    "status": "active"
+  },
+  {
+    "short_code": "JD1SlS",
+    "original_url": "http://www.google.com",
+    "user_id": "6e41e83d-bae9-4b57-8c18-a1aa39d9843b",
+    "id": "5bcaf03f-207b-4a19-9d41-d15c48d30b1b",
+    "clicks": 0,
+    "created_at": "2025-12-04T12:39:59.453Z",
+    "status": "active"
+  },
+  {
+    "short_code": "NptBny",
+    "original_url": "http://www.google.com",
+    "user_id": "6e41e83d-bae9-4b57-8c18-a1aa39d9843b",
+    "id": "fe222f25-cdd5-4f17-b42b-203e00401317",
+    "clicks": 0,
+    "created_at": "2025-12-04T12:40:20.543Z",
+    "status": "active"
+  },
+  {
+    "short_code": "7Dr6wr",
+    "original_url": "http://www.google.com",
+    "user_id": "6e41e83d-bae9-4b57-8c18-a1aa39d9843b",
+    "id": "b9512973-18b1-4d9d-aa8a-cfeaacdeb32e",
+    "clicks": 0,
+    "created_at": "2025-12-04T12:40:48.186Z",
+    "status": "active"
+  },
+  {
+    "short_code": "iHI5ch",
+    "original_url": "http://www.google.com",
+    "user_id": null,
+    "id": "e6522f6e-7584-4edb-978b-52b40e3f26ba",
+    "clicks": 0,
+    "created_at": "2025-12-04T15:57:23.772Z",
+    "status": "active"
+  },
+  {
+    "short_code": "t06ONr",
+    "original_url": "http://www.goodgfggle.com",
+    "user_id": null,
+    "id": "aa4a6c69-2fb2-4873-a4c5-3a9478a215f7",
+    "clicks": 0,
+    "created_at": "2025-12-04T16:00:44.932Z",
+    "status": "active"
+  },
+  {
+    "short_code": "JgbHxP",
+    "original_url": "http://www.goodgfggle.com",
+    "user_id": "6e41e83d-bae9-4b57-8c18-a1aa39d9843b",
+    "id": "3a3a5752-3d15-4f57-9a2a-7e6d4a5d05fe",
+    "clicks": 0,
+    "created_at": "2025-12-04T16:05:44.660Z",
+    "status": "active"
+  },
+  {
+    "short_code": "jWuqHP",
+    "original_url": "http://www.google.com",
+    "user_id": "6e41e83d-bae9-4b57-8c18-a1aa39d9843b",
+    "id": "38de8311-87d8-428c-b354-257e5a69a417",
+    "clicks": 0,
+    "created_at": "2025-12-04T16:06:41.266Z",
+    "status": "active"
+  },
+  {
+    "short_code": "caPJ6h",
+    "original_url": "http://www.google.com",
+    "user_id": null,
+    "expires_at": null,
+    "id": "a37af669-8566-4ed2-a71b-e9fc0a716b33",
+    "clicks": 0,
+    "created_at": "2025-12-04T16:18:58.021Z",
+    "status": "active"
+  },
+  {
+    "short_code": "HY4Afl",
+    "original_url": "http://www.google.com",
+    "user_id": null,
+    "expires_at": null,
+    "id": "ec686293-7862-46a8-8596-4ecf646796c3",
+    "clicks": 0,
+    "created_at": "2025-12-04T17:54:26.377Z",
+    "status": "active"
+  },
+  {
+    "short_code": "cHW6TB",
+    "original_url": "http://www.google.com",
+    "user_id": null,
+    "expires_at": null,
+    "tags": [],
+    "id": "c5f5f3f2-799d-4646-8db9-c680a45f3f3b",
+    "clicks": 0,
+    "created_at": "2025-12-04T18:09:49.132Z",
+    "status": "active"
+  },
+  {
+    "short_code": "sadfsaf",
+    "original_url": "http://www.google.com",
+    "user_id": "6e41e83d-bae9-4b57-8c18-a1aa39d9843b",
+    "expires_at": "2025-12-04T23:43",
+    "tags": [
+      "Tag1"
+    ],
+    "id": "bdd31c8a-fcad-45f0-a4c5-508e6247b775",
+    "clicks": 0,
+    "created_at": "2025-12-04T18:13:56.670Z",
+    "status": "active"
+  },
+  {
+    "short_code": "mg1L3k",
+    "original_url": "http://www.google.com",
+    "user_id": null,
+    "expires_at": null,
+    "tags": [],
+    "id": "a936a2d6-1c52-4a17-b015-ebefc6bebd32",
+    "clicks": 0,
+    "created_at": "2025-12-05T07:10:15.677Z",
+    "status": "active"
+  },
+  {
+    "short_code": "zheYOM",
+    "original_url": "http://www.google.com",
+    "user_id": "6e41e83d-bae9-4b57-8c18-a1aa39d9843b",
+    "expires_at": null,
+    "tags": [],
+    "id": "220ca3f6-196e-42f0-b09a-9c809dec5ff6",
+    "clicks": 0,
+    "created_at": "2025-12-05T12:20:30.539Z",
+    "status": "active"
+  },
+  {
+    "short_code": "8MRlHv",
+    "original_url": "http://www.google.com",
+    "user_id": "6e41e83d-bae9-4b57-8c18-a1aa39d9843b",
+    "expires_at": null,
+    "tags": [
+      "Tag1"
+    ],
+    "id": "a87594a7-e338-41d9-964b-b902e38695e9",
+    "clicks": 0,
+    "created_at": "2025-12-05T12:21:04.137Z",
+    "status": "active"
+  },
+  {
+    "short_code": "rfqbVN",
+    "original_url": "http://www.google.com",
+    "user_id": "6e41e83d-bae9-4b57-8c18-a1aa39d9843b",
+    "expires_at": null,
+    "tags": [],
+    "id": "029a3b42-a33e-4a0a-950f-45315ad896d8",
+    "clicks": 0,
+    "created_at": "2025-12-05T12:38:22.857Z",
+    "status": "active"
+  },
+  {
+    "short_code": "ertewytwety",
+    "original_url": "http://www.google.com",
+    "user_id": "6e41e83d-bae9-4b57-8c18-a1aa39d9843b",
+    "expires_at": "2025-12-05T18:09",
+    "tags": [
+      "Tag2",
+      "Campaign1"
+    ],
+    "id": "bce38852-bff8-40cd-9ee3-3cf6c1bf13f3",
+    "clicks": 0,
+    "created_at": "2025-12-05T12:40:06.427Z",
+    "status": "active"
+  },
+  {
+    "short_code": "6vLZRL",
+    "original_url": "http://www.google.com",
+    "user_id": null,
+    "expires_at": null,
+    "tags": [],
+    "id": "3ee21198-72f3-4146-b64f-5c390157b5e5",
+    "clicks": 0,
+    "created_at": "2025-12-05T13:20:39.630Z",
+    "status": "active"
   }
 ]

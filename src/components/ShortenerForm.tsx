@@ -2,10 +2,15 @@
 
 import { useState } from "react";
 import QRCode from "qrcode";
+import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 export default function ShortenerForm() {
+    const { data: session } = useSession();
     const [originalUrl, setOriginalUrl] = useState("");
     const [customAlias, setCustomAlias] = useState("");
+    const [expiresAt, setExpiresAt] = useState("");
+    const [tags, setTags] = useState("");
     const [shortUrl, setShortUrl] = useState("");
     const [qrCodeUrl, setQrCodeUrl] = useState("");
     const [email, setEmail] = useState("");
@@ -23,11 +28,19 @@ export default function ShortenerForm() {
         setEmailStatus("");
         setCopied(false);
 
+        // Parse tags
+        const parsedTags = tags.split(',').map(t => t.trim()).filter(t => t.length > 0);
+
         try {
             const res = await fetch("/api/shorten", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ originalUrl, customAlias }),
+                body: JSON.stringify({
+                    originalUrl,
+                    customAlias,
+                    expiresAt: expiresAt || null,
+                    tags: parsedTags
+                }),
             });
 
             const data = await res.json();
@@ -120,25 +133,73 @@ export default function ShortenerForm() {
                             </div>
                         </div>
 
-                        <div className="flex items-center space-x-2">
-                            <div className="relative flex-1 group">
-                                <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-xl blur opacity-20 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-                                <div className="relative flex items-center bg-white rounded-xl shadow-md p-1.5 ring-1 ring-gray-900/5">
-                                    <div className="pl-3 text-gray-400 font-mono text-sm">
-                                        /
+                        <div className={`grid grid-cols-1 ${session ? 'md:grid-cols-2' : ''} gap-4`}>
+                            <div className="flex items-center space-x-2">
+                                <div className="relative flex-1 group">
+                                    <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-xl blur opacity-20 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+                                    <div className="relative flex items-center bg-white rounded-xl shadow-md p-1.5 ring-1 ring-gray-900/5">
+                                        <div className="pl-3 text-gray-400 font-mono text-sm">
+                                            /
+                                        </div>
+                                        <input
+                                            type="text"
+                                            placeholder="Custom alias (optional)"
+                                            value={customAlias}
+                                            onChange={(e) => setCustomAlias(e.target.value)}
+                                            className="flex-1 w-full px-3 py-2 text-gray-900 placeholder-gray-400 bg-transparent border-none focus:ring-0 focus:outline-none text-sm font-medium"
+                                        />
                                     </div>
-                                    <input
-                                        type="text"
-                                        placeholder="Custom alias (optional)"
-                                        value={customAlias}
-                                        onChange={(e) => setCustomAlias(e.target.value)}
-                                        className="flex-1 w-full px-3 py-2 text-gray-900 placeholder-gray-400 bg-transparent border-none focus:ring-0 focus:outline-none text-sm font-medium"
-                                    />
                                 </div>
                             </div>
-                            <div className="text-xs text-gray-500 px-2">
-                                e.g. my-campaign
+
+                            {session && (
+                                <div className="flex items-center space-x-2">
+                                    <div className="relative flex-1 group">
+                                        <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-xl blur opacity-20 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+                                        <div className="relative flex items-center bg-white rounded-xl shadow-md p-1.5 ring-1 ring-gray-900/5">
+                                            <div className="pl-3 text-gray-400">
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                </svg>
+                                            </div>
+                                            <input
+                                                type="datetime-local"
+                                                value={expiresAt}
+                                                onChange={(e) => setExpiresAt(e.target.value)}
+                                                className="flex-1 w-full px-3 py-2 text-gray-900 placeholder-gray-400 bg-transparent border-none focus:ring-0 focus:outline-none text-sm font-medium"
+                                                title="Set expiration date (optional)"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {session && (
+                            <div className="mt-4">
+                                <div className="relative group">
+                                    <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-xl blur opacity-20 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+                                    <div className="relative flex items-center bg-white rounded-xl shadow-md p-1.5 ring-1 ring-gray-900/5">
+                                        <div className="pl-3 text-gray-400">
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                            </svg>
+                                        </div>
+                                        <input
+                                            type="text"
+                                            placeholder="Tags (comma separated, optional)"
+                                            value={tags}
+                                            onChange={(e) => setTags(e.target.value)}
+                                            className="flex-1 w-full px-3 py-2 text-gray-900 placeholder-gray-400 bg-transparent border-none focus:ring-0 focus:outline-none text-sm font-medium"
+                                        />
+                                    </div>
+                                </div>
                             </div>
+                        )}
+
+                        <div className="flex justify-between text-xs text-gray-500 px-2 mt-1">
+                            <span>e.g. my-campaign</span>
+                            {session && <span>Expiration & Tags (optional)</span>}
                         </div>
                     </div>
                 </form>
@@ -190,6 +251,15 @@ export default function ShortenerForm() {
                                         </>
                                     )}
                                 </button>
+                                <Link
+                                    href={`/analytics?code=${shortUrl.split('/').pop()}`}
+                                    className="flex-shrink-0 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center shadow-sm hover:shadow"
+                                    title="View Analytics"
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                    </svg>
+                                </Link>
                             </div>
                         </div>
 

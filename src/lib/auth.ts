@@ -4,7 +4,10 @@ import GoogleProvider from "next-auth/providers/google";
 import { db } from "@/lib/db";
 import bcrypt from "bcryptjs";
 
+console.log("Auth options loaded. Secret length:", process.env.NEXTAUTH_SECRET?.length);
+
 export const authOptions: NextAuthOptions = {
+    secret: process.env.NEXTAUTH_SECRET,
     providers: [
         GoogleProvider({
             clientId: process.env.GOOGLE_CLIENT_ID || "",
@@ -36,6 +39,10 @@ export const authOptions: NextAuthOptions = {
                     return null;
                 }
 
+                if (user.status === 'banned') {
+                    throw new Error("Your account has been suspended.");
+                }
+
                 return {
                     id: user.id,
                     name: user.username,
@@ -52,12 +59,21 @@ export const authOptions: NextAuthOptions = {
             if (token && session.user) {
                 // @ts-ignore
                 session.user.id = token.sub;
+                // @ts-ignore
+                session.user.role = token.role;
+                // @ts-ignore
+                session.user.plan = token.plan;
             }
             return session;
         },
         async jwt({ token, user }) {
             if (user) {
                 token.sub = user.id;
+                const dbUser = db.findUserById(user.id);
+                // @ts-ignore
+                token.role = dbUser?.role || 'user';
+                // @ts-ignore
+                token.plan = dbUser?.plan || 'freemium';
             }
             return token;
         },

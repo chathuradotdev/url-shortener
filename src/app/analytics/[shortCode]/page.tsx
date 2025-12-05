@@ -2,119 +2,283 @@ import { db } from "@/lib/db";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 
-interface PageProps {
-    params: {
-        shortCode: string;
-    };
-}
+export const dynamic = 'force-dynamic';
 
-export default function AnalyticsPage({ params }: PageProps) {
-    const { shortCode } = params;
+export default function AnalyticsPage({ params }: { params: { shortCode: string } }) {
+    const shortCode = params.shortCode;
     const url = db.findUrlByShortCode(shortCode);
 
     if (!url) {
         notFound();
     }
 
-    const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
-    const shortUrl = `${baseUrl}/${url.short_code}`;
+    const analytics = db.getUrlAnalytics(shortCode);
+
+    // Process Data
+    const totalClicks = analytics.length;
+
+    // Daily Clicks (Last 30 Days)
+    const dailyClicks = new Map<string, number>();
+    const today = new Date();
+    for (let i = 29; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(d.getDate() - i);
+        const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        dailyClicks.set(dateStr, 0);
+    }
+
+    analytics.forEach(event => {
+        const dateStr = new Date(event.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        if (dailyClicks.has(dateStr)) {
+            dailyClicks.set(dateStr, (dailyClicks.get(dateStr) || 0) + 1);
+        }
+    });
+
+    const maxDailyClicks = Math.max(...Array.from(dailyClicks.values()), 1);
+
+    // Device Stats
+    const deviceStats = analytics.reduce((acc, curr) => {
+        const device = curr.device || "Unknown";
+        acc[device] = (acc[device] || 0) + 1;
+        return acc;
+    }, {} as Record<string, number>);
+
+    // Browser Stats
+    const browserStats = analytics.reduce((acc, curr) => {
+        const browser = curr.browser || "Unknown";
+        acc[browser] = (acc[browser] || 0) + 1;
+        return acc;
+    }, {} as Record<string, number>);
+
+    // OS Stats
+    const osStats = analytics.reduce((acc, curr) => {
+        const os = curr.os || "Unknown";
+        acc[os] = (acc[os] || 0) + 1;
+        return acc;
+    }, {} as Record<string, number>);
+
+    // Referrer Stats
+    const referrerStats = analytics.reduce((acc, curr) => {
+        let ref = curr.referrer || "Direct";
+        if (ref.startsWith("http")) {
+            try {
+                ref = new URL(ref).hostname;
+            } catch (e) { }
+        }
+        acc[ref] = (acc[ref] || 0) + 1;
+        return acc;
+    }, {} as Record<string, number>);
+
+    const getPercent = (val: number) => Math.round((val / totalClicks) * 100) || 0;
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-12">
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="text-center mb-12 animate-in fade-in slide-in-from-bottom-4">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-4">
-                        Link Analytics
-                    </h1>
-                    <p className="text-gray-600">
-                        Track the performance of your shortened link
-                    </p>
-                </div>
-
-                <div className="bg-white/70 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200 p-8 animate-in fade-in slide-in-from-bottom-4 animation-delay-200">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                        <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200">
-                            <div className="flex items-center justify-between mb-4">
-                                <p className="text-sm font-medium text-blue-700">Total Clicks</p>
-                                <div className="p-2 bg-blue-200 rounded-lg">
-                                    <svg className="w-5 h-5 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
-                                    </svg>
-                                </div>
-                            </div>
-                            <div className="flex items-baseline">
-                                <span className="text-5xl font-extrabold text-blue-900">{url.clicks}</span>
-                                <span className="ml-2 text-sm text-blue-600 font-medium">visits</span>
-                            </div>
-                        </div>
-
-                        <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border border-purple-200">
-                            <div className="flex items-center justify-between mb-4">
-                                <p className="text-sm font-medium text-purple-700">Created On</p>
-                                <div className="p-2 bg-purple-200 rounded-lg">
-                                    <svg className="w-5 h-5 text-purple-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                </div>
-                            </div>
-                            <p className="text-2xl font-bold text-purple-900">
-                                {new Date(url.created_at).toLocaleDateString('en-US', {
-                                    weekday: 'long',
-                                    year: 'numeric',
-                                    month: 'long',
-                                    day: 'numeric'
-                                })}
-                            </p>
-                            <p className="text-sm text-purple-600 mt-1">
-                                {new Date(url.created_at).toLocaleTimeString()}
-                            </p>
-                        </div>
+        <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+            <div className="max-w-7xl mx-auto">
+                {/* Header */}
+                <div className="mb-8 flex items-center justify-between">
+                    <div>
+                        <h1 className="text-3xl font-bold text-gray-900">Analytics</h1>
+                        <p className="text-gray-600 mt-1">
+                            For <span className="font-mono text-blue-600 font-semibold">{process.env.NEXTAUTH_URL}/{shortCode}</span>
+                        </p>
                     </div>
-
-                    <div className="space-y-6">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-500 mb-2 uppercase tracking-wider">Original URL</label>
-                            <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 break-all text-gray-700 font-mono text-sm flex items-center">
-                                <span className="flex-1">{url.original_url}</span>
-                                <a href={url.original_url} target="_blank" rel="noopener noreferrer" className="ml-4 text-blue-600 hover:text-blue-700">
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                                    </svg>
-                                </a>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-500 mb-2 uppercase tracking-wider">Shortened URL</label>
-                            <div className="flex items-center gap-4">
-                                <div className="flex-1 bg-white p-4 rounded-xl border-2 border-blue-100 text-blue-600 font-bold text-lg flex items-center justify-between">
-                                    <span>{shortUrl}</span>
-                                </div>
-                                <Link
-                                    href={`/${url.short_code}`}
-                                    target="_blank"
-                                    className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-bold shadow-lg hover:shadow-xl hover:from-blue-700 hover:to-purple-700 transform hover:-translate-y-0.5 transition-all duration-200 flex items-center space-x-2"
-                                >
-                                    <span>Visit Link</span>
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                                    </svg>
-                                </Link>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="mt-8 text-center">
                     <Link
                         href="/dashboard"
-                        className="inline-flex items-center text-gray-500 hover:text-gray-900 font-medium transition-colors"
+                        className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
                     >
-                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                        </svg>
                         Back to Dashboard
                     </Link>
+                </div>
+
+                {/* Overview Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <h3 className="text-sm font-medium text-gray-500">Total Clicks</h3>
+                        <p className="text-3xl font-bold text-gray-900 mt-2">{totalClicks}</p>
+                    </div>
+                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <h3 className="text-sm font-medium text-gray-500">Top Device</h3>
+                        <p className="text-3xl font-bold text-gray-900 mt-2">
+                            {Object.entries(deviceStats).sort((a, b) => b[1] - a[1])[0]?.[0] || "-"}
+                        </p>
+                    </div>
+                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <h3 className="text-sm font-medium text-gray-500">Top Browser</h3>
+                        <p className="text-3xl font-bold text-gray-900 mt-2">
+                            {Object.entries(browserStats).sort((a, b) => b[1] - a[1])[0]?.[0] || "-"}
+                        </p>
+                    </div>
+                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <h3 className="text-sm font-medium text-gray-500">Top Referrer</h3>
+                        <p className="text-3xl font-bold text-gray-900 mt-2 truncate">
+                            {Object.entries(referrerStats).sort((a, b) => b[1] - a[1])[0]?.[0] || "-"}
+                        </p>
+                    </div>
+                </div>
+
+                {/* Charts Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                    {/* Daily Clicks Chart */}
+                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 lg:col-span-2">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-6">Clicks over last 30 days</h3>
+                        <div className="h-64 flex items-end space-x-2 overflow-x-auto pb-2">
+                            {Array.from(dailyClicks.entries()).map(([date, count]) => (
+                                <div key={date} className="flex-1 flex flex-col items-center min-w-[30px] group relative">
+                                    <div
+                                        className="w-full bg-blue-100 hover:bg-blue-200 rounded-t-sm transition-all duration-300 relative"
+                                        style={{ height: `${(count / maxDailyClicks) * 100}%`, minHeight: count > 0 ? '4px' : '0' }}
+                                    >
+                                        <div className="opacity-0 group-hover:opacity-100 absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-gray-900 text-white text-xs py-1 px-2 rounded pointer-events-none whitespace-nowrap z-10">
+                                            {count} clicks on {date}
+                                        </div>
+                                    </div>
+                                    {/* Only show date for every 5th item or first/last to avoid clutter */}
+                                    {/* Actually, let's show all but rotate text if needed, or just show tooltips */}
+                                </div>
+                            ))}
+                        </div>
+                        <div className="flex justify-between text-xs text-gray-500 mt-2 border-t pt-2">
+                            <span>{Array.from(dailyClicks.keys())[0]}</span>
+                            <span>{Array.from(dailyClicks.keys())[Array.from(dailyClicks.keys()).length - 1]}</span>
+                        </div>
+                    </div>
+
+                    {/* Device Stats */}
+                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-4">Devices</h3>
+                        <div className="space-y-4">
+                            {Object.entries(deviceStats)
+                                .sort((a, b) => b[1] - a[1])
+                                .map(([device, count]) => (
+                                    <div key={device}>
+                                        <div className="flex justify-between text-sm mb-1">
+                                            <span className="font-medium text-gray-700">{device}</span>
+                                            <span className="text-gray-500">{count} ({getPercent(count)}%)</span>
+                                        </div>
+                                        <div className="w-full bg-gray-100 rounded-full h-2.5">
+                                            <div
+                                                className="bg-purple-500 h-2.5 rounded-full"
+                                                style={{ width: `${getPercent(count)}%` }}
+                                            ></div>
+                                        </div>
+                                    </div>
+                                ))}
+                        </div>
+                    </div>
+
+                    {/* Browser Stats */}
+                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-4">Browsers</h3>
+                        <div className="space-y-4">
+                            {Object.entries(browserStats)
+                                .sort((a, b) => b[1] - a[1])
+                                .map(([browser, count]) => (
+                                    <div key={browser}>
+                                        <div className="flex justify-between text-sm mb-1">
+                                            <span className="font-medium text-gray-700">{browser}</span>
+                                            <span className="text-gray-500">{count} ({getPercent(count)}%)</span>
+                                        </div>
+                                        <div className="w-full bg-gray-100 rounded-full h-2.5">
+                                            <div
+                                                className="bg-blue-500 h-2.5 rounded-full"
+                                                style={{ width: `${getPercent(count)}%` }}
+                                            ></div>
+                                        </div>
+                                    </div>
+                                ))}
+                        </div>
+                    </div>
+
+                    {/* OS Stats */}
+                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-4">Operating Systems</h3>
+                        <div className="space-y-4">
+                            {Object.entries(osStats)
+                                .sort((a, b) => b[1] - a[1])
+                                .map(([os, count]) => (
+                                    <div key={os}>
+                                        <div className="flex justify-between text-sm mb-1">
+                                            <span className="font-medium text-gray-700">{os}</span>
+                                            <span className="text-gray-500">{count} ({getPercent(count)}%)</span>
+                                        </div>
+                                        <div className="w-full bg-gray-100 rounded-full h-2.5">
+                                            <div
+                                                className="bg-green-500 h-2.5 rounded-full"
+                                                style={{ width: `${getPercent(count)}%` }}
+                                            ></div>
+                                        </div>
+                                    </div>
+                                ))}
+                        </div>
+                    </div>
+
+                    {/* Referrer Stats */}
+                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-4">Referrers</h3>
+                        <div className="space-y-4">
+                            {Object.entries(referrerStats)
+                                .sort((a, b) => b[1] - a[1])
+                                .map(([ref, count]) => (
+                                    <div key={ref}>
+                                        <div className="flex justify-between text-sm mb-1">
+                                            <span className="font-medium text-gray-700">{ref}</span>
+                                            <span className="text-gray-500">{count} ({getPercent(count)}%)</span>
+                                        </div>
+                                        <div className="w-full bg-gray-100 rounded-full h-2.5">
+                                            <div
+                                                className="bg-orange-500 h-2.5 rounded-full"
+                                                style={{ width: `${getPercent(count)}%` }}
+                                            ></div>
+                                        </div>
+                                    </div>
+                                ))}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Recent Activity */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div className="px-6 py-4 border-b border-gray-200">
+                        <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
+                    </div>
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IP Address</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Device</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Browser</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">OS</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Referrer</th>
+                                </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                                {analytics.slice().reverse().slice(0, 20).map((event) => (
+                                    <tr key={event.id}>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {new Date(event.timestamp).toLocaleString()}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
+                                            {event.ip?.replace(/(\d+)\.(\d+)\.(\d+)\.(\d+)/, '$1.$2.***.***') || "Unknown"}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {event.device}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {event.browser}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {event.os}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 truncate max-w-xs">
+                                            {event.referrer}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>

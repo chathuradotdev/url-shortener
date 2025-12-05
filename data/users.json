@@ -2,15 +2,23 @@
   {
     "username": "chathucj",
     "email": "chathucj@gmail.com",
-    "password_hash": "$2a$10$Q1RDUrZkGbLC3HI5WAd/xOmdg.M25nsBuU4R7obaDeB5B1K2ZUuCK",
-    "id": "b2640315-014d-4874-a219-f2b428927a3a",
-    "created_at": "2025-12-02T04:20:00.609Z"
+    "password_hash": "$2a$10$KCoI5pFq7rqBOtlDD7BAceTDBM9BylAQ5UlnOq1N03Xf3F.HwuQF6",
+    "id": "6e41e83d-bae9-4b57-8c18-a1aa39d9843b",
+    "created_at": "2025-12-02T14:58:34.780Z",
+    "role": "admin",
+    "status": "active",
+    "reset_token": "551f5461-3a90-44bd-a052-d27f9f63c821",
+    "reset_token_expiry": "2025-12-04T05:45:43.731Z"
   },
   {
-    "username": "chathucj@gmail.com",
-    "email": "sdgfdg@wqetr.com",
-    "password_hash": "$2a$10$d/TtPooAQdacHHgVMf2uVuohAmzjZBQxQZikSgrWuTq.PaAkCS3Lq",
-    "id": "20582807-adcd-4318-82fb-0d1bcbbcf3d6",
-    "created_at": "2025-12-02T14:11:19.042Z"
+    "username": "chathucj@yahoo.com",
+    "email": "chathucj@yahoo.com",
+    "password_hash": "$2a$10$aNEq5O2sHt2vW7jC9t5UiOfA9Zm.rFSQPNpRQoGKnxsy1RSp2CtrS",
+    "id": "c2d57f1e-2170-4b5e-b2e2-26c567e7f74e",
+    "created_at": "2025-12-03T14:13:47.619Z",
+    "role": "user",
+    "status": "active",
+    "reset_token": "ba1e0427-7ee6-4b1d-a72c-0f00b867b2e7",
+    "reset_token_expiry": "2025-12-04T05:42:18.629Z"
   }
 ]

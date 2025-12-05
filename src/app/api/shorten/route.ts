@@ -11,7 +11,7 @@ function generateShortCode(length = 6) {
 export async function POST(req: Request) {
     try {
         const session = await getServerSession(authOptions);
-        const { originalUrl, customAlias } = await req.json();
+        const { originalUrl, customAlias, expiresAt, tags } = await req.json();
 
         if (!originalUrl) {
             return NextResponse.json(
@@ -61,10 +61,16 @@ export async function POST(req: Request) {
         // @ts-ignore
         const userId = session?.user?.id || null;
 
+        // Only allow expiration and tags for registered users
+        const expirationDate = userId && expiresAt ? expiresAt : null;
+        const urlTags = userId && tags ? tags : [];
+
         const newUrl = db.createUrl({
             short_code: shortCode,
             original_url: originalUrl,
             user_id: userId,
+            expires_at: expirationDate,
+            tags: urlTags,
         });
 
         // Construct the full short URL (assuming localhost for now, or use req.headers.host)
