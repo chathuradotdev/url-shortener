@@ -43,6 +43,8 @@ export interface Url {
     status: 'active' | 'removed';
     expires_at?: string | null;
     tags?: string[];
+    password?: string; // Hashed password
+    cloaked?: boolean;
 }
 
 export interface AnalyticsEvent {
@@ -232,6 +234,15 @@ class JsonDB {
             totalUrls: activeUrls.length,
             totalClicks
         };
+    }
+
+    removeUrlPassword(urlId: string) {
+        const urls = this.read<Url>(URLS_FILE);
+        const urlIndex = urls.findIndex(u => u.id === urlId);
+        if (urlIndex !== -1) {
+            delete urls[urlIndex].password;
+            this.write(URLS_FILE, urls);
+        }
     }
 }
 

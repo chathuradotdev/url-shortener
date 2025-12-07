@@ -154,5 +154,31 @@
     "id": "b537e063-2db4-4c04-bac9-c5a1fbeb1c3d",
     "url_id": "d598b4f4-8d49-4208-a49e-f7076281f676",
     "timestamp": "2025-12-04T07:20:50.546Z"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+    "referrer": "Direct",
+    "ip": "::1",
+    "browser": "Chrome",
+    "device": "Desktop",
+    "os": "Windows",
+    "country": "Unknown",
+    "city": "Unknown",
+    "id": "bd6315ce-cf24-4a7d-bafb-58a031e3eea5",
+    "url_id": "cb8b1b10-ed11-4806-b15e-53188fd1da20",
+    "timestamp": "2025-12-07T19:06:21.571Z"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+    "referrer": "Direct",
+    "ip": "::1",
+    "browser": "Chrome",
+    "device": "Desktop",
+    "os": "Windows",
+    "country": "Unknown",
+    "city": "Unknown",
+    "id": "ff1b94fd-fc4c-4c28-9a5c-33d897c66b35",
+    "url_id": "a0cbae57-fc4a-4310-8b7e-43ee110ac2e8",
+    "timestamp": "2025-12-07T19:43:23.236Z"
   }
 ]

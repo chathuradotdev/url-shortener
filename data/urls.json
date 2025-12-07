@@ -598,5 +598,71 @@
     "clicks": 0,
     "created_at": "2025-12-07T08:38:22.939Z",
     "status": "active"
+  },
+  {
+    "short_code": "aCRi7r",
+    "original_url": "https://www.google.lk",
+    "user_id": null,
+    "expires_at": null,
+    "tags": [],
+    "id": "8e7700e6-ac0d-4335-9825-7e15d426bdd6",
+    "clicks": 0,
+    "created_at": "2025-12-07T18:20:25.913Z",
+    "status": "active"
+  },
+  {
+    "short_code": "gdfgh",
+    "original_url": "https://www.google.lk",
+    "user_id": "78dc1989-121c-474d-8b84-eb4765f9bb06",
+    "expires_at": null,
+    "tags": [
+      "eeee"
+    ],
+    "id": "cb8b1b10-ed11-4806-b15e-53188fd1da20",
+    "clicks": 1,
+    "created_at": "2025-12-07T19:05:07.844Z",
+    "status": "active"
+  },
+  {
+    "short_code": "CfImOl",
+    "original_url": "https://www.google.lk",
+    "user_id": "78dc1989-121c-474d-8b84-eb4765f9bb06",
+    "expires_at": null,
+    "tags": [
+      "chathucj@hotmail.com"
+    ],
+    "password": "$2a$10$srv5Fm3FXBrbBEVFl5DZQe7Mz4ghKio5Uar6.gB9qPEuxXrxryUVS",
+    "cloaked": true,
+    "id": "28ae5c4c-7f1f-4396-a808-b3fdbe73028c",
+    "clicks": 0,
+    "created_at": "2025-12-07T19:41:02.155Z",
+    "status": "active"
+  },
+  {
+    "short_code": "lm5Jac",
+    "original_url": "https://www.google.lk",
+    "user_id": "78dc1989-121c-474d-8b84-eb4765f9bb06",
+    "expires_at": null,
+    "tags": [
+      "chathucj@hotmail.com"
+    ],
+    "password": "$2a$10$U3KOxoOGbvxY0BSYKxBVUOFWUhkRMdRRos9ndp62eJH2s8qvTaGkS",
+    "cloaked": true,
+    "id": "ee45e39d-244c-4644-bec2-2604c0649095",
+    "clicks": 0,
+    "created_at": "2025-12-07T19:42:12.406Z",
+    "status": "active"
+  },
+  {
+    "short_code": "rnAsyg",
+    "original_url": "https://www.google.lk",
+    "user_id": "78dc1989-121c-474d-8b84-eb4765f9bb06",
+    "expires_at": null,
+    "tags": [],
+    "cloaked": true,
+    "id": "a0cbae57-fc4a-4310-8b7e-43ee110ac2e8",
+    "clicks": 1,
+    "created_at": "2025-12-07T19:43:16.286Z",
+    "status": "active"
   }
 ]

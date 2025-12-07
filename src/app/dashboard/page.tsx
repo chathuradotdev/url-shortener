@@ -22,8 +22,15 @@ export default async function Dashboard() {
         // @ts-ignore
         if (session?.user?.id) {
             // @ts-ignore
-            urls = db.getUserUrls(session.user.id);
-            console.log(`Dashboard: Found ${urls.length} URLs for user ${session?.user?.email}`);
+            // @ts-ignore
+            const rawUrls = db.getUserUrls(session.user.id);
+            console.log(`Dashboard: Found ${rawUrls.length} URLs for user ${session?.user?.email}`);
+
+            urls = rawUrls.map(url => ({
+                ...url,
+                hasPassword: !!url.password,
+                password: undefined // Don't send hash to client
+            }));
         }
     } catch (e) {
         console.error("Dashboard: Error fetching URLs:", e);

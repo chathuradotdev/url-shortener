@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import crypto from "crypto";
+import { hash } from "bcryptjs";
 
 function generateShortCode(length = 6) {
     return crypto.randomBytes(length).toString("base64url").substring(0, length);
@@ -11,7 +12,7 @@ function generateShortCode(length = 6) {
 export async function POST(req: Request) {
     try {
         const session = await getServerSession(authOptions);
-        const { originalUrl, customAlias, expiresAt, tags } = await req.json();
+        const { originalUrl, customAlias, expiresAt, tags, password, cloaked } = await req.json();
 
         if (!originalUrl) {
             return NextResponse.json(
@@ -61,9 +62,11 @@ export async function POST(req: Request) {
         // @ts-ignore
         const userId = session?.user?.id || null;
 
-        // Only allow expiration and tags for registered users
+        // Only allow expiration, tags, and password for registered users
         const expirationDate = userId && expiresAt ? expiresAt : null;
         const urlTags = userId && tags ? tags : [];
+        const passwordHash = userId && password ? await hash(password, 10) : undefined;
+        const isCloaked = userId && cloaked ? true : false;
 
         const newUrl = db.createUrl({
             short_code: shortCode,
@@ -71,6 +74,8 @@ export async function POST(req: Request) {
             user_id: userId,
             expires_at: expirationDate,
             tags: urlTags,
+            password: passwordHash,
+            cloaked: isCloaked,
         });
 
         // Construct the full short URL (assuming localhost for now, or use req.headers.host)
