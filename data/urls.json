@@ -574,5 +574,29 @@
     "clicks": 0,
     "created_at": "2025-12-05T13:20:39.630Z",
     "status": "active"
+  },
+  {
+    "short_code": "0da444",
+    "original_url": "https://www.google.com",
+    "user_id": null,
+    "expires_at": null,
+    "tags": [],
+    "id": "e1b13b93-6b0a-4ab5-8fc9-151a8042d13a",
+    "clicks": 0,
+    "created_at": "2025-12-07T08:32:41.019Z",
+    "status": "active"
+  },
+  {
+    "short_code": "ewrtwert",
+    "original_url": "https://www.google.com",
+    "user_id": "78dc1989-121c-474d-8b84-eb4765f9bb06",
+    "expires_at": "2025-12-26T08:38",
+    "tags": [
+      "First"
+    ],
+    "id": "bc807b45-7952-4934-a455-e7a6ac0d0286",
+    "clicks": 0,
+    "created_at": "2025-12-07T08:38:22.939Z",
+    "status": "active"
   }
 ]

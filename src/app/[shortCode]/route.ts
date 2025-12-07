@@ -3,9 +3,9 @@ import { db } from "@/lib/db";
 
 export async function GET(
     request: Request,
-    { params }: { params: { shortCode: string } }
+    { params }: { params: Promise<{ shortCode: string }> }
 ) {
-    const shortCode = params.shortCode;
+    const shortCode = (await params).shortCode;
     const url = db.findUrlByShortCode(shortCode);
 
     if (url) {

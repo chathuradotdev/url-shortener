@@ -20,5 +20,15 @@
     "status": "active",
     "reset_token": "ba1e0427-7ee6-4b1d-a72c-0f00b867b2e7",
     "reset_token_expiry": "2025-12-04T05:42:18.629Z"
+  },
+  {
+    "username": "ChathuraChathura",
+    "email": "chathucj@hotmail.com",
+    "password_hash": "$2a$10$C96y9k76jGpeFaIh7IBsfOhjOlU5419RrWQbsh8Yu5ovI2i.TQYfW",
+    "id": "78dc1989-121c-474d-8b84-eb4765f9bb06",
+    "created_at": "2025-12-07T08:36:20.785Z",
+    "role": "user",
+    "status": "active",
+    "plan": "freemium"
   }
 ]
