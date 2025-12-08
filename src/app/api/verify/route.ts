@@ -2,8 +2,20 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { compare } from "bcryptjs";
 
+import { limiter } from "@/lib/rate-limit";
+
 export async function POST(req: Request) {
     try {
+        const ip = req.headers.get("x-forwarded-for") || "127.0.0.1";
+
+        // 10 requests per minute (prevents brute force)
+        if (!limiter.check(10, ip + "_verify")) {
+            return NextResponse.json(
+                { message: "Rate limit exceeded" },
+                { status: 429 }
+            );
+        }
+
         const { shortCode, password } = await req.json();
 
         if (!shortCode || !password) {

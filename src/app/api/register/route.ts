@@ -2,8 +2,20 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import bcrypt from "bcryptjs";
 
+import { limiter } from "@/lib/rate-limit";
+
 export async function POST(req: Request) {
     try {
+        const ip = req.headers.get("x-forwarded-for") || "127.0.0.1";
+
+        // 5 requests per minute (prevents automated account creation spam)
+        if (!limiter.check(5, ip + "_register")) {
+            return NextResponse.json(
+                { message: "Rate limit exceeded" },
+                { status: 429 }
+            );
+        }
+
         const { username, email, password } = await req.json();
 
         if (!username || !email || !password) {

@@ -96,46 +96,68 @@ export default function ShortenerForm() {
     };
 
     return (
-        <div className="max-w-5xl mx-auto">
+        <div className={`mx-auto ${session ? 'max-w-full' : 'max-w-5xl'}`}>
             <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-8 hover:shadow-2xl transition-shadow duration-300">
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
-                        <div className="relative group mb-4">
-                            <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-xl blur opacity-30 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
-                            <div className="relative flex items-center bg-white dark:bg-gray-900 rounded-xl shadow-xl p-2 ring-1 ring-gray-900/5 dark:ring-white/10">
-                                <div className="pl-4 text-gray-400 group-focus-within:text-blue-600 transition-colors">
-                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                                    </svg>
+                        {session ? (
+                            <div className="relative group mb-4">
+                                <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-xl blur opacity-30 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
+                                <div className="relative flex items-center bg-white dark:bg-gray-900 rounded-xl shadow-xl p-2 ring-1 ring-gray-900/5 dark:ring-white/10">
+                                    <div className="pl-4 text-gray-400 group-focus-within:text-blue-600 transition-colors">
+                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                                        </svg>
+                                    </div>
+                                    <input
+                                        type="url"
+                                        id="url"
+                                        required
+                                        placeholder="Paste your long URL here..."
+                                        value={originalUrl}
+                                        onChange={(e) => setOriginalUrl(e.target.value)}
+                                        className="flex-1 w-full px-4 py-4 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 bg-transparent border-none focus:ring-0 focus:outline-none text-lg font-medium"
+                                    />
                                 </div>
-                                <input
-                                    type="url"
-                                    id="url"
-                                    required
-                                    placeholder="Paste your long URL here..."
-                                    value={originalUrl}
-                                    onChange={(e) => setOriginalUrl(e.target.value)}
-                                    className="flex-1 w-full px-4 py-4 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 bg-transparent border-none focus:ring-0 focus:outline-none text-lg font-medium"
-                                />
-                                <button
-                                    type="submit"
-                                    disabled={loading}
-                                    className="flex-shrink-0 bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-8 rounded-lg font-bold text-base shadow-lg hover:shadow-xl hover:from-blue-700 hover:to-purple-700 transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center space-x-2"
-                                >
-                                    {loading ? (
-                                        <>
-                                            <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                            </svg>
-                                            <span>Shortening...</span>
-                                        </>
-                                    ) : (
-                                        <span>Shorten</span>
-                                    )}
-                                </button>
                             </div>
-                        </div>
+                        ) : (
+                            <div className="relative group mb-4">
+                                <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-xl blur opacity-30 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
+                                <div className="relative flex items-center bg-white dark:bg-gray-900 rounded-xl shadow-xl p-2 ring-1 ring-gray-900/5 dark:ring-white/10">
+                                    <div className="pl-4 text-gray-400 group-focus-within:text-blue-600 transition-colors">
+                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                                        </svg>
+                                    </div>
+                                    <input
+                                        type="url"
+                                        id="url"
+                                        required
+                                        placeholder="Paste your long URL here..."
+                                        value={originalUrl}
+                                        onChange={(e) => setOriginalUrl(e.target.value)}
+                                        className="flex-1 w-full px-4 py-4 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 bg-transparent border-none focus:ring-0 focus:outline-none text-lg font-medium"
+                                    />
+                                    <button
+                                        type="submit"
+                                        disabled={loading}
+                                        className="flex-shrink-0 bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-8 rounded-lg font-bold text-base shadow-lg hover:shadow-xl hover:from-blue-700 hover:to-purple-700 transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center space-x-2"
+                                    >
+                                        {loading ? (
+                                            <>
+                                                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                                <span>Shortening...</span>
+                                            </>
+                                        ) : (
+                                            <span>Shorten</span>
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+                        )}
 
                         <div className={`grid grid-cols-1 ${session ? 'md:grid-cols-2' : ''} gap-4`}>
                             <div className="flex items-center space-x-2">
@@ -219,21 +241,43 @@ export default function ShortenerForm() {
                         )}
 
                         {session && (
-                            <div className="mt-4 flex items-center">
-                                <label className="flex items-center space-x-2 cursor-pointer group">
-                                    <div className="relative">
-                                        <input
-                                            type="checkbox"
-                                            className="sr-only peer"
-                                            checked={cloaked}
-                                            onChange={(e) => setCloaked(e.target.checked)}
-                                        />
-                                        <div className="w-10 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                                    </div>
-                                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-blue-600 transition-colors">
-                                        Cloak Link (Hide original URL)
-                                    </span>
-                                </label>
+                            <div className="mt-4 flex flex-col space-y-6">
+                                <div className="flex items-center">
+                                    <label className="flex items-center space-x-2 cursor-pointer group">
+                                        <div className="relative">
+                                            <input
+                                                type="checkbox"
+                                                className="sr-only peer"
+                                                checked={cloaked}
+                                                onChange={(e) => setCloaked(e.target.checked)}
+                                            />
+                                            <div className="w-10 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                                        </div>
+                                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-blue-600 transition-colors">
+                                            Cloak Link (Hide original URL)
+                                        </span>
+                                    </label>
+                                </div>
+
+                                <div className="mt-2 flex justify-end">
+                                    <button
+                                        type="submit"
+                                        disabled={loading}
+                                        className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-8 rounded-lg font-bold text-base shadow-lg hover:shadow-xl hover:from-blue-700 hover:to-purple-700 transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-2"
+                                    >
+                                        {loading ? (
+                                            <>
+                                                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                                <span>Shortening...</span>
+                                            </>
+                                        ) : (
+                                            <span>Shorten</span>
+                                        )}
+                                    </button>
+                                </div>
                             </div>
                         )}
 

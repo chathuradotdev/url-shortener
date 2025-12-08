@@ -1,13 +1,42 @@
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
+import { limiter } from "@/lib/rate-limit";
+import { db } from "@/lib/db";
 
 export async function POST(req: Request) {
     try {
+        const ip = req.headers.get("x-forwarded-for") || "127.0.0.1";
+
+        // 2 requests per minute (strict anti-spam)
+        if (!limiter.check(2, ip + "_email")) {
+            return NextResponse.json(
+                { message: "Rate limit exceeded" },
+                { status: 429 }
+            );
+        }
+
         const { email, shortUrl } = await req.json();
 
         if (!email || !shortUrl) {
             return NextResponse.json(
                 { message: "Email and Short URL are required" },
+                { status: 400 }
+            );
+        }
+
+        // Validate that the URL belongs to this domain and exists
+        const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+        if (!shortUrl.startsWith(baseUrl)) {
+            return NextResponse.json(
+                { message: "Invalid URL domain" },
+                { status: 400 }
+            );
+        }
+
+        const shortCode = shortUrl.split("/").pop();
+        if (!shortCode || !db.findUrlByShortCode(shortCode)) {
+            return NextResponse.json(
+                { message: "Invalid Short URL" },
                 { status: 400 }
             );
         }

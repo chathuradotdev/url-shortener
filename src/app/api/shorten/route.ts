@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import crypto from "crypto";
 import { hash } from "bcryptjs";
+import { limiter } from "@/lib/rate-limit";
 
 function generateShortCode(length = 6) {
     return crypto.randomBytes(length).toString("base64url").substring(0, length);
@@ -11,6 +12,16 @@ function generateShortCode(length = 6) {
 
 export async function POST(req: Request) {
     try {
+        const ip = req.headers.get("x-forwarded-for") || "127.0.0.1";
+
+        // 20 requests per minute limit
+        if (!limiter.check(20, ip + "_shorten")) {
+            return NextResponse.json(
+                { message: "Rate limit exceeded" },
+                { status: 429 }
+            );
+        }
+
         const session = await getServerSession(authOptions);
         const { originalUrl, customAlias, expiresAt, tags, password, cloaked } = await req.json();
 
