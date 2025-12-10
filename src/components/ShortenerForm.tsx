@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import QRCode from "qrcode";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import QrCodeDisplay from "./QrCodeDisplay";
 
 export default function ShortenerForm() {
     const { data: session } = useSession();
@@ -14,7 +14,6 @@ export default function ShortenerForm() {
     const [password, setPassword] = useState("");
     const [cloaked, setCloaked] = useState(false);
     const [shortUrl, setShortUrl] = useState("");
-    const [qrCodeUrl, setQrCodeUrl] = useState("");
     const [email, setEmail] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -26,7 +25,6 @@ export default function ShortenerForm() {
         setLoading(true);
         setError("");
         setShortUrl("");
-        setQrCodeUrl("");
         setEmailStatus("");
         setCopied(false);
 
@@ -54,10 +52,6 @@ export default function ShortenerForm() {
             }
 
             setShortUrl(data.shortUrl);
-
-            // Generate QR Code
-            const qrUrl = await QRCode.toDataURL(data.shortUrl);
-            setQrCodeUrl(qrUrl);
 
         } catch (err: any) {
             setError(err.message);
@@ -348,19 +342,15 @@ export default function ShortenerForm() {
                         </div>
 
                         <div className="grid md:grid-cols-2 gap-6">
-                            {qrCodeUrl && (
-                                <div className="bg-white dark:bg-gray-900 p-5 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
-                                    <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center">
-                                        <svg className="w-4 h-4 mr-2 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-                                        </svg>
-                                        QR Code
-                                    </p>
-                                    <div className="flex justify-center">
-                                        <img src={qrCodeUrl} alt="QR Code" className="w-32 h-32 border-4 border-gray-100 dark:border-gray-800 rounded-lg shadow-sm" />
-                                    </div>
-                                </div>
-                            )}
+                            <div className="bg-white dark:bg-gray-900 p-5 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                                <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center">
+                                    <svg className="w-4 h-4 mr-2 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                                    </svg>
+                                    QR Code
+                                </p>
+                                <QrCodeDisplay url={shortUrl} />
+                            </div>
 
                             <div className="bg-white dark:bg-gray-900 p-5 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
                                 <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center">

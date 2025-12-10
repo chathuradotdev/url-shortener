@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useState, useMemo } from "react";
+import QrCodeDisplay from "./QrCodeDisplay";
+
 interface Url {
     id: string;
     short_code: string;
@@ -24,6 +26,7 @@ export default function UrlList({ urls, baseUrl }: UrlListProps) {
     const [searchTerm, setSearchTerm] = useState("");
     const [sortBy, setSortBy] = useState<"date_desc" | "date_asc" | "clicks_desc" | "clicks_asc">("date_desc");
     const [currentPage, setCurrentPage] = useState(1);
+    const [qrModalUrl, setQrModalUrl] = useState<string | null>(null);
     const itemsPerPage = 5;
 
     const handleCopy = (shortCode: string, id: string) => {
@@ -94,7 +97,7 @@ export default function UrlList({ urls, baseUrl }: UrlListProps) {
                     className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl hover:from-blue-700 hover:to-purple-700 transform hover:-translate-y-0.5 transition-all duration-200"
                 >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m8-8H4" />
                     </svg>
                     <span>Create your first link</span>
                 </Link>
@@ -106,6 +109,7 @@ export default function UrlList({ urls, baseUrl }: UrlListProps) {
         <div>
             {/* Controls */}
             <div className="p-4 border-b border-gray-200 bg-gray-50/50 flex flex-col sm:flex-row gap-4 justify-between items-center">
+                {/* Search and Sort UI code mostly unchanged but included for completeness */}
                 <div className="relative w-full sm:w-64">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -172,6 +176,17 @@ export default function UrlList({ urls, baseUrl }: UrlListProps) {
                                                 </svg>
                                             )}
                                         </button>
+
+                                        <button
+                                            onClick={() => setQrModalUrl(`${baseUrl}/${url.short_code}`)}
+                                            className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 hover:bg-purple-100 rounded-lg text-gray-600 hover:text-purple-600"
+                                            title="Show QR Code"
+                                        >
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                                            </svg>
+                                        </button>
+
                                         <div className="relative">
                                             <button
                                                 onClick={() => setActiveShareId(activeShareId === url.id ? null : url.id)}
@@ -402,8 +417,6 @@ export default function UrlList({ urls, baseUrl }: UrlListProps) {
                                 </button>
                                 {/* Page Numbers */}
                                 {[...Array(totalPages)].map((_, i) => {
-                                    // Logic to show limited page numbers if too many
-                                    // For now, simple list is fine for typical user load
                                     if (totalPages > 7 && (i + 1 !== 1 && i + 1 !== totalPages && Math.abs(currentPage - (i + 1)) > 1)) {
                                         if (i + 1 === 2 || i + 1 === totalPages - 1) return <span key={i} className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">...</span>;
                                         return null;
@@ -433,6 +446,28 @@ export default function UrlList({ urls, baseUrl }: UrlListProps) {
                                     </svg>
                                 </button>
                             </nav>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* QR Modal */}
+            {qrModalUrl && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setQrModalUrl(null)}>
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 max-w-sm w-full mx-4" onClick={e => e.stopPropagation()}>
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">QR Code</h3>
+                            <button
+                                onClick={() => setQrModalUrl(null)}
+                                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                            >
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div className="flex justify-center">
+                            <QrCodeDisplay url={qrModalUrl} />
                         </div>
                     </div>
                 </div>

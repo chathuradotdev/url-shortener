@@ -1,24 +1,7 @@
-import fs from 'fs';
-import path from 'path';
-import { randomUUID } from 'crypto';
 
-const DATA_DIR = path.join(process.cwd(), 'data');
-const USERS_FILE = path.join(DATA_DIR, 'users.json');
-const URLS_FILE = path.join(DATA_DIR, 'urls.json');
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-// Ensure data directory exists
-if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR);
-}
-
-// Ensure files exist
-if (!fs.existsSync(USERS_FILE)) {
-    fs.writeFileSync(USERS_FILE, JSON.stringify([]));
-}
-if (!fs.existsSync(URLS_FILE)) {
-    fs.writeFileSync(URLS_FILE, JSON.stringify([]));
-}
-
+// User Interface
 export interface User {
     id: string;
     username: string;
@@ -33,20 +16,22 @@ export interface User {
     reset_token_expiry?: string | null;
 }
 
+// Url Interface
 export interface Url {
     id: string;
     short_code: string;
     original_url: string;
-    user_id: string | null; // null for guest
+    user_id: string | null;
     clicks: number;
     created_at: string;
     status: 'active' | 'removed';
     expires_at?: string | null;
     tags?: string[];
-    password?: string; // Hashed password
+    password?: string;
     cloaked?: boolean;
 }
 
+// Analytics Interface
 export interface AnalyticsEvent {
     id: string;
     url_id: string;
@@ -61,189 +46,236 @@ export interface AnalyticsEvent {
     referrer?: string;
 }
 
-const ANALYTICS_FILE = path.join(DATA_DIR, 'analytics.json');
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
 
-// Ensure analytics file exists
-if (!fs.existsSync(ANALYTICS_FILE)) {
-    fs.writeFileSync(ANALYTICS_FILE, JSON.stringify([]));
+if (!supabaseUrl || !supabaseKey) {
+    console.warn("Supabase credentials missing. Make sure NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are set.");
 }
 
-class JsonDB {
-    private read<T>(file: string): T[] {
-        try {
-            const data = fs.readFileSync(file, 'utf-8');
-            return JSON.parse(data);
-        } catch (error) {
-            return [];
+export const supabase = createClient(supabaseUrl, supabaseKey);
+
+class SupabaseDB {
+
+    // --- User Methods ---
+
+    async createUser(user: Omit<User, 'id' | 'created_at' | 'role' | 'status' | 'plan'>): Promise<User> {
+        const { data, error } = await supabase
+            .from('users')
+            .insert([{
+                ...user,
+                role: 'user',
+                status: 'active',
+                plan: 'freemium'
+            }])
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data as User;
+    }
+
+    async findUserByEmail(email: string): Promise<User | null> {
+        const { data } = await supabase
+            .from('users')
+            .select('*')
+            .eq('email', email)
+            .maybeSingle(); // maybeSingle returns null if not found instead of error
+        return data as User | null;
+    }
+
+    async findUserById(id: string): Promise<User | null> {
+        const { data } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', id)
+            .maybeSingle();
+        return data as User | null;
+    }
+
+    async findUserByResetToken(token: string): Promise<User | null> {
+        // We filter by token AND expiry in the query for efficiency
+        const { data } = await supabase
+            .from('users')
+            .select('*')
+            .eq('reset_token', token)
+            .gt('reset_token_expiry', new Date().toISOString())
+            .maybeSingle();
+        return data as User | null;
+    }
+
+    async getAllUsers(): Promise<User[]> {
+        const { data } = await supabase
+            .from('users')
+            .select('*');
+        return (data || []) as User[];
+    }
+
+    async updateUserStatus(userId: string, status: 'active' | 'banned'): Promise<void> {
+        await supabase
+            .from('users')
+            .update({ status })
+            .eq('id', userId);
+    }
+
+    async setUserResetToken(userId: string, token: string, expiry: string): Promise<void> {
+        await supabase
+            .from('users')
+            .update({ reset_token: token, reset_token_expiry: expiry })
+            .eq('id', userId);
+    }
+
+    async updateUserPassword(userId: string, passwordHash: string): Promise<void> {
+        await supabase
+            .from('users')
+            .update({
+                password_hash: passwordHash,
+                reset_token: null,
+                reset_token_expiry: null
+            })
+            .eq('id', userId);
+    }
+
+    // --- URL Methods ---
+
+    async createUrl(url: Omit<Url, 'id' | 'created_at' | 'clicks' | 'status'>): Promise<Url> {
+        const { data, error } = await supabase
+            .from('urls')
+            .insert([{
+                ...url,
+                clicks: 0,
+                status: 'active'
+            }])
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data as Url;
+    }
+
+    async findUrlByShortCode(shortCode: string): Promise<Url | null> {
+        // Ensure we don't return removed URLs? original logic: u.status !== 'removed'
+        const { data } = await supabase
+            .from('urls')
+            .select('*')
+            .eq('short_code', shortCode)
+            .neq('status', 'removed')
+            .maybeSingle();
+        return data as Url | null;
+    }
+
+    async getAllUrls(): Promise<Url[]> {
+        const { data } = await supabase
+            .from('urls')
+            .select('*');
+        return (data || []) as Url[];
+    }
+
+    async updateUrlStatus(urlId: string, status: 'active' | 'removed'): Promise<void> {
+        await supabase
+            .from('urls')
+            .update({ status })
+            .eq('id', urlId);
+    }
+
+    async incrementUrlClicks(shortCode: string): Promise<void> {
+        // RPC is better for atomic increment, but for now we read-modify-write or just use rpc if available.
+        // Or cleaner: invoke a sql function.
+        // But to keep it simple without adding custom SQL functions unless necessary, we can try:
+        // .update({ clicks: 0 }) ... wait, we need atomic increment.
+        // Supabase/PostgREST doesn't support 'clicks + 1' in simple update without rpc.
+        // Plan B: Fetch, then update. (Not atomic but matches JsonDB concurrency level).
+
+        const url = await this.findUrlByShortCode(shortCode);
+        if (url) {
+            await supabase
+                .from('urls')
+                .update({ clicks: url.clicks + 1 })
+                .eq('id', url.id);
         }
     }
 
-    private write<T>(file: string, data: T[]) {
-        fs.writeFileSync(file, JSON.stringify(data, null, 2));
+    async getUserUrls(userId: string): Promise<Url[]> {
+        const { data } = await supabase
+            .from('urls')
+            .select('*')
+            .eq('user_id', userId)
+            .neq('status', 'removed');
+        return (data || []) as Url[];
     }
 
-    // User methods
-    createUser(user: Omit<User, 'id' | 'created_at' | 'role' | 'status' | 'plan'>): User {
-        const users = this.read<User>(USERS_FILE);
-        const newUser: User = {
-            ...user,
-            id: randomUUID(),
-            created_at: new Date().toISOString(),
-            role: 'user',
-            status: 'active',
-            plan: 'freemium'
-        };
-        users.push(newUser);
-        this.write(USERS_FILE, users);
-        return newUser;
+    async removeUrlPassword(urlId: string): Promise<void> {
+        await supabase
+            .from('urls')
+            .update({ password: null })
+            .eq('id', urlId);
     }
 
-    findUserByEmail(email: string): User | undefined {
-        const users = this.read<User>(USERS_FILE);
-        const normalizedEmail = email.toLowerCase().trim();
-        return users.find((u) => u.email.toLowerCase().trim() === normalizedEmail);
-    }
+    // --- Analytics Methods ---
 
-    findUserById(id: string): User | undefined {
-        const users = this.read<User>(USERS_FILE);
-        return users.find((u) => u.id === id);
-    }
-
-    findUserByResetToken(token: string): User | undefined {
-        const users = this.read<User>(USERS_FILE);
-        return users.find((u) => u.reset_token === token && u.reset_token_expiry && new Date(u.reset_token_expiry) > new Date());
-    }
-
-    getAllUsers(): User[] {
-        return this.read<User>(USERS_FILE);
-    }
-
-    updateUserStatus(userId: string, status: 'active' | 'banned') {
-        const users = this.read<User>(USERS_FILE);
-        const userIndex = users.findIndex(u => u.id === userId);
-        if (userIndex !== -1) {
-            users[userIndex].status = status;
-            this.write(USERS_FILE, users);
-        }
-    }
-
-    setUserResetToken(userId: string, token: string, expiry: string) {
-        const users = this.read<User>(USERS_FILE);
-        const userIndex = users.findIndex(u => u.id === userId);
-        if (userIndex !== -1) {
-            users[userIndex].reset_token = token;
-            users[userIndex].reset_token_expiry = expiry;
-            this.write(USERS_FILE, users);
-        }
-    }
-
-    updateUserPassword(userId: string, passwordHash: string) {
-        const users = this.read<User>(USERS_FILE);
-        const userIndex = users.findIndex(u => u.id === userId);
-        if (userIndex !== -1) {
-            users[userIndex].password_hash = passwordHash;
-            users[userIndex].reset_token = null;
-            users[userIndex].reset_token_expiry = null;
-            this.write(USERS_FILE, users);
-        }
-    }
-
-    // URL methods
-    createUrl(url: Omit<Url, 'id' | 'created_at' | 'clicks' | 'status'>): Url {
-        const urls = this.read<Url>(URLS_FILE);
-        const newUrl: Url = {
-            ...url,
-            id: randomUUID(),
-            clicks: 0,
-            created_at: new Date().toISOString(),
-            status: 'active'
-        };
-        urls.push(newUrl);
-        this.write(URLS_FILE, urls);
-        return newUrl;
-    }
-
-    findUrlByShortCode(shortCode: string): Url | undefined {
-        const urls = this.read<Url>(URLS_FILE);
-        return urls.find((u) => u.short_code === shortCode && u.status !== 'removed');
-    }
-
-    getAllUrls(): Url[] {
-        return this.read<Url>(URLS_FILE);
-    }
-
-    updateUrlStatus(urlId: string, status: 'active' | 'removed') {
-        const urls = this.read<Url>(URLS_FILE);
-        const urlIndex = urls.findIndex(u => u.id === urlId);
-        if (urlIndex !== -1) {
-            urls[urlIndex].status = status;
-            this.write(URLS_FILE, urls);
-        }
-    }
-
-    incrementUrlClicks(shortCode: string) {
-        const urls = this.read<Url>(URLS_FILE);
-        const urlIndex = urls.findIndex((u) => u.short_code === shortCode);
-        if (urlIndex !== -1) {
-            urls[urlIndex].clicks += 1;
-            this.write(URLS_FILE, urls);
-        }
-    }
-
-    getUserUrls(userId: string): Url[] {
-        const urls = this.read<Url>(URLS_FILE);
-        return urls.filter((u) => u.user_id === userId && u.status !== 'removed');
-    }
-
-    // Analytics methods
-    trackUrlVisit(shortCode: string, data: Omit<AnalyticsEvent, 'id' | 'timestamp' | 'url_id'>) {
-        const url = this.findUrlByShortCode(shortCode);
+    async trackUrlVisit(shortCode: string, analyticsData: Omit<AnalyticsEvent, 'id' | 'timestamp' | 'url_id'>): Promise<void> {
+        const url = await this.findUrlByShortCode(shortCode);
         if (!url) return;
 
-        const events = this.read<AnalyticsEvent>(ANALYTICS_FILE);
-        const newEvent: AnalyticsEvent = {
-            ...data,
-            id: randomUUID(),
-            url_id: url.id,
-            timestamp: new Date().toISOString(),
-        };
-        events.push(newEvent);
-        this.write(ANALYTICS_FILE, events);
+        await supabase
+            .from('analytics')
+            .insert([{
+                ...analyticsData,
+                url_id: url.id,
+                // timestamp is auto-defaulted in DB schema, or we can send it
+                timestamp: new Date().toISOString()
+            }]);
     }
 
-    getUrlAnalytics(shortCode: string): AnalyticsEvent[] {
-        const url = this.findUrlByShortCode(shortCode);
+    async getUrlAnalytics(shortCode: string): Promise<AnalyticsEvent[]> {
+        const url = await this.findUrlByShortCode(shortCode);
         if (!url) return [];
 
-        const events = this.read<AnalyticsEvent>(ANALYTICS_FILE);
-        return events.filter((e) => e.url_id === url.id);
+        const { data } = await supabase
+            .from('analytics')
+            .select('*')
+            .eq('url_id', url.id);
+        return (data || []) as AnalyticsEvent[];
     }
 
-    getAllAnalytics(): AnalyticsEvent[] {
-        return this.read<AnalyticsEvent>(ANALYTICS_FILE);
+    async getAllAnalytics(): Promise<AnalyticsEvent[]> {
+        const { data } = await supabase
+            .from('analytics')
+            .select('*');
+        return (data || []) as AnalyticsEvent[];
     }
 
-    getSystemStats() {
-        const users = this.read<User>(USERS_FILE);
-        const urls = this.read<Url>(URLS_FILE);
-        const activeUrls = urls.filter(u => u.status !== 'removed');
-        const totalClicks = activeUrls.reduce((sum, url) => sum + url.clicks, 0);
+    async getSystemStats(): Promise<{ totalUsers: number, totalUrls: number, totalClicks: number }> {
+        // This acts as a rough "count"
+        // For accurate counts in Supabase, we use count='exact' and head=true
+
+        const { count: userCount } = await supabase.from('users').select('*', { count: 'exact', head: true });
+
+        // For URLs, filter by active
+        const { count: urlCount } = await supabase
+            .from('urls')
+            .select('*', { count: 'exact', head: true })
+            .neq('status', 'removed');
+
+        // Total clicks is harder without aggregation queries.
+        // We can either fetch all (expensive) or create a Postgres view / RPC.
+        // For parity with old code: fetch all active urls and sum.
+        // WARNING: This is bad for scale, but matches original implementation logic.
+        // Optimization: Create an RPC function `get_system_stats` later.
+
+        const { data: urls } = await supabase
+            .from('urls')
+            .select('clicks')
+            .neq('status', 'removed');
+
+        const totalClicks = (urls || []).reduce((sum, u) => sum + (u.clicks || 0), 0);
 
         return {
-            totalUsers: users.length,
-            totalUrls: activeUrls.length,
+            totalUsers: userCount || 0,
+            totalUrls: urlCount || 0,
             totalClicks
         };
     }
-
-    removeUrlPassword(urlId: string) {
-        const urls = this.read<Url>(URLS_FILE);
-        const urlIndex = urls.findIndex(u => u.id === urlId);
-        if (urlIndex !== -1) {
-            delete urls[urlIndex].password;
-            this.write(URLS_FILE, urls);
-        }
-    }
 }
 
-export const db = new JsonDB();
+export const db = new SupabaseDB();
