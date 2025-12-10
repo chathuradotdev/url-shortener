@@ -7,7 +7,7 @@ export async function POST(req: Request) {
     try {
         const { email } = await req.json();
 
-        const user = db.findUserByEmail(email);
+        const user = await db.findUserByEmail(email);
         if (!user) {
             // Return 200 even if user not found to prevent enumeration
             return NextResponse.json({ message: "If an account exists, a reset link has been sent." });
@@ -17,7 +17,7 @@ export async function POST(req: Request) {
         // Token expires in 1 hour
         const expiry = new Date(Date.now() + 3600000).toISOString();
 
-        db.setUserResetToken(user.id, token, expiry);
+        await db.setUserResetToken(user.id, token, expiry);
 
         const resetLink = `${process.env.NEXTAUTH_URL}/reset-password?token=${token}`;
         const emailHtml = getPasswordResetEmailHtml(resetLink);

@@ -8,7 +8,7 @@ export default async function ShortCodePage({
     params: Promise<{ shortCode: string }>;
 }) {
     const { shortCode } = await params;
-    const url = db.findUrlByShortCode(shortCode);
+    const url = await db.findUrlByShortCode(shortCode);
 
     if (!url) {
         notFound();
@@ -68,8 +68,8 @@ export default async function ShortCodePage({
     else if (userAgent.includes("Android")) os = "Android";
     else if (userAgent.includes("iOS")) os = "iOS";
 
-    db.incrementUrlClicks(shortCode);
-    db.trackUrlVisit(shortCode, {
+    await db.incrementUrlClicks(shortCode);
+    await db.trackUrlVisit(shortCode, {
         user_agent: userAgent,
         referrer: referer,
         ip: ip,

@@ -10,14 +10,14 @@ export async function POST(req: Request) {
             return NextResponse.json({ message: "Missing token or password" }, { status: 400 });
         }
 
-        const user = db.findUserByResetToken(token);
+        const user = await db.findUserByResetToken(token);
 
         if (!user) {
             return NextResponse.json({ message: "Invalid or expired token" }, { status: 400 });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        db.updateUserPassword(user.id, hashedPassword);
+        await db.updateUserPassword(user.id, hashedPassword);
 
         return NextResponse.json({ message: "Password updated successfully" });
 

@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ message: "Short code is required" }, { status: 400 });
     }
 
-    const url = db.findUrlByShortCode(shortCode);
+    const url = await db.findUrlByShortCode(shortCode);
 
     if (!url) {
         return NextResponse.json({ message: "URL not found" }, { status: 404 });

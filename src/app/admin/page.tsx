@@ -15,10 +15,12 @@ export default async function AdminDashboard() {
         redirect("/dashboard");
     }
 
-    const users = db.getAllUsers();
-    const urls = db.getAllUrls();
-    const stats = db.getSystemStats();
-    const analytics = db.getAllAnalytics();
+    const [users, urls, stats, analytics] = await Promise.all([
+        db.getAllUsers(),
+        db.getAllUrls(),
+        db.getSystemStats(),
+        db.getAllAnalytics()
+    ]);
 
     // Sort URLs by clicks
     const topUrls = [...urls].sort((a, b) => b.clicks - a.clicks).slice(0, 10);

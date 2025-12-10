@@ -4,15 +4,15 @@ import Link from "next/link";
 
 export const dynamic = 'force-dynamic';
 
-export default function AnalyticsPage({ params }: { params: { shortCode: string } }) {
+export default async function AnalyticsPage({ params }: { params: { shortCode: string } }) {
     const shortCode = params.shortCode;
-    const url = db.findUrlByShortCode(shortCode);
+    const url = await db.findUrlByShortCode(shortCode);
 
     if (!url) {
         notFound();
     }
 
-    const analytics = db.getUrlAnalytics(shortCode);
+    const analytics = await db.getUrlAnalytics(shortCode);
 
     // Process Data
     const totalClicks = analytics.length;

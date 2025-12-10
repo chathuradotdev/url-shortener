@@ -25,7 +25,7 @@ export async function POST(req: Request) {
             );
         }
 
-        const url = db.findUrlByShortCode(shortCode);
+        const url = await db.findUrlByShortCode(shortCode);
 
         if (!url) {
             return NextResponse.json(

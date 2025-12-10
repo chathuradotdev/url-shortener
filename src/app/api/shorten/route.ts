@@ -54,7 +54,7 @@ export async function POST(req: Request) {
             }
 
             // Check if alias exists
-            const existingUrl = db.findUrlByShortCode(customAlias);
+            const existingUrl = await db.findUrlByShortCode(customAlias);
             if (existingUrl) {
                 return NextResponse.json(
                     { message: "Alias already taken" },
@@ -65,7 +65,7 @@ export async function POST(req: Request) {
         } else {
             shortCode = generateShortCode();
             // Ensure generated code is unique (simple retry logic could be added here)
-            while (db.findUrlByShortCode(shortCode)) {
+            while (await db.findUrlByShortCode(shortCode)) {
                 shortCode = generateShortCode();
             }
         }
@@ -79,7 +79,7 @@ export async function POST(req: Request) {
         const passwordHash = userId && password ? await hash(password, 10) : undefined;
         const isCloaked = userId && cloaked ? true : false;
 
-        const newUrl = db.createUrl({
+        const newUrl = await db.createUrl({
             short_code: shortCode,
             original_url: originalUrl,
             user_id: userId,

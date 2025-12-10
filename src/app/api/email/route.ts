@@ -34,7 +34,8 @@ export async function POST(req: Request) {
         }
 
         const shortCode = shortUrl.split("/").pop();
-        if (!shortCode || !db.findUrlByShortCode(shortCode)) {
+        const hasUrl = shortCode ? await db.findUrlByShortCode(shortCode) : null;
+        if (!shortCode || !hasUrl) {
             return NextResponse.json(
                 { message: "Invalid Short URL" },
                 { status: 400 }

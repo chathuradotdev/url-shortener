@@ -23,7 +23,7 @@ export default async function Dashboard() {
         if (session?.user?.id) {
             // @ts-ignore
             // @ts-ignore
-            const rawUrls = db.getUserUrls(session.user.id);
+            const rawUrls = await db.getUserUrls(session.user.id);
             console.log(`Dashboard: Found ${rawUrls.length} URLs for user ${session?.user?.email}`);
 
             urls = rawUrls.map(url => ({

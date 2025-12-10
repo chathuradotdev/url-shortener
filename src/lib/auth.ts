@@ -24,7 +24,7 @@ export const authOptions: NextAuthOptions = {
                     return null;
                 }
 
-                const user = db.findUserByEmail(credentials.email);
+                const user = await db.findUserByEmail(credentials.email);
 
                 if (!user || !user.password_hash) {
                     return null;
@@ -69,7 +69,7 @@ export const authOptions: NextAuthOptions = {
         async jwt({ token, user }) {
             if (user) {
                 token.sub = user.id;
-                const dbUser = db.findUserById(user.id);
+                const dbUser = await db.findUserById(user.id);
                 // @ts-ignore
                 token.role = dbUser?.role || 'user';
                 // @ts-ignore

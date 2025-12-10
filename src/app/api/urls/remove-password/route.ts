@@ -25,7 +25,7 @@ export async function POST(req: Request) {
         }
 
         // @ts-ignore
-        const urls = db.getUserUrls(session.user.id);
+        const urls = await db.getUserUrls(session.user.id);
         const url = urls.find(u => u.id === urlId);
 
         if (!url) {
@@ -35,7 +35,7 @@ export async function POST(req: Request) {
             );
         }
 
-        db.removeUrlPassword(urlId);
+        await db.removeUrlPassword(urlId);
 
         return NextResponse.json({ message: "Password removed" });
 
