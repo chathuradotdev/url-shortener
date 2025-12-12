@@ -1,3 +1,4 @@
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Providers } from "@/components/Providers";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -62,6 +63,7 @@ export default function RootLayout({
                         <Footer />
                     </div>
                 </Providers>
+                <SpeedInsights />
             </body>
         </html>
     );
