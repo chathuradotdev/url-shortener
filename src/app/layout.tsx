@@ -8,8 +8,41 @@ import { Inter } from "next/font/google";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-    title: "URL Shortener",
-    description: "Shorten your URLs easily",
+    metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
+    title: {
+        default: "URL Shortener - Shorten Your Links Instantly",
+        template: "%s | URL Shortener",
+    },
+    description: "Free URL Shortener with advanced analytics, QR codes, and link management. Create short, memorable links not just for business but for everyone.",
+    keywords: ["url shortener", "link shortener", "qr code generator", "link management", "analytics", "free url shortener"],
+    authors: [{ name: "URL Shortener Team" }],
+    creator: "URL Shortener Team",
+    publisher: "URL Shortener",
+    openGraph: {
+        type: "website",
+        locale: "en_US",
+        url: "/",
+        title: "URL Shortener - Shorten Your Links Instantly",
+        description: "Create short, manageable links, generate QR codes, and share them with ease.",
+        siteName: "URL Shortener",
+    },
+    twitter: {
+        card: "summary_large_image",
+        title: "URL Shortener - Shorten Your Links Instantly",
+        description: "Create short, manageable links, generate QR codes, and share them with ease.",
+        creator: "@urlshortener",
+    },
+    robots: {
+        index: true,
+        follow: true,
+        googleBot: {
+            index: true,
+            follow: true,
+            "max-video-preview": -1,
+            "max-image-preview": "large",
+            "max-snippet": -1,
+        },
+    },
 };
 
 export default function RootLayout({

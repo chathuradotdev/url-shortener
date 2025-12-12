@@ -66,14 +66,37 @@ export const authOptions: NextAuthOptions = {
             }
             return session;
         },
-        async jwt({ token, user }) {
+        async jwt({ token, user, account }) {
             if (user) {
-                token.sub = user.id;
-                const dbUser = await db.findUserById(user.id);
-                // @ts-ignore
-                token.role = dbUser?.role || 'user';
-                // @ts-ignore
-                token.plan = dbUser?.plan || 'freemium';
+                let dbUser;
+
+                if (account?.provider === 'google') {
+                    // For Google, we must lookup by email as user.id is Google's ID
+                    dbUser = await db.findUserByEmail(user.email!);
+
+                    if (!dbUser) {
+                        try {
+                            dbUser = await db.createUser({
+                                username: user.name || user.email!.split('@')[0],
+                                email: user.email!,
+                                image: user.image || undefined,
+                            });
+                        } catch (e) {
+                            console.error("Error creating user from Google:", e);
+                        }
+                    }
+                } else {
+                    // For Credentials, user.id is already our DB UUID (from authorize)
+                    dbUser = await db.findUserById(user.id);
+                }
+
+                if (dbUser) {
+                    token.sub = dbUser.id;
+                    // @ts-ignore
+                    token.role = dbUser.role;
+                    // @ts-ignore
+                    token.plan = dbUser.plan;
+                }
             }
             return token;
         },

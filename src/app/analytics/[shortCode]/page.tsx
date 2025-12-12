@@ -4,7 +4,8 @@ import Link from "next/link";
 
 export const dynamic = 'force-dynamic';
 
-export default async function AnalyticsPage({ params }: { params: { shortCode: string } }) {
+export default async function AnalyticsPage(props: { params: Promise<{ shortCode: string }> }) {
+    const params = await props.params;
     const shortCode = params.shortCode;
     const url = await db.findUrlByShortCode(shortCode);
 

@@ -4,8 +4,28 @@ import { authOptions } from "@/lib/auth";
 
 export default async function Home() {
     const session = await getServerSession(authOptions);
+    const jsonLd = {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "URL Shortener",
+        "url": process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+        "description": "Free URL Shortener with advanced analytics, QR codes, and link management.",
+        "applicationCategory": "Utilities",
+        "operatingSystem": "Any",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+        },
+    };
+
     return (
         <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-950 dark:to-black relative overflow-hidden transition-colors duration-300">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
+
             {/* Decorative background elements */}
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
                 <div className="absolute top-20 left-10 w-72 h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob"></div>
