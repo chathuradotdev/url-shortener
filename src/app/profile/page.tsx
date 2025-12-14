@@ -102,7 +102,7 @@ export default async function ProfilePage() {
                     </div>
                 )}
 
-                <LoginHistory loginHistory={loginHistory} />
+                <LoginHistory loginHistory={loginHistory || []} />
 
                 {/* Subscription Status Card - Simple for now */}
                 <div className="mt-8 bg-white dark:bg-gray-800 shadow rounded-2xl p-8">

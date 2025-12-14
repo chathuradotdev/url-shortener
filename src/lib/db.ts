@@ -146,7 +146,7 @@ class SupabaseDB {
             .eq('id', userId);
     }
 
-    async updateLastLogin(userId: string): Promise<void> {
+    async updateLastLogin(userId: string, ip?: string, userAgent?: string): Promise<void> {
         const now = new Date().toISOString();
 
         // Update user's last_login field
@@ -156,7 +156,7 @@ class SupabaseDB {
             .eq('id', userId);
 
         // Record in history
-        await this.recordLoginHistory(userId, now);
+        await this.recordLoginHistory(userId, now, ip, userAgent);
     }
 
     async recordLoginHistory(userId: string, timestamp: string, ip?: string, userAgent?: string): Promise<void> {

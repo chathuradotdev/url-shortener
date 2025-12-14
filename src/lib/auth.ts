@@ -121,7 +121,16 @@ export const authOptions: NextAuthOptions = {
                 if (user.email) {
                     const dbUser = await db.findUserByEmail(user.email);
                     if (dbUser) {
-                        await db.updateLastLogin(dbUser.id);
+                        try {
+                            const { headers } = await import("next/headers");
+                            const headerList = await headers();
+                            const ip = headerList.get("x-forwarded-for") || undefined;
+                            const userAgent = headerList.get("user-agent") || undefined;
+                            await db.updateLastLogin(dbUser.id, ip, userAgent);
+                        } catch (e) {
+                            console.error("Failed to fetch headers in signIn event:", e);
+                            await db.updateLastLogin(dbUser.id);
+                        }
                     }
                 }
             }
