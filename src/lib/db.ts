@@ -14,6 +14,7 @@ export interface User {
     plan: 'freemium' | 'premium';
     reset_token?: string | null;
     reset_token_expiry?: string | null;
+    last_login?: string | null;
 }
 
 // Url Interface
@@ -44,6 +45,15 @@ export interface AnalyticsEvent {
     browser?: string;
     os?: string;
     referrer?: string;
+}
+
+// Login History Interface
+export interface LoginRecord {
+    id: string;
+    user_id: string;
+    timestamp: string;
+    ip?: string;
+    user_agent?: string;
 }
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -134,6 +144,45 @@ class SupabaseDB {
                 reset_token_expiry: null
             })
             .eq('id', userId);
+    }
+
+    async updateLastLogin(userId: string): Promise<void> {
+        const now = new Date().toISOString();
+
+        // Update user's last_login field
+        await supabase
+            .from('users')
+            .update({ last_login: now })
+            .eq('id', userId);
+
+        // Record in history
+        await this.recordLoginHistory(userId, now);
+    }
+
+    async recordLoginHistory(userId: string, timestamp: string, ip?: string, userAgent?: string): Promise<void> {
+        await supabase
+            .from('login_history')
+            .insert([{
+                user_id: userId,
+                timestamp: timestamp,
+                ip: ip,
+                user_agent: userAgent
+            }]);
+    }
+
+    async getLoginHistory(userId: string): Promise<LoginRecord[]> {
+        // Get records from last 6 months
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+        const { data } = await supabase
+            .from('login_history')
+            .select('*')
+            .eq('user_id', userId)
+            .gte('timestamp', sixMonthsAgo.toISOString())
+            .order('timestamp', { ascending: false });
+
+        return (data || []) as LoginRecord[];
     }
 
     // --- URL Methods ---

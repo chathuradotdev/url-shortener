@@ -41,8 +41,11 @@ export default function Navbar() {
                         {session ? (
                             <>
 
-                                <Link href="/tools/utm-builder" className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors">
+                                <Link href="/tools/utm-builder" className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                                     UTM Builder
+                                </Link>
+                                <Link href="/profile" className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                                    My Profile
                                 </Link>
                                 <Link
                                     href="/dashboard"

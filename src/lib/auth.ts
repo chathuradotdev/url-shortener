@@ -63,6 +63,8 @@ export const authOptions: NextAuthOptions = {
                 session.user.role = token.role;
                 // @ts-ignore
                 session.user.plan = token.plan;
+                // @ts-ignore
+                session.user.last_login = token.last_login;
             }
             return session;
         },
@@ -96,10 +98,34 @@ export const authOptions: NextAuthOptions = {
                     token.role = dbUser.role;
                     // @ts-ignore
                     token.plan = dbUser.plan;
+                    // @ts-ignore
+                    token.last_login = dbUser.last_login;
                 }
             }
             return token;
         },
+    },
+    events: {
+        async signIn({ user }) {
+            if (user?.id) {
+                // user.id might be the Google ID or the DB ID depending on flow
+                // But in 'signIn' event, 'user' object is what returns from 'authorize' or 'profile'
+                // If credentials provider, user is what 'authorize' returns (contains DB ID)
+                // If google provider, user contains profile info. We need to handle this.
+
+                // However, the `jwt` callback runs before this or in parallel?
+                // Actually `signIn` event receives the user object.
+
+                // Let's rely on finding the user by email if ID lookup fails or is ambiguous.
+                // Or safely, just look up by email.
+                if (user.email) {
+                    const dbUser = await db.findUserByEmail(user.email);
+                    if (dbUser) {
+                        await db.updateLastLogin(dbUser.id);
+                    }
+                }
+            }
+        }
     },
     pages: {
         signIn: "/login",

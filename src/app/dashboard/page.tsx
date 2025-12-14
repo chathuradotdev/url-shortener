@@ -66,6 +66,20 @@ export default async function Dashboard() {
                                 )}
                             </h1>
                             <p className="text-gray-600">Manage and track your shortened URLs</p>
+                            {/* @ts-ignore */}
+                            {session?.user?.last_login && (
+                                <p className="text-xs text-gray-500 mt-1">
+                                    {/* @ts-ignore */}
+                                    Last login: {new Date(session.user.last_login).toLocaleString("en-US", {
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric',
+                                        hour: 'numeric',
+                                        minute: 'numeric',
+                                        hour12: true
+                                    })}
+                                </p>
+                            )}
                         </div>
                         <div className="flex items-center space-x-4">
                             {/* @ts-ignore */}
