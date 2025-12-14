@@ -294,7 +294,7 @@ class SupabaseDB {
         return (data || []) as AnalyticsEvent[];
     }
 
-    async getSystemStats(): Promise<{ totalUsers: number, totalUrls: number, totalClicks: number }> {
+    async getSystemStats(): Promise<{ totalUsers: number, totalUrls: number, totalClicks: number, guestUrls: number, memberUrls: number }> {
         // This acts as a rough "count"
         // For accurate counts in Supabase, we use count='exact' and head=true
 
@@ -305,6 +305,18 @@ class SupabaseDB {
             .from('urls')
             .select('*', { count: 'exact', head: true })
             .neq('status', 'removed');
+
+        const { count: guestUrlCount } = await supabase
+            .from('urls')
+            .select('*', { count: 'exact', head: true })
+            .neq('status', 'removed')
+            .is('user_id', null);
+
+        const { count: memberUrlCount } = await supabase
+            .from('urls')
+            .select('*', { count: 'exact', head: true })
+            .neq('status', 'removed')
+            .not('user_id', 'is', null);
 
         // Total clicks is harder without aggregation queries.
         // We can either fetch all (expensive) or create a Postgres view / RPC.
@@ -322,8 +334,31 @@ class SupabaseDB {
         return {
             totalUsers: userCount || 0,
             totalUrls: urlCount || 0,
-            totalClicks
+            totalClicks,
+            guestUrls: guestUrlCount || 0,
+            memberUrls: memberUrlCount || 0
         };
+    }
+
+    async getMaintenanceMode(): Promise<boolean> {
+        const { data } = await supabase
+            .from('settings')
+            .select('value')
+            .eq('key', 'maintenance_mode')
+            .maybeSingle();
+        return data?.value === 'true';
+    }
+
+    async setMaintenanceMode(enabled: boolean): Promise<void> {
+        const { error } = await supabase
+            .from('settings')
+            .upsert({
+                key: 'maintenance_mode',
+                value: String(enabled),
+                updated_at: new Date().toISOString()
+            });
+
+        if (error) console.error("Error setting maintenance mode:", error);
     }
 }
 

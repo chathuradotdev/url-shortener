@@ -54,7 +54,7 @@ export default function Navbar() {
                                     Dashboard
                                 </Link>
                                 <button
-                                    onClick={() => signOut()}
+                                    onClick={() => signOut({ callbackUrl: "/" })}
                                     className="text-sm font-medium text-gray-500 hover:text-red-600 px-4 py-2 transition-colors duration-200"
                                 >
                                     Sign Out
