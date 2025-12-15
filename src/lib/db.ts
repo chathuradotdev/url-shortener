@@ -146,6 +146,14 @@ class SupabaseDB {
             .eq('id', userId);
     }
 
+    // Updates user plan directly
+    async updateUserPlan(userId: string, plan: 'freemium' | 'premium'): Promise<void> {
+        await supabase
+            .from('users')
+            .update({ plan })
+            .eq('id', userId);
+    }
+
     async updateLastLogin(userId: string, ip?: string, userAgent?: string): Promise<void> {
         const now = new Date().toISOString();
 

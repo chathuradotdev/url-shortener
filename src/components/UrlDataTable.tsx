@@ -11,18 +11,22 @@ import {
     getFilteredRowModel,
     getPaginationRowModel,
     getSortedRowModel,
+    getExpandedRowModel,
     useReactTable,
+    ExpandedState,
 } from "@tanstack/react-table"
 import {
     ArrowUpDown,
     ChevronDown,
+    ChevronRight,
     QrCode,
     Copy,
     Calendar,
     BarChart2,
     Share2,
     Lock,
-    Ghost
+    Ghost,
+    Folder
 } from "lucide-react"
 
 import { Button } from "./ui/button"
@@ -72,6 +76,8 @@ interface Url {
     expires_at?: string | null;
     hasPassword?: boolean;
     cloaked?: boolean;
+    subRows?: Url[]; // For grouping
+    isBatchParent?: boolean;
 }
 
 interface UrlDataTableProps {
@@ -80,12 +86,66 @@ interface UrlDataTableProps {
     onShowQrCode: (url: string) => void;
 }
 
+// Helper to group data
+function groupUrlsByBatch(data: Url[]): Url[] {
+    const batchMap = new Map<string, Url[]>();
+    const individualUrls: Url[] = [];
+
+    data.forEach(url => {
+        const bulkTag = url.tags?.find(t => t.startsWith('blk'));
+        if (bulkTag) {
+            if (!batchMap.has(bulkTag)) {
+                batchMap.set(bulkTag, []);
+            }
+            batchMap.get(bulkTag)!.push(url);
+        } else {
+            individualUrls.push(url);
+        }
+    });
+
+    const batchRows: Url[] = Array.from(batchMap.entries()).map(([tag, urls]) => {
+        // Calculate aggregates
+        const totalClicks = urls.reduce((sum, u) => sum + u.clicks, 0);
+        // Date from timestamp in tag blkMMDDYYYYHHMMSS
+        // simple parsing
+        let dateStr = "Unknown Date";
+        try {
+            // blk 12 15 2025 07 20 55
+            const raw = tag.slice(3);
+            if (raw.length >= 8) {
+                const month = raw.slice(0, 2);
+                const day = raw.slice(2, 4);
+                const year = raw.slice(4, 8);
+                dateStr = `${month}/${day}/${year}`;
+            }
+        } catch (e) { }
+
+        return {
+            id: `batch_${tag}`,
+            short_code: tag, // Display tag as ID
+            original_url: `Bulk Upload - ${urls.length} URLs`,
+            clicks: totalClicks,
+            created_at: urls[0].created_at, // Use first child's date
+            tags: [tag],
+            subRows: urls,
+            isBatchParent: true
+        };
+    });
+
+    return [...batchRows, ...individualUrls];
+}
+
+
 export function UrlDataTable({ data, baseUrl, onShowQrCode }: UrlDataTableProps) {
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = React.useState({})
     const [globalFilter, setGlobalFilter] = React.useState("")
+    const [expanded, setExpanded] = React.useState<ExpandedState>({})
+
+    // Process data for grouping
+    const processedData = React.useMemo(() => groupUrlsByBatch(data), [data]);
 
     const [copiedId, setCopiedId] = React.useState<string | null>(null);
 
@@ -146,14 +206,35 @@ export function UrlDataTable({ data, baseUrl, onShowQrCode }: UrlDataTableProps)
     };
 
     const columns: ColumnDef<Url>[] = [
-        // ... (previous columns remain unchanged)
         {
             accessorKey: "short_code",
             header: "Short Link",
             cell: ({ row }) => {
-                const url = row.original
+                const url = row.original;
+
+                if (url.isBatchParent) {
+                    return (
+                        <div className="flex items-center space-x-2 font-semibold text-gray-700">
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 w-6 p-0 mr-1"
+                                onClick={row.getToggleExpandedHandler()}
+                            >
+                                {row.getIsExpanded() ? (
+                                    <ChevronDown className="h-4 w-4" />
+                                ) : (
+                                    <ChevronRight className="h-4 w-4" />
+                                )}
+                            </Button>
+                            <Folder className="h-4 w-4 text-blue-500 mr-2" />
+                            <span>Batch: {url.original_url}</span>
+                        </div>
+                    )
+                }
+
                 return (
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-2 pl-4 md:pl-0">
                         <a href={`${baseUrl}/${url.short_code}`} target="_blank" rel="noreferrer" className="text-blue-600 hover:text-blue-800 hover:underline font-medium transition-colors">
                             {baseUrl}/{url.short_code}
                         </a>
@@ -164,11 +245,16 @@ export function UrlDataTable({ data, baseUrl, onShowQrCode }: UrlDataTableProps)
         {
             accessorKey: "original_url",
             header: "Original URL",
-            cell: ({ row }) => (
-                <div className="max-w-[250px] truncate text-muted-foreground" title={row.getValue("original_url")}>
-                    {row.getValue("original_url")}
-                </div>
-            )
+            cell: ({ row }) => {
+                if (row.original.isBatchParent) {
+                    return null; // Don't show redundant info
+                }
+                return (
+                    <div className="max-w-[250px] truncate text-muted-foreground" title={row.getValue("original_url")}>
+                        {row.getValue("original_url")}
+                    </div>
+                )
+            }
         },
         {
             accessorKey: "clicks",
@@ -186,7 +272,7 @@ export function UrlDataTable({ data, baseUrl, onShowQrCode }: UrlDataTableProps)
             },
             cell: ({ row }) => (
                 <div className="flex items-center">
-                    <span className="inline-flex items-center justify-center px-2 py-1 bg-green-50 text-green-700 rounded-md text-xs font-medium ring-1 ring-inset ring-green-600/20">
+                    <span className={`inline-flex items-center justify-center px-2 py-1 rounded-md text-xs font-medium ring-1 ring-inset ${row.original.isBatchParent ? 'bg-blue-50 text-blue-700 ring-blue-600/20' : 'bg-green-50 text-green-700 ring-green-600/20'}`}>
                         {row.getValue("clicks")}
                     </span>
                 </div>
@@ -198,6 +284,16 @@ export function UrlDataTable({ data, baseUrl, onShowQrCode }: UrlDataTableProps)
             cell: ({ row }) => {
                 const tags = row.original.tags
                 if (!tags || tags.length === 0) return <span className="text-muted-foreground text-xs italic">No tags</span>
+
+                // For batch parent, highlight the batch tag
+                if (row.original.isBatchParent) {
+                    return (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-purple-100 text-purple-800 border border-purple-200">
+                            {tags[0]}
+                        </span>
+                    )
+                }
+
                 return (
                     <div className="flex flex-wrap gap-1">
                         {tags.map(tag => (
@@ -235,6 +331,8 @@ export function UrlDataTable({ data, baseUrl, onShowQrCode }: UrlDataTableProps)
             accessorKey: "expires_at",
             header: "Expires",
             cell: ({ row }) => {
+                if (row.original.isBatchParent) return <span className="text-gray-300">-</span>;
+
                 const expiresAt = row.original.expires_at
                 if (!expiresAt) return <span className="text-muted-foreground text-xs">-</span>
                 return (
@@ -251,6 +349,8 @@ export function UrlDataTable({ data, baseUrl, onShowQrCode }: UrlDataTableProps)
             enableHiding: false,
             cell: ({ row }) => {
                 const url = row.original
+
+                if (url.isBatchParent) return <span className="text-gray-300 text-xs">Batch Group</span>;
 
                 return (
                     <div className="flex items-center gap-1">
@@ -306,7 +406,7 @@ export function UrlDataTable({ data, baseUrl, onShowQrCode }: UrlDataTableProps)
                                 </TooltipContent>
                             </Tooltip>
 
-                            {/* Share - Tooltip removed to avoid conflicts */}
+                            {/* Share */}
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-green-600 hover:bg-green-50" title="Share ...">
@@ -402,7 +502,7 @@ export function UrlDataTable({ data, baseUrl, onShowQrCode }: UrlDataTableProps)
     ]
 
     const table = useReactTable({
-        data,
+        data: processedData,
         columns,
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
@@ -413,6 +513,9 @@ export function UrlDataTable({ data, baseUrl, onShowQrCode }: UrlDataTableProps)
         onColumnVisibilityChange: setColumnVisibility,
         onRowSelectionChange: setRowSelection,
         onGlobalFilterChange: setGlobalFilter,
+        getExpandedRowModel: getExpandedRowModel(),
+        getSubRows: (row) => row.subRows,
+        onExpandedChange: setExpanded,
         globalFilterFn: (row, columnId, filterValue) => {
             const value = filterValue.toLowerCase();
             const shortCode = (row.getValue("short_code") as string)?.toLowerCase() || "";
@@ -427,11 +530,13 @@ export function UrlDataTable({ data, baseUrl, onShowQrCode }: UrlDataTableProps)
             columnVisibility,
             rowSelection,
             globalFilter,
+            expanded,
         },
     })
 
     return (
         <div className="w-full space-y-4">
+            {/* Filter and Columns UI remains same */}
             <div className="flex items-center py-4 justify-between gap-4">
                 <Input
                     placeholder="Filter URLs, tags, or short codes..."
@@ -466,6 +571,7 @@ export function UrlDataTable({ data, baseUrl, onShowQrCode }: UrlDataTableProps)
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>
+
             <div className="rounded-md border bg-white shadow-sm overflow-hidden">
                 <Table>
                     <TableHeader>
@@ -492,10 +598,14 @@ export function UrlDataTable({ data, baseUrl, onShowQrCode }: UrlDataTableProps)
                                 <TableRow
                                     key={row.id}
                                     data-state={row.getIsSelected() && "selected"}
-                                    className="hover:bg-blue-50/10 transition-colors"
+                                    className={`
+                                        transition-colors
+                                        ${row.depth > 0 ? 'bg-gray-50/50 hover:bg-gray-50/80 ml-4' : 'hover:bg-blue-50/10'}
+                                        ${row.original.isBatchParent ? 'bg-blue-50/30 hover:bg-blue-50/50' : ''}
+                                    `}
                                 >
                                     {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id}>
+                                        <TableCell key={cell.id} className={row.depth > 0 && cell.column.id === 'short_code' ? 'pl-8' : ''}>
                                             {flexRender(
                                                 cell.column.columnDef.cell,
                                                 cell.getContext()
@@ -517,6 +627,8 @@ export function UrlDataTable({ data, baseUrl, onShowQrCode }: UrlDataTableProps)
                     </TableBody>
                 </Table>
             </div>
+
+            {/* Pagination */}
             <div className="flex items-center justify-end space-x-2 py-4">
                 <div className="flex-1 text-sm text-muted-foreground">
                     Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
@@ -541,7 +653,7 @@ export function UrlDataTable({ data, baseUrl, onShowQrCode }: UrlDataTableProps)
                 </div>
             </div>
 
-            {/* Edit Dialog */}
+            {/* Edit Dialog remains same */}
             <Dialog open={!!editingUrl} onOpenChange={(open) => !open && setEditingUrl(null)}>
                 <DialogContent>
                     <DialogHeader>

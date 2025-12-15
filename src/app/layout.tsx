@@ -1,5 +1,6 @@
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Providers } from "@/components/Providers";
+import { Toaster } from "@/components/ui/sonner";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import "./globals.css";
@@ -62,6 +63,7 @@ export default function RootLayout({
                         </div>
                         <Footer />
                     </div>
+                    <Toaster />
                 </Providers>
                 <SpeedInsights />
             </body>

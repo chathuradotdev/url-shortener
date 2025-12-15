@@ -32,9 +32,21 @@ import {
     DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuTrigger,
+    DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { User } from "@/lib/db";
-import { toggleUserStatus } from "./actions";
+import { toast } from "sonner";
+import { toggleUserStatus, changeUserPlan } from "./actions";
 
 export const columns: ColumnDef<User>[] = [
     {
@@ -65,6 +77,23 @@ export const columns: ColumnDef<User>[] = [
         },
     },
     {
+        accessorKey: "plan",
+        header: "Plan",
+        cell: ({ row }) => {
+            const plan = row.getValue("plan") as string;
+            return (
+                <span
+                    className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${plan === "premium"
+                        ? "bg-purple-100 text-purple-800"
+                        : "bg-gray-100 text-gray-800"
+                        }`}
+                >
+                    {plan ? plan.charAt(0).toUpperCase() + plan.slice(1) : "Freemium"}
+                </span>
+            );
+        },
+    },
+    {
         accessorKey: "last_login",
         header: ({ column }) => {
             return (
@@ -85,25 +114,100 @@ export const columns: ColumnDef<User>[] = [
     {
         id: "actions",
         header: "Action",
-        cell: ({ row }) => {
-            const user = row.original;
-            const isPending = React.useTransition()[1];
-
-            return (
-                <Button
-                    variant="ghost"
-                    className={`${user.status === "active"
-                        ? "text-red-600 hover:text-red-900"
-                        : "text-green-600 hover:text-green-900"
-                        }`}
-                    onClick={() => toggleUserStatus(user.id, user.status || "active")}
-                >
-                    {user.status === "active" ? "Ban" : "Unban"}
-                </Button>
-            );
-        },
+        cell: ({ row }) => <UserActionsCell user={row.original} />,
     },
 ];
+
+const UserActionsCell = ({ user }: { user: User }) => {
+    const [showBanDialog, setShowBanDialog] = React.useState(false);
+    const [showPlanDialog, setShowPlanDialog] = React.useState(false);
+
+    return (
+        <>
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="h-8 w-8 p-0">
+                        <span className="sr-only">Open menu</span>
+                        <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuPortal>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuItem
+                            onSelect={() => setShowBanDialog(true)}
+                            className={user.status === 'banned' ? 'text-green-600' : 'text-red-600'}
+                        >
+                            {user.status === "active" ? "Ban User" : "Unban User"}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                            onSelect={() => setShowPlanDialog(true)}
+                        >
+                            {user.plan === "premium" ? "Downgrade to Freemium" : "Upgrade to Premium"}
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenuPortal>
+            </DropdownMenu>
+
+            <AlertDialog open={showBanDialog} onOpenChange={setShowBanDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This will <strong>{user.status === "active" ? "ban" : "unban"}</strong> the user <strong>{user.username}</strong>.
+                            {user.status === "active" && " They will no longer be able to log in."}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={async () => {
+                                try {
+                                    await toggleUserStatus(user.id, user.status || "active");
+                                    toast.success(`User ${user.status === "active" ? "banned" : "unbanned"} successfully`);
+                                } catch (error) {
+                                    toast.error("Failed to update user status");
+                                }
+                            }}
+                            className={user.status === "active" ? "bg-red-600 hover:bg-red-700" : "bg-green-600 hover:bg-green-700"}
+                        >
+                            {user.status === "active" ? "Ban User" : "Unban User"}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            <AlertDialog open={showPlanDialog} onOpenChange={setShowPlanDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Change User Plan</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Are you sure you want to <strong>{user.plan === 'premium' ? 'downgrade' : 'upgrade'}</strong> <strong>{user.username}</strong> to <strong>{user.plan === 'premium' ? 'Freemium' : 'Premium'}</strong>?
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={async () => {
+                                try {
+                                    await changeUserPlan(user.id, user.plan === 'premium' ? 'freemium' : 'premium');
+                                    toast.success("User plan updated successfully", {
+                                        description: `User ${user.username} is now ${user.plan === 'premium' ? 'Freemium' : 'Premium'}`
+                                    });
+                                } catch (error) {
+                                    toast.error("Failed to update plan");
+                                }
+                            }}
+                        >
+                            Confirm Change
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+        </>
+    );
+};
+
 
 export function UsersTable({ data }: { data: User[] }) {
     const [sorting, setSorting] = React.useState<SortingState>([]);

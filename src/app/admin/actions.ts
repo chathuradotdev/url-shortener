@@ -14,3 +14,14 @@ export async function toggleUrlStatus(urlId: string, currentStatus: string) {
     await db.updateUrlStatus(urlId, newStatus as any);
     revalidatePath("/admin");
 }
+
+export async function changeUserPlan(userId: string, newPlan: 'freemium' | 'premium') {
+    console.log("Updating user plan...", userId, newPlan);
+    // Explicitly check if function exists to debug runtime header
+    if (typeof db.updateUserPlan !== 'function') {
+        console.error("CRITICAL: db.updateUserPlan is not a function!", Object.keys(db));
+        throw new Error("Database method declaration mismatch");
+    }
+    await db.updateUserPlan(userId, newPlan);
+    revalidatePath("/admin");
+}
