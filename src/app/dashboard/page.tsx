@@ -18,6 +18,7 @@ export default async function Dashboard() {
 
     // @ts-ignore
     let urls: any[] = [];
+    // @ts-ignore
     let userPlan = session.user?.plan || 'freemium';
 
     try {
