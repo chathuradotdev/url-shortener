@@ -28,7 +28,7 @@ export default function FeaturesPage() {
 
             {/* Comparison Section */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
                     {/* Guest Plan */}
                     <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow duration-300">
@@ -88,16 +88,13 @@ export default function FeaturesPage() {
                     </div>
 
                     {/* Registered Plan */}
-                    <div className="bg-white rounded-2xl shadow-xl border-2 border-blue-500 overflow-hidden transform scale-105 z-10">
-                        <div className="absolute top-0 right-0 bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg uppercase tracking-wider">
-                            Recommended
-                        </div>
+                    <div className="bg-white rounded-2xl shadow-xl border-2 border-blue-100 overflow-hidden hover:border-blue-500 transition-colors duration-300">
                         <div className="p-8 bg-blue-50 border-b border-blue-100">
                             <h2 className="text-2xl font-bold text-gray-900 mb-2">Registered User</h2>
                             <p className="text-gray-600">Unlock the full potential of your links.</p>
                             <div className="mt-4">
                                 <span className="text-4xl font-extrabold text-gray-900">Free</span>
-                                <span className="text-gray-500 ml-2">/ forever (for now)</span>
+                                <span className="text-gray-500 ml-2">/ forever</span>
                             </div>
                         </div>
                         <div className="p-8">
@@ -113,40 +110,91 @@ export default function FeaturesPage() {
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                     </svg>
                                     <span className="text-gray-900 font-medium">Comprehensive Dashboard</span>
-                                    <p className="text-sm text-gray-500 ml-auto pl-4">Manage all your links in one place</p>
                                 </li>
                                 <li className="flex items-start">
                                     <svg className="w-6 h-6 text-blue-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                     </svg>
                                     <span className="text-gray-900 font-medium">Advanced Analytics</span>
-                                    <p className="text-sm text-gray-500 ml-auto pl-4">Track clicks, locations, devices & more</p>
                                 </li>
                                 <li className="flex items-start">
                                     <svg className="w-6 h-6 text-blue-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                     </svg>
                                     <span className="text-gray-900 font-medium">Link Management</span>
-                                    <p className="text-sm text-gray-500 ml-auto pl-4">Edit destinations or delete old links</p>
                                 </li>
                                 <li className="flex items-start">
                                     <svg className="w-6 h-6 text-blue-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                     </svg>
                                     <span className="text-gray-900 font-medium">Persistent History</span>
-                                    <p className="text-sm text-gray-500 ml-auto pl-4">Never lose track of your shortened URLs</p>
                                 </li>
                                 <li className="flex items-start">
                                     <svg className="w-6 h-6 text-blue-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                     </svg>
                                     <span className="text-gray-900 font-medium">UTM Builder</span>
-                                    <p className="text-sm text-gray-500 ml-auto pl-4">Create campaign-ready links easily</p>
                                 </li>
                             </ul>
                             <div className="mt-8">
-                                <Link href="/register" className="block w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-3 px-4 rounded-xl text-center hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all">
+                                <Link href="/register" className="block w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-xl text-center hover:bg-blue-700 shadow-md hover:shadow-lg transition-all">
                                     Create Free Account
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Premium User Plan */}
+                    <div className="bg-white rounded-2xl shadow-xl border-2 border-amber-500 overflow-hidden transform md:scale-105 z-10 transition-transform duration-300 relative">
+                        <div className="absolute top-0 right-0 bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg uppercase tracking-wider">
+                            Best Value
+                        </div>
+                        <div className="p-8 bg-amber-50 border-b border-amber-100">
+                            <h2 className="text-2xl font-bold text-gray-900 mb-2">Premium User</h2>
+                            <p className="text-gray-600">Power tools for advanced users.</p>
+                            <div className="mt-4">
+                                <span className="text-4xl font-extrabold text-gray-900">$1</span>
+                                <span className="text-gray-500 ml-2">/ month</span>
+                            </div>
+                        </div>
+                        <div className="p-8">
+                            <ul className="space-y-4">
+                                <li className="flex items-start">
+                                    <svg className="w-6 h-6 text-amber-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    <span className="text-gray-900 font-medium">Everything in Registered</span>
+                                </li>
+                                <li className="flex items-start">
+                                    <svg className="w-6 h-6 text-amber-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    <span className="text-gray-900 font-medium">Bulk URL Upload</span>
+                                    <p className="text-sm text-gray-500 ml-auto pl-4">Upload CSV for bulk shortening</p>
+                                </li>
+                                <li className="flex items-start">
+                                    <svg className="w-6 h-6 text-amber-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    <span className="text-gray-900 font-medium">Email Notifications</span>
+                                    <p className="text-sm text-gray-500 ml-auto pl-4">Alerts when uploads complete</p>
+                                </li>
+                                <li className="flex items-start">
+                                    <svg className="w-6 h-6 text-amber-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    <span className="text-gray-900 font-medium">Priority Support</span>
+                                </li>
+                                <li className="flex items-start">
+                                    <svg className="w-6 h-6 text-amber-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    <span className="text-gray-900 font-medium">Ad-free Experience</span>
+                                </li>
+                            </ul>
+                            <div className="mt-8">
+                                <Link href="/register?plan=premium" className="block w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold py-3 px-4 rounded-xl text-center hover:from-amber-600 hover:to-orange-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all">
+                                    Get Premium
                                 </Link>
                             </div>
                         </div>
