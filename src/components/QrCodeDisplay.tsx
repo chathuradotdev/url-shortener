@@ -6,20 +6,37 @@ import QRCode from "qrcode";
 interface QrCodeDisplayProps {
     url: string;
     altText?: string;
+    options?: {
+        width?: number;
+        margin?: number;
+        color?: {
+            dark?: string;
+            light?: string;
+        };
+    };
 }
 
-export default function QrCodeDisplay({ url, altText = "QR Code" }: QrCodeDisplayProps) {
+export default function QrCodeDisplay({ url, altText = "QR Code", options }: QrCodeDisplayProps) {
     const [qrDataUrl, setQrDataUrl] = useState<string>("");
+
+    const qrOptions = {
+        width: options?.width || 400,
+        margin: options?.margin ?? 2,
+        color: {
+            dark: options?.color?.dark || "#000000",
+            light: options?.color?.light || "#ffffff",
+        }
+    };
 
     useEffect(() => {
         if (url) {
-            QRCode.toDataURL(url, { width: 400, margin: 2 }, (err, dataUrl) => {
+            QRCode.toDataURL(url, qrOptions, (err, dataUrl) => {
                 if (!err) {
                     setQrDataUrl(dataUrl);
                 }
             });
         }
-    }, [url]);
+    }, [url, options]);
 
     const handleDownloadPng = () => {
         if (!qrDataUrl) return;
@@ -34,7 +51,7 @@ export default function QrCodeDisplay({ url, altText = "QR Code" }: QrCodeDispla
     const handleDownloadSvg = async () => {
         if (!url) return;
         try {
-            const svgString = await QRCode.toString(url, { type: "svg", width: 400, margin: 2 });
+            const svgString = await QRCode.toString(url, { ...qrOptions, type: "svg" });
             const blob = new Blob([svgString], { type: "image/svg+xml" });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);

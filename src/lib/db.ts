@@ -56,6 +56,30 @@ export interface LoginRecord {
     user_agent?: string;
 }
 
+// Bio Page Interface
+export interface BioPage {
+    id: string;
+    user_id: string;
+    slug: string;
+    title?: string;
+    description?: string;
+    avatar_url?: string;
+    theme?: any;
+    created_at: string;
+}
+
+// Bio Link Interface
+export interface BioLink {
+    id: string;
+    bio_page_id: string;
+    title: string;
+    url: string;
+    icon?: string;
+    position: number;
+    is_active: boolean;
+    created_at: string;
+}
+
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
 
@@ -66,6 +90,96 @@ if (!supabaseUrl || !supabaseKey) {
 export const supabase = createClient(supabaseUrl, supabaseKey);
 
 class SupabaseDB {
+
+    // --- Bio Page Methods ---
+
+    async getBioPageByUserId(userId: string): Promise<BioPage | null> {
+        const { data } = await supabase
+            .from('bio_pages')
+            .select('*')
+            .eq('user_id', userId)
+            .maybeSingle();
+        return data as BioPage | null;
+    }
+
+    async getBioPageBySlug(slug: string): Promise<BioPage | null> {
+        const { data } = await supabase
+            .from('bio_pages')
+            .select('*')
+            .eq('slug', slug)
+            .maybeSingle();
+        return data as BioPage | null;
+    }
+
+    async createBioPage(bioPage: Omit<BioPage, 'id' | 'created_at'>): Promise<BioPage> {
+        const { data, error } = await supabase
+            .from('bio_pages')
+            .insert([bioPage])
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data as BioPage;
+    }
+
+    async updateBioPage(userId: string, updates: Partial<BioPage>): Promise<BioPage> {
+        const { data, error } = await supabase
+            .from('bio_pages')
+            .update(updates)
+            .eq('user_id', userId)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data as BioPage;
+    }
+
+    // --- Bio Link Methods ---
+
+    async getBioLinks(bioPageId: string): Promise<BioLink[]> {
+        const { data } = await supabase
+            .from('bio_links')
+            .select('*')
+            .eq('bio_page_id', bioPageId)
+            .order('position', { ascending: true });
+        return (data || []) as BioLink[];
+    }
+
+    async addBioLink(link: Omit<BioLink, 'id' | 'created_at'>): Promise<BioLink> {
+        // Get current max position to append to end
+        // Optimization: handled by client or separate query. For now, we trust input or 0.
+        // Actually, let's find the max position if position is not provided?
+        // Let's assume the caller handles position logic or we default to 0.
+
+        const { data, error } = await supabase
+            .from('bio_links')
+            .insert([link])
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data as BioLink;
+    }
+
+    async updateBioLink(id: string, updates: Partial<BioLink>): Promise<BioLink> {
+        const { data, error } = await supabase
+            .from('bio_links')
+            .update(updates)
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data as BioLink;
+    }
+
+    async deleteBioLink(id: string): Promise<void> {
+        const { error } = await supabase
+            .from('bio_links')
+            .delete()
+            .eq('id', id);
+        if (error) throw error;
+    }
 
     // --- User Methods ---
 

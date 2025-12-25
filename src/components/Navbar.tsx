@@ -44,6 +44,9 @@ export default function Navbar() {
                                 <Link href="/tools/utm-builder" className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                                     UTM Builder
                                 </Link>
+                                <Link href="/dashboard/bio" className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                                    Link in Bio <span className="text-xs bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-1.5 py-0.5 rounded-full ml-1">PRO</span>
+                                </Link>
                                 <Link href="/profile" className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                                     My Profile
                                 </Link>

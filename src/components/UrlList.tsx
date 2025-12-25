@@ -20,10 +20,14 @@ interface Url {
 interface UrlListProps {
     urls: Url[];
     baseUrl: string;
+    userPlan?: string;
 }
 
-export default function UrlList({ urls, baseUrl }: UrlListProps) {
+export default function UrlList({ urls, baseUrl, userPlan }: UrlListProps) {
     const [qrModalUrl, setQrModalUrl] = useState<string | null>(null);
+    const [qrColor, setQrColor] = useState("#000000");
+    const [qrBgColor, setQrBgColor] = useState("#ffffff");
+    const [qrWidth, setQrWidth] = useState(400);
 
     if (urls.length === 0) {
         return (
@@ -56,7 +60,13 @@ export default function UrlList({ urls, baseUrl }: UrlListProps) {
                 <UrlDataTable
                     data={urls}
                     baseUrl={baseUrl}
-                    onShowQrCode={(url) => setQrModalUrl(url)}
+                    onShowQrCode={(url) => {
+                        setQrModalUrl(url);
+                        // Reset colors and size when opening modal
+                        setQrColor("#000000");
+                        setQrBgColor("#ffffff");
+                        setQrWidth(400);
+                    }}
                 />
             </div>
 
@@ -75,8 +85,68 @@ export default function UrlList({ urls, baseUrl }: UrlListProps) {
                                 </svg>
                             </button>
                         </div>
+
+                        {userPlan === 'premium' && (
+                            <div className="mb-4 space-y-3">
+                                <div className="text-sm font-medium text-gray-700 dark:text-gray-300">Customize Colors</div>
+                                <div className="flex gap-4">
+                                    <div className="flex-1">
+                                        <label htmlFor="qrColor" className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Foreground</label>
+                                        <div className="flex items-center gap-2">
+                                            <input
+                                                type="color"
+                                                id="qrColor"
+                                                value={qrColor}
+                                                onChange={(e) => setQrColor(e.target.value)}
+                                                className="w-8 h-8 p-0 border-0 rounded-full cursor-pointer"
+                                            />
+                                            <span className="text-xs font-mono text-gray-600 dark:text-gray-400 uppercase">{qrColor}</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex-1">
+                                        <label htmlFor="qrBgColor" className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Background</label>
+                                        <div className="flex items-center gap-2">
+                                            <input
+                                                type="color"
+                                                id="qrBgColor"
+                                                value={qrBgColor}
+                                                onChange={(e) => setQrBgColor(e.target.value)}
+                                                className="w-8 h-8 p-0 border-0 rounded-full cursor-pointer"
+                                            />
+                                            <span className="text-xs font-mono text-gray-600 dark:text-gray-400 uppercase">{qrBgColor}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="mt-3">
+                                    <div className="flex justify-between mb-1">
+                                        <label htmlFor="qrWidth" className="text-xs text-gray-500 dark:text-gray-400">Size (px)</label>
+                                        <span className="text-xs font-mono text-gray-600 dark:text-gray-400">{qrWidth}px</span>
+                                    </div>
+                                    <input
+                                        type="range"
+                                        id="qrWidth"
+                                        min="200"
+                                        max="2000"
+                                        step="50"
+                                        value={qrWidth}
+                                        onChange={(e) => setQrWidth(Number(e.target.value))}
+                                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+                                    />
+                                </div>
+                            </div>
+                        )}
+
                         <div className="flex justify-center">
-                            <QrCodeDisplay url={qrModalUrl} />
+                            <QrCodeDisplay
+                                url={qrModalUrl}
+                                options={{
+                                    width: qrWidth,
+                                    color: {
+                                        dark: qrColor,
+                                        light: qrBgColor
+                                    }
+                                }}
+                            />
                         </div>
                     </div>
                 </div>

@@ -198,7 +198,7 @@ export default async function Dashboard() {
                         <h2 className="text-xl font-bold text-gray-900">Your Links</h2>
                     </div>
 
-                    <UrlList urls={urls} baseUrl={process.env.NEXTAUTH_URL || "http://localhost:3000"} />
+                    <UrlList urls={urls} baseUrl={process.env.NEXTAUTH_URL || "http://localhost:3000"} userPlan={userPlan} />
                 </div>
             </div>
         </div>
