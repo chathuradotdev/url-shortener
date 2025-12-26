@@ -19,6 +19,8 @@ export default function ShortenerForm() {
     const [error, setError] = useState("");
     const [emailStatus, setEmailStatus] = useState("");
     const [copied, setCopied] = useState(false);
+    const [androidDeepLink, setAndroidDeepLink] = useState("");
+    const [iosDeepLink, setIosDeepLink] = useState("");
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -27,6 +29,8 @@ export default function ShortenerForm() {
         setShortUrl("");
         setEmailStatus("");
         setCopied(false);
+        setAndroidDeepLink("");
+        setIosDeepLink("");
 
         // Parse tags
         const parsedTags = tags.split(',').map(t => t.trim()).filter(t => t.length > 0);
@@ -42,6 +46,8 @@ export default function ShortenerForm() {
                     tags: parsedTags,
                     password: password || null,
                     cloaked,
+                    androidDeepLink,
+                    iosDeepLink,
                 }),
             });
 
@@ -227,6 +233,45 @@ export default function ShortenerForm() {
                                             placeholder="Password (optional)"
                                             value={password}
                                             onChange={(e) => setPassword(e.target.value)}
+                                            className="flex-1 w-full px-3 py-2 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 bg-transparent border-none focus:ring-0 focus:outline-none text-sm font-medium"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {session && (
+                            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="relative group">
+                                    <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-xl blur opacity-20 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+                                    <div className="relative flex items-center bg-white dark:bg-gray-900 rounded-xl shadow-md p-1.5 ring-1 ring-gray-900/5 dark:ring-white/10">
+                                        <div className="pl-3 text-gray-400">
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                            </svg>
+                                        </div>
+                                        <input
+                                            type="text"
+                                            placeholder="Android Deep Link (e.g. myapp://path)"
+                                            value={androidDeepLink}
+                                            onChange={(e) => setAndroidDeepLink(e.target.value)}
+                                            className="flex-1 w-full px-3 py-2 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 bg-transparent border-none focus:ring-0 focus:outline-none text-sm font-medium"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="relative group">
+                                    <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-xl blur opacity-20 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+                                    <div className="relative flex items-center bg-white dark:bg-gray-900 rounded-xl shadow-md p-1.5 ring-1 ring-gray-900/5 dark:ring-white/10">
+                                        <div className="pl-3 text-gray-400">
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                            </svg>
+                                        </div>
+                                        <input
+                                            type="text"
+                                            placeholder="iOS Deep Link (e.g. myapp://path)"
+                                            value={iosDeepLink}
+                                            onChange={(e) => setIosDeepLink(e.target.value)}
                                             className="flex-1 w-full px-3 py-2 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 bg-transparent border-none focus:ring-0 focus:outline-none text-sm font-medium"
                                         />
                                     </div>

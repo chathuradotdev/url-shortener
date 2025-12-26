@@ -6,8 +6,12 @@ import bcrypt from "bcryptjs";
 
 console.log("Auth options loaded. Secret length:", process.env.NEXTAUTH_SECRET?.length);
 
+if (!process.env.NEXTAUTH_SECRET) {
+    console.warn("NEXTAUTH_SECRET is missing. This will cause authentication failures.");
+}
+
 export const authOptions: NextAuthOptions = {
-    secret: process.env.NEXTAUTH_SECRET,
+    secret: process.env.NEXTAUTH_SECRET || "fallback-secret-for-dev",  // Prevents hard crash but warns
     providers: [
         GoogleProvider({
             clientId: process.env.GOOGLE_CLIENT_ID || "",

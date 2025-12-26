@@ -80,6 +80,52 @@ export default async function ShortCodePage({
         city: "Unknown"
     });
 
+    // Deep Linking Logic
+    if (device === "Mobile" || device === "Tablet") {
+        let deepLink = null;
+        if (os === "Android" && url.android_deep_link) {
+            deepLink = url.android_deep_link;
+        } else if (os === "iOS" && url.ios_deep_link) {
+            deepLink = url.ios_deep_link;
+        }
+
+        if (deepLink) {
+            return (
+                <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 font-sans">
+                    <div className="p-8 bg-white rounded-xl shadow-lg text-center max-w-sm mx-4">
+                        <div className="mb-4">
+                            <svg className="w-12 h-12 mx-auto text-blue-600 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                        </div>
+                        <h2 className="text-xl font-bold text-gray-800 mb-2">Opening App...</h2>
+                        <p className="text-gray-500 text-sm mb-6">If the app doesn't open automatically, you will be redirected to the website shortly.</p>
+
+                        <a
+                            href={deepLink}
+                            className="block w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors mb-3"
+                        >
+                            Open App
+                        </a>
+                        <a
+                            href={url.original_url}
+                            className="block w-full bg-gray-100 text-gray-700 font-semibold py-3 px-4 rounded-lg hover:bg-gray-200 transition-colors"
+                        >
+                            Continue to Website
+                        </a>
+                    </div>
+                    <script dangerouslySetInnerHTML={{
+                        __html: `
+                        window.location.href = "${deepLink}"; 
+                        setTimeout(function() { 
+                            window.location.href = "${url.original_url}"; 
+                        }, 2500);
+                    `}} />
+                </div>
+            );
+        }
+    }
+
     if (url.cloaked) {
         return (
             <div className="h-screen w-screen overflow-hidden">

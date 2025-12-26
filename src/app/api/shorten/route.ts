@@ -23,7 +23,7 @@ export async function POST(req: Request) {
         }
 
         const session = await getServerSession(authOptions);
-        const { originalUrl, customAlias, expiresAt, tags, password, cloaked } = await req.json();
+        const { originalUrl, customAlias, expiresAt, tags, password, cloaked, androidDeepLink, iosDeepLink } = await req.json();
 
         if (!originalUrl) {
             return NextResponse.json(
@@ -73,11 +73,23 @@ export async function POST(req: Request) {
         // @ts-ignore
         const userId = session?.user?.id || null;
 
+        let userPlan = 'freemium';
+        if (userId) {
+            const user = await db.findUserById(userId);
+            if (user) {
+                userPlan = user.plan;
+            }
+        }
+
         // Only allow expiration, tags, and password for registered users
         const expirationDate = userId && expiresAt ? expiresAt : null;
         const urlTags = userId && tags ? tags : [];
         const passwordHash = userId && password ? await hash(password, 10) : undefined;
         const isCloaked = userId && cloaked ? true : false;
+
+        // Deep linking only for premium users
+        const androidLink = userId && userPlan === 'premium' && androidDeepLink ? androidDeepLink : null;
+        const iosLink = userId && userPlan === 'premium' && iosDeepLink ? iosDeepLink : null;
 
         const newUrl = await db.createUrl({
             short_code: shortCode,
@@ -87,6 +99,8 @@ export async function POST(req: Request) {
             tags: urlTags,
             password: passwordHash,
             cloaked: isCloaked,
+            android_deep_link: androidLink,
+            ios_deep_link: iosLink
         });
 
         // Construct the full short URL (assuming localhost for now, or use req.headers.host)

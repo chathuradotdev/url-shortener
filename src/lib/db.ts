@@ -30,6 +30,8 @@ export interface Url {
     tags?: string[];
     password?: string;
     cloaked?: boolean;
+    android_deep_link?: string | null;
+    ios_deep_link?: string | null;
 }
 
 // Analytics Interface
@@ -87,7 +89,11 @@ if (!supabaseUrl || !supabaseKey) {
     console.warn("Supabase credentials missing. Make sure NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are set.");
 }
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+// Create a dummy client or validation proxy if tokens are missing to prevent crash during import
+export const supabase = (supabaseUrl && supabaseKey)
+    ? createClient(supabaseUrl, supabaseKey)
+    : createClient('https://placeholder.supabase.co', 'placeholder'); // This will fail on use but pass import
+
 
 class SupabaseDB {
 
