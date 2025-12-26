@@ -29,7 +29,7 @@ export interface Url {
     expires_at?: string | null;
     tags?: string[];
     password?: string;
-    cloak?: boolean;
+    cloaked?: boolean;
     android_deep_link?: string | null;
     ios_deep_link?: string | null;
     permanent_redirect?: boolean; // 301 Redirect

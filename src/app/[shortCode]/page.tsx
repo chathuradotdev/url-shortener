@@ -126,7 +126,7 @@ export default async function ShortCodePage({
         }
     }
 
-    if (url.cloak) {
+    if (url.cloaked) {
         return (
             <div className="h-screen w-screen overflow-hidden">
                 <iframe

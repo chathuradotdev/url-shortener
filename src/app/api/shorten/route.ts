@@ -99,7 +99,7 @@ export async function POST(req: Request) {
             expires_at: expirationDate,
             tags: urlTags,
             password: passwordHash,
-            cloak: isCloaked,
+            cloaked: isCloaked,
             android_deep_link: androidLink,
             ios_deep_link: iosLink,
             permanent_redirect: isPermanentRedirect
