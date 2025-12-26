@@ -29,9 +29,10 @@ export interface Url {
     expires_at?: string | null;
     tags?: string[];
     password?: string;
-    cloaked?: boolean;
+    cloak?: boolean;
     android_deep_link?: string | null;
     ios_deep_link?: string | null;
+    permanent_redirect?: boolean; // 301 Redirect
 }
 
 // Analytics Interface

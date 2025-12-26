@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { redirect, notFound } from "next/navigation";
+import { redirect, notFound, permanentRedirect } from "next/navigation";
 import { headers } from "next/headers";
 
 export default async function ShortCodePage({
@@ -126,7 +126,7 @@ export default async function ShortCodePage({
         }
     }
 
-    if (url.cloaked) {
+    if (url.cloak) {
         return (
             <div className="h-screen w-screen overflow-hidden">
                 <iframe
@@ -136,6 +136,10 @@ export default async function ShortCodePage({
                 />
             </div>
         );
+    }
+
+    if (url.permanent_redirect) {
+        permanentRedirect(url.original_url);
     }
 
     redirect(url.original_url);

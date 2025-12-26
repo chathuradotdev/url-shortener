@@ -23,7 +23,7 @@ export async function POST(req: Request) {
         }
 
         const session = await getServerSession(authOptions);
-        const { originalUrl, customAlias, expiresAt, tags, password, cloaked, androidDeepLink, iosDeepLink } = await req.json();
+        const { originalUrl, customAlias, expiresAt, tags, password, cloaked, androidDeepLink, iosDeepLink, permanentRedirect } = await req.json();
 
         if (!originalUrl) {
             return NextResponse.json(
@@ -87,9 +87,10 @@ export async function POST(req: Request) {
         const passwordHash = userId && password ? await hash(password, 10) : undefined;
         const isCloaked = userId && cloaked ? true : false;
 
-        // Deep linking only for premium users
+        // Deep linking and Permanent Redirect only for premium users
         const androidLink = userId && userPlan === 'premium' && androidDeepLink ? androidDeepLink : null;
         const iosLink = userId && userPlan === 'premium' && iosDeepLink ? iosDeepLink : null;
+        const isPermanentRedirect = userId && userPlan === 'premium' && permanentRedirect ? true : false;
 
         const newUrl = await db.createUrl({
             short_code: shortCode,
@@ -98,9 +99,10 @@ export async function POST(req: Request) {
             expires_at: expirationDate,
             tags: urlTags,
             password: passwordHash,
-            cloaked: isCloaked,
+            cloak: isCloaked,
             android_deep_link: androidLink,
-            ios_deep_link: iosLink
+            ios_deep_link: iosLink,
+            permanent_redirect: isPermanentRedirect
         });
 
         // Construct the full short URL (assuming localhost for now, or use req.headers.host)
