@@ -6,6 +6,7 @@ import Link from "next/link";
 import { UsersTable } from "./users-table";
 import { UrlsTable } from "./urls-table";
 import { toggleMaintenanceMode } from "./settings-actions";
+import { AlertsManager } from "./alerts-manager"; // Import AlertsManager
 
 export const dynamic = 'force-dynamic';
 
@@ -17,12 +18,13 @@ export default async function AdminDashboard() {
         redirect("/dashboard");
     }
 
-    const [users, urls, stats, analytics, maintenanceMode] = await Promise.all([
+    const [users, urls, stats, analytics, maintenanceMode, alerts] = await Promise.all([
         db.getAllUsers(),
         db.getAllUrls(),
         db.getSystemStats(),
         db.getAllAnalytics(),
-        db.getMaintenanceMode()
+        db.getMaintenanceMode(),
+        db.getSystemAlerts(false) // Fetch all alerts, including inactive
     ]);
 
     // Daily Clicks (Last 30 Days)
@@ -137,6 +139,10 @@ export default async function AdminDashboard() {
                             <UsersTable data={users} />
                         </div>
                     </div>
+
+
+                    {/* System Alerts Manager */}
+                    <AlertsManager alerts={alerts} />
 
                     {/* Top URLs & Moderation */}
                     <div className="bg-white rounded-lg shadow overflow-hidden">

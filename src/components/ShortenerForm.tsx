@@ -30,9 +30,6 @@ export default function ShortenerForm() {
         setShortUrl("");
         setEmailStatus("");
         setCopied(false);
-        setAndroidDeepLink("");
-        setIosDeepLink("");
-        setPermanentRedirect(false);
 
         // Parse tags
         const parsedTags = tags.split(',').map(t => t.trim()).filter(t => t.length > 0);

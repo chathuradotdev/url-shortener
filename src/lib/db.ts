@@ -59,6 +59,20 @@ export interface LoginRecord {
     user_agent?: string;
 }
 
+// System Alert Interface
+export interface SystemAlert {
+    id: string;
+    message: string;
+    type: 'info' | 'warning' | 'error' | 'success' | 'promo';
+    is_active: boolean;
+    audience: 'all' | 'guest' | 'user';
+    start_date?: string | null;
+    end_date?: string | null;
+    action_label?: string | null;
+    action_url?: string | null;
+    created_at: string;
+}
+
 // Bio Page Interface
 export interface BioPage {
     id: string;
@@ -476,6 +490,77 @@ class SupabaseDB {
             .eq('key', 'maintenance_mode')
             .maybeSingle();
         return data?.value === 'true';
+    }
+
+
+    // System Alerts
+    async getSystemAlerts(activeOnly: boolean = false, targetAudience?: 'guest' | 'user'): Promise<SystemAlert[]> {
+        let query = supabase
+            .from('system_alerts')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (activeOnly) {
+            const now = new Date().toISOString();
+            query = query
+                .eq('is_active', true)
+                .or(`start_date.is.null,start_date.lte.${now}`)
+                .or(`end_date.is.null,end_date.gte.${now}`);
+
+            if (targetAudience) {
+                // Filter for 'all' OR specific audience
+                query = query.in('audience', ['all', targetAudience]);
+            }
+        }
+
+        const { data, error } = await query;
+        if (error) {
+            console.error("Error fetching system alerts:", error);
+            return [];
+        }
+        return data as SystemAlert[];
+    }
+
+    async createSystemAlert(alert: Omit<SystemAlert, 'id' | 'created_at'>): Promise<SystemAlert | null> {
+        const { data, error } = await supabase
+            .from('system_alerts')
+            .insert(alert)
+            .select()
+            .single();
+
+        if (error) {
+            console.error("Error creating system alert:", error);
+            return null;
+        }
+        return data as SystemAlert;
+    }
+
+    async updateSystemAlert(id: string, updates: Partial<SystemAlert>): Promise<SystemAlert | null> {
+        const { data, error } = await supabase
+            .from('system_alerts')
+            .update(updates)
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) {
+            console.error("Error updating system alert:", error);
+            return null;
+        }
+        return data as SystemAlert;
+    }
+
+    async deleteSystemAlert(id: string): Promise<boolean> {
+        const { error } = await supabase
+            .from('system_alerts')
+            .delete()
+            .eq('id', id);
+
+        if (error) {
+            console.error("Error deleting system alert:", error);
+            return false;
+        }
+        return true;
     }
 
     async setMaintenanceMode(enabled: boolean): Promise<void> {

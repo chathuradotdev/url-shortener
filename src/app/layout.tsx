@@ -3,7 +3,12 @@ import { Providers } from "@/components/Providers";
 import { Toaster } from "@/components/ui/sonner";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ProUpgradeBanner from "@/components/ProUpgradeBanner";
+import SystemAlertBanner from "@/components/SystemAlertBanner";
+import { db } from "@/lib/db";
 import "./globals.css";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 
@@ -47,16 +52,21 @@ export const metadata: Metadata = {
     },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
+    const session = await getServerSession(authOptions);
+    const audience = session?.user ? 'user' : 'guest';
+    const alerts = await db.getSystemAlerts(true, audience);
     return (
         <html lang="en" suppressHydrationWarning>
             <body className={`${inter.className} bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 antialiased`}>
                 <Providers>
                     <div className="flex flex-col min-h-screen">
+                        <SystemAlertBanner alerts={alerts} />
+                        <ProUpgradeBanner />
                         <Navbar />
                         <div className="flex-grow">
                             {children}
