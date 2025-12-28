@@ -1,4 +1,7 @@
 import ShortenerForm from "@/components/ShortenerForm";
+import AdvancedFeaturesSection from "@/components/AdvancedFeaturesSection";
+import BioLinkShowcase from "@/components/BioLinkShowcase";
+import PremiumDashboardShowcase from "@/components/PremiumDashboardShowcase";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
@@ -169,6 +172,15 @@ export default async function Home() {
                                 </div>
                             </div>
                         </div>
+
+                        {/* Interactive Feature Showcase */}
+                        <AdvancedFeaturesSection />
+
+                        {/* Bio Link Showcase */}
+                        <BioLinkShowcase />
+
+                        {/* Premium Dashboard Showcase */}
+                        <PremiumDashboardShowcase />
                     </>
                 )}
             </div>
