@@ -97,7 +97,7 @@ export default function ShortenerForm() {
 
     return (
         <div className={`mx-auto ${session ? 'max-w-full' : 'max-w-5xl'}`}>
-            <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-8 hover:shadow-2xl transition-shadow duration-300">
+            <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-4 md:p-8 hover:shadow-2xl transition-shadow duration-300">
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
                         {session ? (

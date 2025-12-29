@@ -45,13 +45,13 @@ export default async function Home() {
                                 ✨ Free URL Shortener
                             </span>
                         </div> */}
-                        <h1 className="text-5xl font-extrabold text-gray-900 dark:text-white sm:text-6xl md:text-7xl mb-6">
+                        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-gray-900 dark:text-white mb-6">
                             Shorten Your Links{" "}
                             <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
                                 Instantly
                             </span>
                         </h1>
-                        <p className="mt-4 max-w-2xl mx-auto text-xl text-gray-600 dark:text-gray-300 leading-relaxed">
+                        <p className="mt-4 max-w-2xl mx-auto text-lg sm:text-xl text-gray-600 dark:text-gray-300 leading-relaxed px-2">
                             Create short, manageable links, generate QR codes, and share them with ease.
                         </p>
                     </div>
@@ -100,7 +100,7 @@ export default async function Home() {
                     <>
                         <SocialProof />
 
-                        <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div className="mt-12 md:mt-20 grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
                             <div className="text-center p-6 rounded-xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow duration-300">
                                 <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mx-auto mb-4">
                                     <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -133,13 +133,13 @@ export default async function Home() {
                         </div>
 
                         {/* Why Create an Account Section */}
-                        <div className="mt-24 mb-12">
+                        <div className="mt-16 md:mt-24 mb-12">
                             <div className="text-center mb-12">
                                 <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Why Create an Account?</h2>
                                 <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">Take control of your links with our powerful tools.</p>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
                                 <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
                                     <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
                                         <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
