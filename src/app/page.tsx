@@ -2,6 +2,7 @@ import ShortenerForm from "@/components/ShortenerForm";
 import AdvancedFeaturesSection from "@/components/AdvancedFeaturesSection";
 import BioLinkShowcase from "@/components/BioLinkShowcase";
 import PremiumDashboardShowcase from "@/components/PremiumDashboardShowcase";
+import SocialProof from "@/components/SocialProof";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
@@ -36,14 +37,14 @@ export default async function Home() {
                 <div className="absolute -bottom-8 left-1/2 w-72 h-72 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-4000"></div>
             </div>
 
-            <div className="relative max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
+            <div className="relative max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
                 {!session ? (
                     <div className="text-center mb-10 animate-in fade-in slide-in-from-bottom-4">
-                        <div className="inline-block mb-4">
+                        {/* <div className="inline-block mb-4">
                             <span className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800 border border-blue-200">
                                 ✨ Free URL Shortener
                             </span>
-                        </div>
+                        </div> */}
                         <h1 className="text-5xl font-extrabold text-gray-900 dark:text-white sm:text-6xl md:text-7xl mb-6">
                             Shorten Your Links{" "}
                             <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
@@ -97,6 +98,8 @@ export default async function Home() {
                 {/* Features section */}
                 {!session && (
                     <>
+                        <SocialProof />
+
                         <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8">
                             <div className="text-center p-6 rounded-xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow duration-300">
                                 <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mx-auto mb-4">
