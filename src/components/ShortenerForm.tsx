@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import QrCodeDisplay from "./QrCodeDisplay";
@@ -22,6 +22,13 @@ export default function ShortenerForm() {
     const [androidDeepLink, setAndroidDeepLink] = useState("");
     const [iosDeepLink, setIosDeepLink] = useState("");
     const [permanentRedirect, setPermanentRedirect] = useState(false);
+    const resultRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (shortUrl && resultRef.current) {
+            resultRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+    }, [shortUrl]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -360,7 +367,7 @@ export default function ShortenerForm() {
 
                 {
                     shortUrl && (
-                        <div className="mt-8 p-6 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl border-2 border-blue-200 dark:border-blue-900 animate-in fade-in slide-in-from-bottom-4">
+                        <div ref={resultRef} className="mt-4 p-6 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl border-2 border-blue-200 dark:border-blue-900 animate-in fade-in slide-in-from-bottom-4">
                             <div className="mb-6">
                                 <p className="text-sm font-semibold text-gray-600 dark:text-gray-300 mb-2 flex items-center">
                                     <svg className="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
