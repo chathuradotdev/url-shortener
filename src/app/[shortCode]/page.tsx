@@ -68,6 +68,18 @@ export default async function ShortCodePage({
     else if (userAgent.includes("Android")) os = "Android";
     else if (userAgent.includes("iOS")) os = "iOS";
 
+    // Geo Targeting Logic
+    const country = headersList.get("x-vercel-ip-country") || "Unknown";
+    let targetUrl = url.original_url;
+
+    if (url.targeting_enabled && url.geo_targeting) {
+        // Cast to Record<string, string> if TS complains, or rely on loose types from DB helper
+        const geoRules = url.geo_targeting as Record<string, string>;
+        if (country !== "Unknown" && geoRules[country]) {
+            targetUrl = geoRules[country];
+        }
+    }
+
     await db.incrementUrlClicks(shortCode);
     await db.trackUrlVisit(shortCode, {
         user_agent: userAgent,
@@ -82,13 +94,29 @@ export default async function ShortCodePage({
 
     // Interim Page Logic (Greetings / Warnings)
     if (url.interim_page_enabled) {
-        const { InterimRedirect } = await import("@/components/InterimRedirect");
-        return (
-            <InterimRedirect
-                originalUrl={url.original_url}
-                message={url.interim_message}
-            />
-        );
+        let showInterim = true;
+
+        // Check visit limit if set
+        if (url.interim_visit_limit && url.interim_visit_limit > 0) {
+            const currentCount = url.interim_visit_count || 0;
+            if (currentCount >= url.interim_visit_limit) {
+                showInterim = false;
+            } else {
+                // Increment count if showing
+                await db.incrementInterimVisitCount(url.id);
+            }
+        }
+
+        if (showInterim) {
+            const { InterimRedirect } = await import("@/components/InterimRedirect");
+            return (
+                <InterimRedirect
+                    originalUrl={targetUrl}
+                    message={url.interim_message}
+                    delay={url.interim_duration || 5}
+                />
+            );
+        }
     }
 
     // Deep Linking Logic
@@ -119,7 +147,7 @@ export default async function ShortCodePage({
                             Open App
                         </a>
                         <a
-                            href={url.original_url}
+                            href={targetUrl}
                             className="block w-full bg-gray-100 text-gray-700 font-semibold py-3 px-4 rounded-lg hover:bg-gray-200 transition-colors"
                         >
                             Continue to Website
@@ -129,7 +157,7 @@ export default async function ShortCodePage({
                         __html: `
                         window.location.href = "${deepLink}"; 
                         setTimeout(function() { 
-                            window.location.href = "${url.original_url}"; 
+                            window.location.href = "${targetUrl}"; 
                         }, 2500);
                     `}} />
                 </div>
@@ -141,7 +169,7 @@ export default async function ShortCodePage({
         return (
             <div className="h-screen w-screen overflow-hidden">
                 <iframe
-                    src={url.original_url}
+                    src={targetUrl}
                     className="w-full h-full border-0"
                     title="Content"
                 />
@@ -150,8 +178,8 @@ export default async function ShortCodePage({
     }
 
     if (url.permanent_redirect) {
-        permanentRedirect(url.original_url);
+        permanentRedirect(targetUrl);
     }
 
-    redirect(url.original_url);
+    redirect(targetUrl);
 }

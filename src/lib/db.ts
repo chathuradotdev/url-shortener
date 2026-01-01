@@ -35,6 +35,11 @@ export interface Url {
     permanent_redirect?: boolean; // 301 Redirect
     interim_page_enabled?: boolean;
     interim_message?: string;
+    interim_duration?: number;
+    interim_visit_limit?: number; // How many visitors see the message
+    interim_visit_count?: number; // How many have seen it so far
+    targeting_enabled?: boolean;
+    geo_targeting?: Record<string, string>; // { "US": "https://...", "GB": "https://..." }
 }
 
 // Analytics Interface
@@ -373,19 +378,22 @@ class SupabaseDB {
     }
 
     async incrementUrlClicks(shortCode: string): Promise<void> {
-        // RPC is better for atomic increment, but for now we read-modify-write or just use rpc if available.
-        // Or cleaner: invoke a sql function.
-        // But to keep it simple without adding custom SQL functions unless necessary, we can try:
-        // .update({ clicks: 0 }) ... wait, we need atomic increment.
-        // Supabase/PostgREST doesn't support 'clicks + 1' in simple update without rpc.
-        // Plan B: Fetch, then update. (Not atomic but matches JsonDB concurrency level).
-
         const url = await this.findUrlByShortCode(shortCode);
         if (url) {
             await supabase
                 .from('urls')
                 .update({ clicks: url.clicks + 1 })
                 .eq('id', url.id);
+        }
+    }
+
+    async incrementInterimVisitCount(urlId: string): Promise<void> {
+        // Fallback: This is not race-condition safe but works for low traffic
+        const { data } = await supabase.from('urls').select('interim_visit_count').eq('id', urlId).single();
+        if (data) {
+            await supabase.from('urls').update({
+                interim_visit_count: (data.interim_visit_count || 0) + 1
+            }).eq('id', urlId);
         }
     }
 

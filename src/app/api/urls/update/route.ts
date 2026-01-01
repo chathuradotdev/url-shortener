@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
     try {
-        const { id, original_url, expires_at, interim_page_enabled, interim_message } = await req.json();
+        const { id, original_url, expires_at, interim_page_enabled, interim_message, interim_duration, interim_visit_limit, targeting_enabled, geo_targeting } = await req.json();
 
         if (!id) {
             return NextResponse.json({ error: "URL ID is required" }, { status: 400 });
@@ -20,7 +20,11 @@ export async function POST(req: Request) {
                 original_url,
                 expires_at: expires_at ? new Date(expires_at).toISOString() : null,
                 interim_page_enabled,
-                interim_message
+                interim_message,
+                interim_duration: interim_duration ? parseInt(interim_duration) : 5,
+                interim_visit_limit: interim_visit_limit ? parseInt(interim_visit_limit) : 0,
+                targeting_enabled,
+                geo_targeting
             })
             .eq("id", id);
 

@@ -84,6 +84,10 @@ interface Url {
     isBatchParent?: boolean;
     interim_page_enabled?: boolean;
     interim_message?: string;
+    interim_duration?: number;
+    interim_visit_limit?: number;
+    targeting_enabled?: boolean;
+    geo_targeting?: Record<string, string>;
 }
 
 interface UrlDataTableProps {
@@ -210,7 +214,11 @@ export function UrlDataTable({ data, baseUrl, onShowQrCode }: UrlDataTableProps)
                     original_url: editingUrl.original_url,
                     expires_at: editingUrl.expires_at,
                     interim_page_enabled: editingUrl.interim_page_enabled,
-                    interim_message: editingUrl.interim_message
+                    interim_message: editingUrl.interim_message,
+                    interim_duration: editingUrl.interim_duration,
+                    interim_visit_limit: editingUrl.interim_visit_limit,
+                    targeting_enabled: editingUrl.targeting_enabled,
+                    geo_targeting: editingUrl.geo_targeting
                 }),
             });
 
@@ -830,6 +838,134 @@ export function UrlDataTable({ data, baseUrl, onShowQrCode }: UrlDataTableProps)
                                             onChange={(e) => setEditingUrl({ ...editingUrl, interim_message: e.target.value })}
                                             placeholder="Example: Thanks for visiting! You are being redirected..."
                                         />
+
+                                        <div className="pt-2 flex gap-4">
+                                            <div className="flex-1">
+                                                <Label htmlFor="interim_duration">Redirect Delay (s)</Label>
+                                                <Input
+                                                    id="interim_duration"
+                                                    type="number"
+                                                    min={1}
+                                                    max={60}
+                                                    className="mt-1"
+                                                    value={editingUrl.interim_duration || 5}
+                                                    onChange={(e) => setEditingUrl({ ...editingUrl, interim_duration: parseInt(e.target.value) || 5 })}
+                                                />
+                                            </div>
+                                            <div className="flex-1">
+                                                <Label htmlFor="interim_visit_limit">Visitor Limit</Label>
+                                                <Input
+                                                    id="interim_visit_limit"
+                                                    type="number"
+                                                    min={0}
+                                                    placeholder="0 = Unlimited"
+                                                    className="mt-1"
+                                                    value={editingUrl.interim_visit_limit || ""}
+                                                    onChange={(e) => setEditingUrl({ ...editingUrl, interim_visit_limit: parseInt(e.target.value) || 0 })}
+                                                />
+                                                <p className="text-[0.7rem] text-muted-foreground mt-1">
+                                                    Show only to first N visitors. 0 or empty for unlimited.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="space-y-4 pt-4 border-t">
+                                <h4 className="flex items-center text-sm font-medium text-gray-900">
+                                    Smart Targeting (Geo)
+                                </h4>
+                                <div className="space-y-2">
+                                    <div className="flex items-center space-x-2">
+                                        <input
+                                            type="checkbox"
+                                            id="targeting_enabled"
+                                            checked={editingUrl.targeting_enabled || false}
+                                            onChange={(e) => setEditingUrl({ ...editingUrl, targeting_enabled: e.target.checked })}
+                                            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                        />
+                                        <Label htmlFor="targeting_enabled" className="text-sm font-normal text-gray-700">
+                                            Enable Geo-Targeting (Redirect by Country)
+                                        </Label>
+                                    </div>
+                                </div>
+
+                                {editingUrl.targeting_enabled && (
+                                    <div className="space-y-3 pl-6">
+                                        <p className="text-xs text-muted-foreground">
+                                            Add destination URLs for specific countries. Users from these countries will be redirected there instead of the main URL.
+                                        </p>
+
+                                        <div className="grid grid-cols-3 gap-2">
+                                            <div className="col-span-1">
+                                                <Label className="text-xs">Country Code</Label>
+                                                <Input
+                                                    placeholder="US, GB, IN"
+                                                    id="new-geo-code"
+                                                    className="h-8 text-xs"
+                                                />
+                                            </div>
+                                            <div className="col-span-2">
+                                                <Label className="text-xs">Target URL</Label>
+                                                <div className="flex gap-2">
+                                                    <Input
+                                                        placeholder="https://example.com/us"
+                                                        id="new-geo-url"
+                                                        className="h-8 text-xs"
+                                                    />
+                                                    <Button
+                                                        type="button"
+                                                        size="sm"
+                                                        variant="secondary"
+                                                        className="h-8 px-2"
+                                                        onClick={() => {
+                                                            const codeInput = document.getElementById('new-geo-code') as HTMLInputElement;
+                                                            const urlInput = document.getElementById('new-geo-url') as HTMLInputElement;
+                                                            const code = codeInput.value.toUpperCase().trim();
+                                                            const url = urlInput.value.trim();
+
+                                                            if (code && url) {
+                                                                const currentGeo = editingUrl.geo_targeting || {};
+                                                                setEditingUrl({
+                                                                    ...editingUrl,
+                                                                    geo_targeting: { ...currentGeo, [code]: url }
+                                                                });
+                                                                codeInput.value = '';
+                                                                urlInput.value = '';
+                                                            }
+                                                        }}
+                                                    >
+                                                        +
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-2 mt-2">
+                                            {Object.entries(editingUrl.geo_targeting || {}).map(([code, url]) => (
+                                                <div key={code} className="flex items-center gap-2 text-sm bg-gray-50 p-2 rounded border">
+                                                    <span className="font-bold w-8">{code}</span>
+                                                    <span className="flex-1 truncate text-gray-600" title={url}>{url}</span>
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                                                        onClick={() => {
+                                                            const newGeo = { ...editingUrl.geo_targeting };
+                                                            delete newGeo[code];
+                                                            setEditingUrl({ ...editingUrl, geo_targeting: newGeo });
+                                                        }}
+                                                    >
+                                                        ×
+                                                    </Button>
+                                                </div>
+                                            ))}
+                                            {(!editingUrl.geo_targeting || Object.keys(editingUrl.geo_targeting).length === 0) && (
+                                                <p className="text-xs text-gray-400 italic">No rules added yet.</p>
+                                            )}
+                                        </div>
                                     </div>
                                 )}
                             </div>
