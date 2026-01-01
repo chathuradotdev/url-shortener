@@ -28,6 +28,8 @@ export async function processBulkUpload(formData: FormData) {
     }
 
     const file = formData.get('file') as File;
+    const dryRun = formData.get('dryRun') === 'true';
+
     if (!file) {
         throw new Error("No file uploaded");
     }
@@ -64,6 +66,29 @@ export async function processBulkUpload(formData: FormData) {
     let startIndex = 0;
     if (jsonData.length > 0 && typeof jsonData[0][0] === 'string' && /url|link/i.test(jsonData[0][0])) {
         startIndex = 1;
+    }
+
+    // DRY RUN: Just count valid URLs
+    if (dryRun) {
+        let foundCount = 0;
+        for (let i = startIndex; i < jsonData.length; i++) {
+            const row = jsonData[i];
+            if (!row || row.length === 0) continue;
+            const originalUrl = String(row[0]).trim();
+            if (!originalUrl) continue;
+            // Basic validation to count it as a target
+            try {
+                new URL(originalUrl);
+                foundCount++;
+            } catch (e) {
+                // Ignore invalid URLs in count or maybe count them as 'invalid' if we want to warn
+            }
+        }
+        return {
+            success: true,
+            dryRun: true,
+            foundCount
+        };
     }
 
     // Generate a base tag for this batch: blk{MMDDYYYY}{HHMMSS}
@@ -132,6 +157,7 @@ export async function processBulkUpload(formData: FormData) {
 
     return {
         success: true,
+        dryRun: false,
         total: successCount + failedCount,
         successCount,
         failedCount,

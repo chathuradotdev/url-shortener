@@ -5,6 +5,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { toast } from "sonner";
 import { processBulkUpload } from "./actions";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function BulkUploadPage() {
     const [isDragging, setIsDragging] = useState(false);
@@ -12,6 +22,10 @@ export default function BulkUploadPage() {
     const [isUploading, setIsUploading] = useState(false);
     const [logs, setLogs] = useState<{ original: string, short: string, error?: string }[]>([]);
     const [bulkTag, setBulkTag] = useState<string | null>(null);
+
+    // Confirmation state
+    const [confirmationOpen, setConfirmationOpen] = useState(false);
+    const [previewCount, setPreviewCount] = useState(0);
 
     const handleDragOver = (e: React.DragEvent) => {
         e.preventDefault();
@@ -52,9 +66,13 @@ export default function BulkUploadPage() {
 
         setFile(selectedFile);
         toast.success("File selected ready for upload");
+        // Reset previous states
+        setLogs([]);
+        setBulkTag(null);
+        setConfirmationOpen(false);
     };
 
-    const handleUpload = async () => {
+    const handleAnalyze = async () => {
         if (!file) return;
 
         setIsUploading(true);
@@ -63,17 +81,44 @@ export default function BulkUploadPage() {
 
         const formData = new FormData();
         formData.append("file", file);
+        formData.append("dryRun", "true");
 
         try {
             const result = await processBulkUpload(formData);
 
-            if (result.success) {
+            if (result.success && result.dryRun && typeof result.foundCount === 'number') {
+                setPreviewCount(result.foundCount);
+                setConfirmationOpen(true);
+            }
+        } catch (error: any) {
+            console.error("Analysis failed", error);
+            toast.error(error.message || "Failed to analyze file");
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
+    const handleProcess = async () => {
+        if (!file) return;
+
+        // Close modal first
+        setConfirmationOpen(false);
+        setIsUploading(true);
+
+        const formData = new FormData();
+        formData.append("file", file);
+        // dryRun default is false/undefined
+
+        try {
+            const result = await processBulkUpload(formData);
+
+            if (result.success && !result.dryRun) {
                 toast.success(`Successfully processed ${result.successCount} URLs`);
-                if (result.failedCount > 0) {
+                if ((result.failedCount ?? 0) > 0) {
                     toast.warning(`${result.failedCount} URLs failed to process`);
                 }
-                setLogs(result.logs);
-                setBulkTag(result.tag);
+                setLogs(result.logs ?? []);
+                setBulkTag(result.tag ?? null);
             }
         } catch (error: any) {
             console.error("Upload failed", error);
@@ -108,10 +153,10 @@ export default function BulkUploadPage() {
                         <div className="bg-blue-50 rounded-xl p-6 mb-8 border border-blue-100">
                             <h3 className="text-lg font-semibold text-blue-900 mb-2">Instructions</h3>
                             <ul className="list-disc list-inside text-blue-800 space-y-1 text-sm">
-                                <li>Prepare an Excel file (.xlsx or .xls).</li>
-                                <li>Put your long URLs in the <strong>first column (Column A)</strong>.</li>
-                                <li>The system will automatically generate short links for each valid URL.</li>
-                                <li>You will receive an email summary upon completion.</li>
+                                <li key="instr-1">Prepare an Excel file (.xlsx or .xls).</li>
+                                <li key="instr-2">Put your long URLs in the <strong>first column (Column A)</strong>.</li>
+                                <li key="instr-3">The system will automatically generate short links for each valid URL.</li>
+                                <li key="instr-4">You will receive an email summary upon completion.</li>
                             </ul>
                         </div>
 
@@ -176,7 +221,7 @@ export default function BulkUploadPage() {
                         {/* Action Button */}
                         <div className="mt-8 flex justify-end">
                             <button
-                                onClick={handleUpload}
+                                onClick={handleAnalyze}
                                 disabled={!file || isUploading}
                                 className={`
                                     px-8 py-3 rounded-lg font-semibold text-white shadow-lg transition-all duration-200 flex items-center
@@ -219,8 +264,16 @@ export default function BulkUploadPage() {
                                     </span>
                                 )}
                             </div>
-                            <div className="text-sm text-gray-500">
-                                Total: {logs.length} | Success: <span className="text-green-600 font-bold">{logs.filter(l => !l.error).length}</span> | Failed: <span className="text-red-600 font-bold">{logs.filter(l => l.error).length}</span>
+                            <div className="flex items-center space-x-4">
+                                <Link
+                                    href="/dashboard"
+                                    className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+                                >
+                                    View on Dashboard
+                                </Link>
+                                <div className="text-sm text-gray-500">
+                                    Total: {logs.length} | Success: <span className="text-green-600 font-bold">{logs.filter(l => !l.error).length}</span> | Failed: <span className="text-red-600 font-bold">{logs.filter(l => l.error).length}</span>
+                                </div>
                             </div>
                         </div>
                         <div className="max-h-96 overflow-y-auto">
@@ -265,6 +318,26 @@ export default function BulkUploadPage() {
                         </div>
                     </div>
                 )}
+
+                {/* Confirmation Dialog */}
+                <AlertDialog open={confirmationOpen} onOpenChange={setConfirmationOpen}>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Confirm Bulk Upload</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                We found <strong>{previewCount}</strong> valid URLs in your file.
+                                <br />
+                                Are you sure you want to proceed with shortening all these URLs?
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={handleProcess} className="bg-blue-600 hover:bg-blue-700">
+                                Proceed
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
             </div>
         </div>
     );
