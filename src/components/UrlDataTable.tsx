@@ -206,7 +206,9 @@ export function UrlDataTable({ data, baseUrl, onShowQrCode }: UrlDataTableProps)
                 body: JSON.stringify({
                     id: editingUrl.id,
                     original_url: editingUrl.original_url,
-                    expires_at: editingUrl.expires_at
+                    expires_at: editingUrl.expires_at,
+                    interim_page_enabled: editingUrl.interim_page_enabled,
+                    interim_message: editingUrl.interim_message
                 }),
             });
 
@@ -795,6 +797,41 @@ export function UrlDataTable({ data, baseUrl, onShowQrCode }: UrlDataTableProps)
                                     Leave empty for no expiration.
                                 </p>
                             </div>
+
+                            <div className="space-y-4 pt-4 border-t">
+                                <h4 className="flex items-center text-sm font-medium text-gray-900">
+                                    Greeting / Interim Page
+                                </h4>
+                                <div className="space-y-2">
+                                    <div className="flex items-center space-x-2">
+                                        <input
+                                            type="checkbox"
+                                            id="interim_page_enabled"
+                                            checked={editingUrl.interim_page_enabled || false}
+                                            onChange={(e) => setEditingUrl({ ...editingUrl, interim_page_enabled: e.target.checked })}
+                                            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                        />
+                                        <Label htmlFor="interim_page_enabled" className="text-sm font-normal text-gray-700">
+                                            Show an interim page with a message before redirecting
+                                        </Label>
+                                    </div>
+                                </div>
+
+                                {editingUrl.interim_page_enabled && (
+                                    <div className="space-y-2 pl-6">
+                                        <Label htmlFor="interim_message">Greeting Message</Label>
+                                        <textarea
+                                            id="interim_message"
+                                            rows={3}
+                                            className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                            value={editingUrl.interim_message || ""}
+                                            onChange={(e) => setEditingUrl({ ...editingUrl, interim_message: e.target.value })}
+                                            placeholder="Example: Thanks for visiting! You are being redirected..."
+                                        />
+                                    </div>
+                                )}
+                            </div>
+
                             <DialogFooter>
                                 <Button type="button" variant="outline" onClick={() => setEditingUrl(null)}>
                                     Cancel
@@ -807,6 +844,6 @@ export function UrlDataTable({ data, baseUrl, onShowQrCode }: UrlDataTableProps)
                     )}
                 </DialogContent>
             </Dialog>
-        </div>
+        </div >
     )
 }

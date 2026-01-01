@@ -80,6 +80,17 @@ export default async function ShortCodePage({
         city: "Unknown"
     });
 
+    // Interim Page Logic (Greetings / Warnings)
+    if (url.interim_page_enabled) {
+        const { InterimRedirect } = await import("@/components/InterimRedirect");
+        return (
+            <InterimRedirect
+                originalUrl={url.original_url}
+                message={url.interim_message}
+            />
+        );
+    }
+
     // Deep Linking Logic
     if (device === "Mobile" || device === "Tablet") {
         let deepLink = null;

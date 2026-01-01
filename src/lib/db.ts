@@ -33,6 +33,8 @@ export interface Url {
     android_deep_link?: string | null;
     ios_deep_link?: string | null;
     permanent_redirect?: boolean; // 301 Redirect
+    interim_page_enabled?: boolean;
+    interim_message?: string;
 }
 
 // Analytics Interface

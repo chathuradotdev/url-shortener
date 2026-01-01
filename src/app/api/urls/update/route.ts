@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
     try {
-        const { id, original_url, expires_at } = await req.json();
+        const { id, original_url, expires_at, interim_page_enabled, interim_message } = await req.json();
 
         if (!id) {
             return NextResponse.json({ error: "URL ID is required" }, { status: 400 });
@@ -18,7 +18,9 @@ export async function POST(req: Request) {
             .from("urls")
             .update({
                 original_url,
-                expires_at: expires_at ? new Date(expires_at).toISOString() : null
+                expires_at: expires_at ? new Date(expires_at).toISOString() : null,
+                interim_page_enabled,
+                interim_message
             })
             .eq("id", id);
 
