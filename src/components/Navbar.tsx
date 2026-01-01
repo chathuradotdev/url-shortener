@@ -43,6 +43,9 @@ export default function Navbar() {
                         <Link href="/analytics" className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                             Analytics
                         </Link>
+                        <Link href="/help" className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                            Help Center
+                        </Link>
                         <Link href="/contact" className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                             Contact
                         </Link>
@@ -123,6 +126,13 @@ export default function Navbar() {
                             className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                         >
                             Analytics
+                        </Link>
+                        <Link
+                            href="/help"
+                            onClick={() => setIsOpen(false)}
+                            className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                        >
+                            Help Center
                         </Link>
                         <Link
                             href="/contact"
