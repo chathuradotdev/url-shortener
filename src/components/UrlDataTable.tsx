@@ -88,6 +88,12 @@ interface Url {
     interim_visit_limit?: number;
     targeting_enabled?: boolean;
     geo_targeting?: Record<string, string>;
+    time_targeting?: {
+        startTime: string;
+        endTime: string;
+        days: string[];
+        url: string;
+    }[];
 }
 
 interface UrlDataTableProps {
@@ -218,7 +224,8 @@ export function UrlDataTable({ data, baseUrl, onShowQrCode }: UrlDataTableProps)
                     interim_duration: editingUrl.interim_duration,
                     interim_visit_limit: editingUrl.interim_visit_limit,
                     targeting_enabled: editingUrl.targeting_enabled,
-                    geo_targeting: editingUrl.geo_targeting
+                    geo_targeting: editingUrl.geo_targeting,
+                    time_targeting: editingUrl.time_targeting
                 }),
             });
 
@@ -968,6 +975,133 @@ export function UrlDataTable({ data, baseUrl, onShowQrCode }: UrlDataTableProps)
                                         </div>
                                     </div>
                                 )}
+                            </div>
+
+                            <div className="space-y-4 pt-4 border-t">
+                                <h4 className="flex items-center text-sm font-medium text-gray-900">
+                                    Time Targeting
+                                </h4>
+                                <div className="space-y-2">
+                                    <p className="text-xs text-muted-foreground">
+                                        Redirect users based on the time of day and day of the week (User's local time).
+                                    </p>
+
+                                    {/* List existing Time Rules */}
+                                    <div className="space-y-2">
+                                        {(editingUrl.time_targeting || []).map((rule, idx) => (
+                                            <div key={idx} className="flex flex-col gap-2 bg-gray-50 p-2 rounded border">
+                                                <div className="flex justify-between items-start">
+                                                    <span className="font-medium text-xs">
+                                                        {rule.days.length === 7 ? "Every day" : rule.days.join(", ")} | {rule.startTime} - {rule.endTime}
+                                                    </span>
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="h-5 w-5 p-0 text-red-500 hover:text-red-700"
+                                                        onClick={() => {
+                                                            const newRules = [...(editingUrl.time_targeting || [])];
+                                                            newRules.splice(idx, 1);
+                                                            setEditingUrl({ ...editingUrl, time_targeting: newRules });
+                                                        }}
+                                                    >
+                                                        ×
+                                                    </Button>
+                                                </div>
+                                                <div className="text-xs text-gray-600 truncate" title={rule.url}>
+                                                    → {rule.url}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Add New Time Rule */}
+                                    <div className="bg-blue-50/50 p-3 rounded-lg border border-blue-100 space-y-3 mt-2">
+                                        <div className="flex gap-2">
+                                            <div className="w-1/3">
+                                                <Label className="text-xs">Start Time</Label>
+                                                <Input
+                                                    type="time"
+                                                    id="new-time-start"
+                                                    className="h-8 text-xs bg-white"
+                                                    defaultValue="09:00"
+                                                />
+                                            </div>
+                                            <div className="w-1/3">
+                                                <Label className="text-xs">End Time</Label>
+                                                <Input
+                                                    type="time"
+                                                    id="new-time-end"
+                                                    className="h-8 text-xs bg-white"
+                                                    defaultValue="17:00"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <Label className="text-xs">Days</Label>
+                                            <div className="flex flex-wrap gap-2 mt-1">
+                                                {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
+                                                    <label key={day} className="flex items-center space-x-1 cursor-pointer">
+                                                        <input
+                                                            type="checkbox"
+                                                            className="h-3 w-3 rounded border-gray-300 text-blue-600 focus:ring-blue-500 rule-day-checkbox"
+                                                            value={day}
+                                                            defaultChecked={['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].includes(day)}
+                                                        />
+                                                        <span className="text-xs text-gray-600">{day}</span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <Label className="text-xs">Target URL</Label>
+                                            <div className="flex gap-2">
+                                                <Input
+                                                    placeholder="https://example.com/promo"
+                                                    id="new-time-url"
+                                                    className="h-8 text-xs bg-white"
+                                                />
+                                                <Button
+                                                    type="button"
+                                                    size="sm"
+                                                    variant="secondary"
+                                                    className="h-8 px-3"
+                                                    onClick={() => {
+                                                        const startInput = document.getElementById('new-time-start') as HTMLInputElement;
+                                                        const endInput = document.getElementById('new-time-end') as HTMLInputElement;
+                                                        const urlInput = document.getElementById('new-time-url') as HTMLInputElement;
+                                                        const checkboxes = document.querySelectorAll('.rule-day-checkbox') as NodeListOf<HTMLInputElement>;
+
+                                                        const days = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
+                                                        const start = startInput.value;
+                                                        const end = endInput.value;
+                                                        const url = urlInput.value.trim();
+
+                                                        if (start && end && url && days.length > 0) {
+                                                            const newRule = {
+                                                                startTime: start,
+                                                                endTime: end,
+                                                                days,
+                                                                url
+                                                            };
+                                                            setEditingUrl({
+                                                                ...editingUrl,
+                                                                time_targeting: [...(editingUrl.time_targeting || []), newRule]
+                                                            });
+                                                            urlInput.value = '';
+                                                        } else {
+                                                            alert("Please fill in all fields and select at least one day.");
+                                                        }
+                                                    }}
+                                                >
+                                                    Add Rule
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <DialogFooter>

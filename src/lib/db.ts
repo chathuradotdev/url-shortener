@@ -40,6 +40,12 @@ export interface Url {
     interim_visit_count?: number; // How many have seen it so far
     targeting_enabled?: boolean;
     geo_targeting?: Record<string, string>; // { "US": "https://...", "GB": "https://..." }
+    time_targeting?: {
+        startTime: string; // "09:00"
+        endTime: string;   // "17:00"
+        days: string[];    // ["Mon", "Tue"]
+        url: string;
+    }[];
 }
 
 // Analytics Interface

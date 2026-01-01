@@ -80,6 +80,40 @@ export default async function ShortCodePage({
         }
     }
 
+    // Time Targeting Logic
+    // We try to get the user's timezone from Vercel headers.
+    // If not available, we could default to UTC or skip.
+    const timezone = headersList.get("x-vercel-ip-timezone");
+
+    if (url.time_targeting && Array.isArray(url.time_targeting) && url.time_targeting.length > 0 && timezone) {
+        try {
+            const now = new Date();
+            // Get current time in user's timezone
+            const userTimeStr = now.toLocaleTimeString("en-US", { timeZone: timezone, hour12: false, hour: '2-digit', minute: '2-digit' }); // "14:30"
+            const userDay = now.toLocaleDateString("en-US", { timeZone: timezone, weekday: 'short' }); // "Mon"
+
+            // Find a matching rule
+            const matchedRule = url.time_targeting.find((rule: any) => {
+                // Check Day
+                if (!rule.days.includes(userDay)) return false;
+
+                // Check Time Range
+                // Simple string comparison works for "HH:MM" 24h format
+                // e.g. "09:00" <= "14:30" <= "17:00"
+                if (userTimeStr >= rule.startTime && userTimeStr <= rule.endTime) {
+                    return true;
+                }
+                return false;
+            });
+
+            if (matchedRule) {
+                targetUrl = matchedRule.url;
+            }
+        } catch (e) {
+            console.error("Time targeting error:", e);
+        }
+    }
+
     await db.incrementUrlClicks(shortCode);
     await db.trackUrlVisit(shortCode, {
         user_agent: userAgent,
