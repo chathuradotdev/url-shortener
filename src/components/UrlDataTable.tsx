@@ -82,6 +82,8 @@ interface Url {
     cloaked?: boolean;
     subRows?: Url[]; // For grouping
     isBatchParent?: boolean;
+    interim_page_enabled?: boolean;
+    interim_message?: string;
 }
 
 interface UrlDataTableProps {
