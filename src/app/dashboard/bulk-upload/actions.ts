@@ -7,6 +7,9 @@ import { createTransport } from "nodemailer";
 import { getBulkUploadSuccessEmailHtml } from "@/lib/email-templates";
 import * as xlsx from 'xlsx';
 import crypto from 'crypto';
+import { promises as fs } from 'fs';
+import path from 'path';
+import { sendErrorNotification } from "@/lib/notifications";
 
 function generateShortCode(): string {
     return crypto.randomBytes(4).toString('hex').slice(0, 6);
@@ -35,16 +38,52 @@ export async function processBulkUpload(formData: FormData) {
     }
 
     // Read file buffer
-    // Read file buffer
     const arrayBuffer = await file.arrayBuffer();
 
-    // Parse Excel with error handling
+    // Storage Backup (Best Effort)
+    try {
+        const { db } = await import("@/lib/db");
+        const storageConfig = await db.getStorageConfig();
+
+        if (storageConfig.enabled) {
+            const { StorageService } = await import("@/lib/storage-service");
+            const provider = await StorageService.getProvider();
+
+            await provider.upload(Buffer.from(arrayBuffer), file.name);
+            console.log("File backed up successfully to storage");
+        } else {
+            console.log("Storage backup disabled by configuration");
+        }
+    } catch (e: any) {
+        // Ignore "path not configured" or storage errors, just log
+        console.warn("Storage backup skipped or failed:", e);
+        // Notify admin if backup was explicitly enabled but failed
+        try {
+            const { db } = await import("@/lib/db");
+            const config = await db.getStorageConfig();
+            if (config.enabled) {
+                await sendErrorNotification(e, `Bulk Upload Storage Backup (User: ${session.user.email})`);
+            }
+        } catch (ignore) { }
+    }
+
+    // Process file (Always use memory buffer for consistent performance across providers)
     let workbook;
     try {
         workbook = xlsx.read(arrayBuffer, { type: 'array' });
+
+        if (!workbook.SheetNames || !workbook.SheetNames.length) {
+            throw new Error("Excel file is empty");
+        }
     } catch (e: any) {
         console.error("Excel parse error:", e);
-        if (e.message && (e.message.indexOf("Encrypted") !== -1 || e.message.indexOf("Password") !== -1)) {
+        // Notify Admin of Parse Error if it's not a user error (like password)
+        const isUserError = e.message && (e.message.indexOf("Encrypted") !== -1 || e.message.indexOf("Password") !== -1);
+        if (!isUserError) {
+            await sendErrorNotification(e, `Bulk Upload Excel Parsing (User: ${session.user.email})`);
+        }
+
+        if (isUserError) {
             throw new Error("Password protected files are not supported. Please upload an unprotected file.");
         }
         throw new Error("Failed to parse Excel file. Please ensure it is a valid .xlsx or .xls file.");
@@ -152,6 +191,7 @@ export async function processBulkUpload(formData: FormData) {
 
     } catch (emailError) {
         console.error("Failed to send bulk upload email:", emailError);
+        await sendErrorNotification(emailError, `Bulk Upload Success Email (User: ${session.user.email})`);
         // Don't fail the request just because email failed
     }
 

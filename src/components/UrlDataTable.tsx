@@ -26,7 +26,11 @@ import {
     Share2,
     Lock,
     Ghost,
-    Folder
+    Folder,
+    LayoutList,
+    Layers,
+    File,
+    Download
 } from "lucide-react"
 
 import { Button } from "./ui/button"
@@ -143,9 +147,24 @@ export function UrlDataTable({ data, baseUrl, onShowQrCode }: UrlDataTableProps)
     const [rowSelection, setRowSelection] = React.useState({})
     const [globalFilter, setGlobalFilter] = React.useState("")
     const [expanded, setExpanded] = React.useState<ExpandedState>({})
+    const [viewMode, setViewMode] = React.useState<'all' | 'single' | 'groups'>('all')
 
     // Process data for grouping
-    const processedData = React.useMemo(() => groupUrlsByBatch(data), [data]);
+    const processedData = React.useMemo(() => {
+        // First get everything in the "Grouped" structure (Batches + Individuals)
+        const grouped = groupUrlsByBatch(data);
+        // Sort everything by date so they are interleaved chronologically
+        const allSorted = grouped.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+        if (viewMode === 'groups') {
+            return allSorted.filter(u => u.isBatchParent);
+        }
+        if (viewMode === 'single') {
+            return allSorted.filter(u => !u.isBatchParent);
+        }
+        // 'all': Return the full interleaved list
+        return allSorted;
+    }, [data, viewMode]);
 
     const [copiedId, setCopiedId] = React.useState<string | null>(null);
 
@@ -202,6 +221,30 @@ export function UrlDataTable({ data, baseUrl, onShowQrCode }: UrlDataTableProps)
         } finally {
             setIsUpdateLoading(false);
             setEditingUrl(null);
+        }
+    };
+
+    const handleDownloadBatch = async (batchRow: Url) => {
+        if (!batchRow.subRows || batchRow.subRows.length === 0) return;
+
+        try {
+            const xlsx = await import("xlsx");
+
+            const data = batchRow.subRows.map(u => ({
+                'Original URL': u.original_url,
+                'Short URL': `${baseUrl}/${u.short_code}`,
+                'Created At': new Date(u.created_at).toLocaleString()
+            }));
+
+            const worksheet = xlsx.utils.json_to_sheet(data);
+            const workbook = xlsx.utils.book_new();
+            xlsx.utils.book_append_sheet(workbook, worksheet, "Batch URLs");
+
+            // Generate filename based on batch tag or date
+            xlsx.writeFile(workbook, `${batchRow.short_code}_urls.xlsx`);
+        } catch (error) {
+            console.error("Failed to download batch:", error);
+            alert("Failed to generate download.");
         }
     };
 
@@ -350,7 +393,30 @@ export function UrlDataTable({ data, baseUrl, onShowQrCode }: UrlDataTableProps)
             cell: ({ row }) => {
                 const url = row.original
 
-                if (url.isBatchParent) return <span className="text-gray-300 text-xs">Batch Group</span>;
+                if (url.isBatchParent) {
+                    return (
+                        <div className="flex items-center gap-1">
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-8 w-8 text-muted-foreground hover:text-blue-600 hover:bg-blue-50"
+                                            onClick={() => handleDownloadBatch(url)}
+                                            title="Download Excel"
+                                        >
+                                            <Download className="h-4 w-4" />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>Download Batch Excel</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                        </div>
+                    );
+                }
 
                 return (
                     <div className="flex items-center gap-1">
@@ -544,6 +610,36 @@ export function UrlDataTable({ data, baseUrl, onShowQrCode }: UrlDataTableProps)
                     onChange={(event) => setGlobalFilter(event.target.value)}
                     className="max-w-sm"
                 />
+
+                <div className="flex items-center bg-gray-100 p-1 rounded-lg border border-gray-200">
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setViewMode('single')}
+                        className={`h-8 text-xs px-3 ${viewMode === 'single' ? 'shadow-sm bg-white text-gray-900' : 'text-gray-500 hover:text-gray-900'}`}
+                        title="Show Individual URLs"
+                    >
+                        <File className="mr-2 h-3.5 w-3.5" /> Single
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setViewMode('groups')}
+                        className={`h-8 text-xs px-3 ${viewMode === 'groups' ? 'shadow-sm bg-white text-gray-900' : 'text-gray-500 hover:text-gray-900'}`}
+                        title="Show Bulk Batches"
+                    >
+                        <Folder className="mr-2 h-3.5 w-3.5" /> Groups
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setViewMode('all')}
+                        className={`h-8 text-xs px-3 ${viewMode === 'all' ? 'shadow-sm bg-white text-gray-900' : 'text-gray-500 hover:text-gray-900'}`}
+                        title="Show All (Mixed)"
+                    >
+                        <LayoutList className="mr-2 h-3.5 w-3.5" /> All
+                    </Button>
+                </div>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="outline" className="ml-auto">

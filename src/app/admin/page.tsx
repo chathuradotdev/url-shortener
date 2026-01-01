@@ -5,8 +5,9 @@ import { db } from "@/lib/db";
 import Link from "next/link";
 import { UsersTable } from "./users-table";
 import { UrlsTable } from "./urls-table";
-import { toggleMaintenanceMode } from "./settings-actions";
+import { toggleMaintenanceMode, updateNotificationEmails } from "./settings-actions";
 import { AlertsManager } from "./alerts-manager"; // Import AlertsManager
+import { StorageSettings } from "./storage-settings";
 
 export const dynamic = 'force-dynamic';
 
@@ -18,13 +19,15 @@ export default async function AdminDashboard() {
         redirect("/dashboard");
     }
 
-    const [users, urls, stats, analytics, maintenanceMode, alerts] = await Promise.all([
+    const [users, urls, stats, analytics, maintenanceMode, alerts, storageConfig, notificationEmails] = await Promise.all([
         db.getAllUsers(),
         db.getAllUrls(),
         db.getSystemStats(),
         db.getAllAnalytics(),
         db.getMaintenanceMode(),
-        db.getSystemAlerts(false) // Fetch all alerts, including inactive
+        db.getSystemAlerts(false), // Fetch all alerts, including inactive
+        db.getStorageConfig(),
+        db.getAdminNotificationEmails()
     ]);
 
     // Daily Clicks (Last 30 Days)
@@ -127,6 +130,39 @@ export default async function AdminDashboard() {
                                     </button>
                                 </form>
                             </div>
+
+                            <div className="mt-8 pt-6 border-t border-gray-100">
+                                <form action={updateNotificationEmails} className="space-y-4">
+                                    <div>
+                                        <label htmlFor="notification_emails" className="block text-sm font-medium text-gray-900">
+                                            Error Notification Emails
+                                        </label>
+                                        <p className="mt-1 text-sm text-gray-500">
+                                            Comma-separated list of emails to receive system error alerts (e.g. bulk upload failures).
+                                        </p>
+                                    </div>
+                                    <div className="flex gap-4">
+                                        <div className="flex-1 max-w-lg">
+                                            <input
+                                                type="text"
+                                                name="notification_emails"
+                                                id="notification_emails"
+                                                defaultValue={notificationEmails?.join(', ') || ''}
+                                                placeholder="admin@example.com, tech@example.com"
+                                                className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md p-2 border"
+                                            />
+                                        </div>
+                                        <button
+                                            type="submit"
+                                            className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                        >
+                                            Save Emails
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <StorageSettings initialConfig={storageConfig} />
                         </div>
                     </div>
 

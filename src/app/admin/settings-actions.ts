@@ -8,6 +8,29 @@ export async function toggleMaintenanceMode(currentState: boolean) {
     revalidatePath("/admin");
 }
 
+export async function updateStorageConfig(formData: FormData) {
+    const config = {
+        enabled: formData.get('storage_enabled') === 'on',
+        provider: (formData.get('storage_provider') as string) || 'local',
+        localPath: (formData.get('storage_path') as string) || '',
+        bucket: (formData.get('storage_bucket') as string) || '',
+        region: (formData.get('storage_region') as string) || '',
+        accessKey: (formData.get('storage_access_key') as string) || '',
+        secretKey: (formData.get('storage_secret_key') as string) || '',
+        endpoint: (formData.get('storage_endpoint') as string) || '',
+        connectionString: (formData.get('storage_connection_string') as string) || '',
+    };
+
+    await db.setStorageConfig(config);
+    revalidatePath("/admin");
+}
+
+export async function updateNotificationEmails(formData: FormData) {
+    const emails = formData.get('notification_emails') as string;
+    await db.setAdminNotificationEmails(emails || '');
+    revalidatePath("/admin");
+}
+
 export async function createAlert(formData: FormData) {
     const message = formData.get('message') as string;
     const type = (formData.get('type') as any) || 'info';

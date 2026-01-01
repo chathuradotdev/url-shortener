@@ -492,6 +492,60 @@ class SupabaseDB {
         return data?.value === 'true';
     }
 
+    async getAdminNotificationEmails(): Promise<string[]> {
+        const { data } = await supabase
+            .from('settings')
+            .select('value')
+            .eq('key', 'admin_notification_emails')
+            .maybeSingle();
+
+        if (!data?.value) return [];
+        return data.value.split(',').map((e: string) => e.trim()).filter(Boolean);
+    }
+
+    async getStorageConfig() {
+        // Fetch all storage related keys
+        const keys = [
+            'storage_provider',
+            'storage_enabled',
+            'storage_path', // Local path
+            'storage_bucket', // S3 Bucket or Azure Container
+            'storage_region',
+            'storage_access_key',
+            'storage_secret_key',
+            'storage_endpoint',
+            'storage_connection_string'
+        ];
+
+        const { data } = await supabase
+            .from('settings')
+            .select('key, value')
+            .in('key', keys);
+
+        const config: Record<string, string> = {};
+        data?.forEach(item => {
+            config[item.key] = item.value;
+        });
+
+        return {
+            enabled: config['storage_enabled'] === 'true',
+            provider: config['storage_provider'] || 'local',
+            localPath: config['storage_path'] || config['file_storage_path'] || '', // Fallback to old key
+            bucket: config['storage_bucket'] || '',
+            region: config['storage_region'] || '',
+            accessKey: config['storage_access_key'] || '',
+            secretKey: config['storage_secret_key'] || '',
+            endpoint: config['storage_endpoint'] || '',
+            connectionString: config['storage_connection_string'] || ''
+        };
+    }
+
+    // Deprecated but kept for backward compatibility if needed, aliased to setStorageConfig logic
+    async getFileStoragePath(): Promise<string | null> {
+        const config = await this.getStorageConfig();
+        return config.localPath || null;
+    }
+
 
     // System Alerts
     async getSystemAlerts(activeOnly: boolean = false, targetAudience?: 'guest' | 'user'): Promise<SystemAlert[]> {
@@ -573,6 +627,57 @@ class SupabaseDB {
             });
 
         if (error) console.error("Error setting maintenance mode:", error);
+    }
+
+    async setAdminNotificationEmails(emails: string): Promise<void> {
+        const { error } = await supabase
+            .from('settings')
+            .upsert({
+                key: 'admin_notification_emails',
+                value: emails,
+                updated_at: new Date().toISOString()
+            });
+
+        if (error) console.error("Error setting admin notification emails:", error);
+    }
+
+    async setStorageConfig(config: {
+        enabled: boolean,
+        provider: string,
+        localPath?: string,
+        bucket?: string,
+        region?: string,
+        accessKey?: string,
+        secretKey?: string,
+        endpoint?: string,
+        connectionString?: string
+    }): Promise<void> {
+        const updates = [
+            { key: 'storage_enabled', value: String(config.enabled) },
+            { key: 'storage_provider', value: config.provider },
+            { key: 'storage_path', value: config.localPath },
+            { key: 'storage_bucket', value: config.bucket },
+            { key: 'storage_region', value: config.region },
+            { key: 'storage_access_key', value: config.accessKey },
+            { key: 'storage_secret_key', value: config.secretKey },
+            { key: 'storage_endpoint', value: config.endpoint },
+            { key: 'storage_connection_string', value: config.connectionString },
+        ].filter(u => u.value !== undefined); // Only update defined values
+
+        const { error } = await supabase
+            .from('settings')
+            .upsert(updates.map(u => ({
+                key: u.key,
+                value: u.value,
+                updated_at: new Date().toISOString()
+            })));
+
+        if (error) console.error("Error setting storage config:", error);
+    }
+
+    async setFileStoragePath(path: string): Promise<void> {
+        // Alias to new config
+        return this.setStorageConfig({ enabled: !!path, provider: 'local', localPath: path });
     }
 }
 

@@ -143,3 +143,50 @@ export function getBulkUploadSuccessEmailHtml(userName: string, totalUrls: numbe
 </html>
   `;
 }
+
+export function getErrorNotificationEmailHtml(errorContext: string, errorMessage: string, stackTrace?: string) {
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>System Error Alert</title>
+</head>
+<body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f4f5; margin: 0; padding: 0;">
+  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; margin-top: 40px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+    
+    <!-- Header -->
+    <div style="background: linear-gradient(to right, #ef4444, #b91c1c); padding: 30px 20px; text-align: center;">
+      <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: bold;">System Error Alert</h1>
+    </div>
+
+    <!-- Content -->
+    <div style="padding: 40px 30px;">
+      <h2 style="color: #1f2937; margin-top: 0; font-size: 20px;">Context: ${errorContext}</h2>
+      
+      <div style="background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 20px; margin-bottom: 24px;">
+        <h3 style="color: #991b1b; margin-top: 0; font-size: 16px;">Error Message</h3>
+        <p style="color: #b91c1c; font-family: monospace; font-size: 14px; margin: 0;">
+          ${errorMessage}
+        </p>
+      </div>
+
+      ${stackTrace ? `
+      <div style="background-color: #f3f4f6; border-radius: 8px; padding: 20px; margin-bottom: 24px;">
+        <h3 style="color: #4b5563; margin-top: 0; font-size: 16px;">Stack Trace</h3>
+        <pre style="color: #1f2937; font-family: monospace; font-size: 12px; white-space: pre-wrap; word-break: break-all; margin: 0; overflow-x: auto;">
+${stackTrace}
+        </pre>
+      </div>
+      ` : ''}
+
+      <p style="color: #4b5563; font-size: 14px; line-height: 1.5; margin-bottom: 0;">
+        Timestamp: ${new Date().toISOString()}
+      </p>
+    </div>
+    
+  </div>
+</body>
+</html>
+  `;
+}
