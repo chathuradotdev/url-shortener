@@ -8,7 +8,7 @@ interface InterimRedirectProps {
     message?: string;
     delay?: number; // seconds
 }
-
+//
 export function InterimRedirect({ originalUrl, message, delay = 5 }: InterimRedirectProps) {
     const [seconds, setSeconds] = useState(delay);
 
