@@ -22,6 +22,8 @@ export default function ShortenerForm() {
     const [androidDeepLink, setAndroidDeepLink] = useState("");
     const [iosDeepLink, setIosDeepLink] = useState("");
     const [permanentRedirect, setPermanentRedirect] = useState(false);
+    const [burnAfterReading, setBurnAfterReading] = useState(false);
+    const [burnVisitLimit, setBurnVisitLimit] = useState(1);
     const resultRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -55,6 +57,8 @@ export default function ShortenerForm() {
                     androidDeepLink,
                     iosDeepLink,
                     permanentRedirect,
+                    burnAfterReading,
+                    burnVisitLimit
                 }),
             });
 
@@ -324,6 +328,62 @@ export default function ShortenerForm() {
                                             <span className="text-xs text-gray-500">For SEO transfer (Premium only)</span>
                                         </div>
                                     </label>
+
+                                    <label className="flex items-center space-x-2 cursor-pointer group">
+                                        <div className="relative">
+                                            <input
+                                                type="checkbox"
+                                                className="sr-only peer"
+                                                checked={permanentRedirect}
+                                                onChange={(e) => setPermanentRedirect(e.target.checked)}
+                                            />
+                                            <div className="w-10 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                                        </div>
+                                        <div>
+                                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-blue-600 transition-colors block">
+                                                Permanent Redirect (301)
+                                            </span>
+                                            <span className="text-xs text-gray-500">For SEO transfer (Premium only)</span>
+                                        </div>
+                                    </label>
+
+                                    <label className="flex items-center space-x-2 cursor-pointer group">
+                                        <div className="relative">
+                                            <input
+                                                type="checkbox"
+                                                className="sr-only peer"
+                                                checked={burnAfterReading}
+                                                onChange={(e) => setBurnAfterReading(e.target.checked)}
+                                            />
+                                            <div className="w-10 h-6 bg-red-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-red-300 dark:peer-focus:ring-red-800 rounded-full peer dark:bg-red-900/30 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-red-600"></div>
+                                        </div>
+                                        <div>
+                                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-red-600 transition-colors block flex items-center">
+                                                <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                </svg>
+                                                Burn After Reading 🔥
+                                            </span>
+                                            <span className="text-xs text-gray-500">Self-destruct after visits (Premium only)</span>
+                                        </div>
+                                    </label>
+
+                                    {burnAfterReading && (
+                                        <div className="ml-12 animate-in slide-in-from-top-2 fade-in">
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                Self-destruct after N visits:
+                                            </label>
+                                            <input
+                                                type="number"
+                                                min="1"
+                                                max="1000"
+                                                value={burnVisitLimit}
+                                                onChange={(e) => setBurnVisitLimit(parseInt(e.target.value) || 1)}
+                                                className="w-24 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-1 focus:ring-red-500"
+                                            />
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="mt-2 flex justify-end">

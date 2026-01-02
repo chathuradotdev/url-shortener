@@ -46,6 +46,8 @@ export interface Url {
         days: string[];    // ["Mon", "Tue"]
         url: string;
     }[];
+    burn_after_reading?: boolean;
+    burn_visit_limit?: number; // Default 1
 }
 
 // Analytics Interface

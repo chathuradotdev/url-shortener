@@ -23,6 +23,28 @@ export default async function ShortCodePage({
                 </div>
             </div>
         );
+
+    }
+
+    if (url.burn_after_reading && url.clicks >= (url.burn_visit_limit || 1)) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-950 text-white font-mono">
+                <div className="p-8 max-w-md w-full text-center border border-red-900/50 bg-red-950/10 rounded-xl shadow-2xl relative overflow-hidden">
+                    <div className="absolute inset-0 bg-red-500/5 animate-pulse pointer-events-none"></div>
+                    <h1 className="text-4xl font-bold text-red-500 mb-6 flex items-center justify-center gap-3">
+                        <span className="text-5xl">🔥</span>
+                        <span>BURNT</span>
+                    </h1>
+                    <p className="text-red-300/80 text-lg mb-8 leading-relaxed">
+                        This link has self-destructed.<br />
+                        The message is gone forever.
+                    </p>
+                    <div className="text-xs text-red-900/50 uppercase tracking-widest">
+                        System Message: 410 Gone
+                    </div>
+                </div>
+            </div>
+        );
     }
 
     if (url.expires_at && new Date(url.expires_at) < new Date()) {

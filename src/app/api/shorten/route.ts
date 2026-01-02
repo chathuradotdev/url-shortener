@@ -23,7 +23,7 @@ export async function POST(req: Request) {
         }
 
         const session = await getServerSession(authOptions);
-        const { originalUrl, customAlias, expiresAt, tags, password, cloaked, androidDeepLink, iosDeepLink, permanentRedirect } = await req.json();
+        const { originalUrl, customAlias, expiresAt, tags, password, cloaked, androidDeepLink, iosDeepLink, permanentRedirect, burnAfterReading, burnVisitLimit } = await req.json();
 
         if (!originalUrl) {
             return NextResponse.json(
@@ -102,7 +102,9 @@ export async function POST(req: Request) {
             cloaked: isCloaked,
             android_deep_link: androidLink,
             ios_deep_link: iosLink,
-            permanent_redirect: isPermanentRedirect
+            permanent_redirect: isPermanentRedirect,
+            burn_after_reading: userId && userPlan === 'premium' && burnAfterReading ? true : false,
+            burn_visit_limit: userId && userPlan === 'premium' && burnVisitLimit ? burnVisitLimit : 1
         });
 
         // Construct the full short URL (assuming localhost for now, or use req.headers.host)
