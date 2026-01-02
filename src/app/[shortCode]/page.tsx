@@ -2,6 +2,35 @@ import { db } from "@/lib/db";
 import { redirect, notFound, permanentRedirect } from "next/navigation";
 import { headers } from "next/headers";
 
+export async function generateMetadata({ params }: { params: Promise<{ shortCode: string }> }) {
+    const { shortCode } = await params;
+    const url = await db.findUrlByShortCode(shortCode);
+
+    if (!url || !url.social_title) {
+        return {
+            title: "Shortened URL",
+        };
+    }
+
+    return {
+        title: url.social_title,
+        description: url.social_description || "Click to see more",
+        openGraph: {
+            title: url.social_title,
+            description: url.social_description || "Click to see more",
+            images: url.social_image ? [{ url: url.social_image }] : [],
+            url: `https://your-domain.com/${shortCode}`,
+            type: 'website',
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title: url.social_title,
+            description: url.social_description || "Click to see more",
+            images: url.social_image ? [url.social_image] : [],
+        },
+    };
+}
+
 export default async function ShortCodePage({
     params,
 }: {

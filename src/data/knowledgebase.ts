@@ -205,6 +205,68 @@ View your current usage and upgrade to **Pro** for:
         `,
         lastUpdated: "2025-01-01",
         relatedIds: ["1"]
+    },
+    {
+        id: "7",
+        slug: "burn-after-reading",
+        title: "Burn After Reading",
+        description: "Create self-destructing links for secure sharing.",
+        category: "Advanced Features",
+        icon: "🔥",
+        tags: ["security", "self-destruct", "private", "limit"],
+        content: `
+# Burn After Reading 🔥
+
+Share sensitive information securely with links that self-destruct after being visited.
+
+## How it Works
+
+When you enable **Burn After Reading** on a link, you set a specific **Visit Limit** (e.g., 1 visit). Once that limit is reached, the link is permanently destroyed.
+
+- **1 Visit**: The recipient sees the content once. If they refresh or try to share the link, it shows a "Burnt" message (Status 410).
+- **Secure**: The data is gone forever. No history is kept of the destination for subsequent visitors.
+
+## How to Enable
+
+1. Create a new link.
+2. Toggle **Burn After Reading (Premium)**.
+3. Set the **Visit Limit** (Default is 1).
+4. Share the link.
+
+> **Warning**: Test this carefully! If YOU click the link to test it, that counts as the 1 visit, and it will be burnt for your recipient.
+        `,
+        lastUpdated: "2025-01-02",
+        relatedIds: ["1", "3"]
+    },
+    {
+        id: "8",
+        slug: "social-previews",
+        title: "Custom Social Previews",
+        description: "Control how your links look on Facebook, Twitter, and LinkedIn.",
+        category: "Advanced Features",
+        icon: "🖼️",
+        tags: ["social", "og", "meta", "facebook", "twitter", "preview"],
+        content: `
+# Custom Social Media Previews
+
+Take control of your brand's appearance. Instead of showing the generic preview of your destination URL (or often nothing at all), you can define exactly what people see when you share your short link.
+
+## Why use this?
+- **CTR**: Custom titles and images increase Click-Through Rates significantly.
+- **Myths & Clickbait**: You can create intriguing previews that don't match the destination metadata exactly.
+- **Branding**: Ensure your logo or campaign image is always front and center.
+
+## How to Configure
+
+1. In the shortener form, open the **Social Media Preview (Premium)** section.
+2. **Title**: The bold headline users see (e.g., "Exclusive 50% Off!").
+3. **Description**: The 1-2 lines of text under the headline.
+4. **Image URL**: A link to a public image (JPG/PNG) you want to use as the thumbnail.
+
+The system generates Open Graph (OG) and Twitter Card tags automatically for your short link.
+        `,
+        lastUpdated: "2025-01-02",
+        relatedIds: ["1", "4"]
     }
 ];
 

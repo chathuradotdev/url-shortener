@@ -24,6 +24,9 @@ export default function ShortenerForm() {
     const [permanentRedirect, setPermanentRedirect] = useState(false);
     const [burnAfterReading, setBurnAfterReading] = useState(false);
     const [burnVisitLimit, setBurnVisitLimit] = useState(1);
+    const [socialTitle, setSocialTitle] = useState("");
+    const [socialDescription, setSocialDescription] = useState("");
+    const [socialImage, setSocialImage] = useState("");
     const resultRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -58,7 +61,10 @@ export default function ShortenerForm() {
                     iosDeepLink,
                     permanentRedirect,
                     burnAfterReading,
-                    burnVisitLimit
+                    burnVisitLimit,
+                    socialTitle,
+                    socialDescription,
+                    socialImage
                 }),
             });
 
@@ -384,6 +390,41 @@ export default function ShortenerForm() {
                                             />
                                         </div>
                                     )}
+                                </div>
+
+                                <div className="mt-6 bg-blue-50/50 dark:bg-blue-900/10 rounded-xl p-4 border border-blue-100 dark:border-blue-900/30">
+                                    <div className="flex items-center space-x-2 mb-3">
+                                        <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                                        </svg>
+                                        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                            Social Media Preview (Premium)
+                                        </h3>
+                                    </div>
+
+                                    <div className="space-y-3">
+                                        <input
+                                            type="text"
+                                            placeholder="Custom Title (e.g. My Awesome Product)"
+                                            value={socialTitle}
+                                            onChange={(e) => setSocialTitle(e.target.value)}
+                                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="Custom Description (e.g. Click to see the best deal...)"
+                                            value={socialDescription}
+                                            onChange={(e) => setSocialDescription(e.target.value)}
+                                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                                        />
+                                        <input
+                                            type="url"
+                                            placeholder="Custom Image URL (e.g. https://example.com/image.png)"
+                                            value={socialImage}
+                                            onChange={(e) => setSocialImage(e.target.value)}
+                                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                                        />
+                                    </div>
                                 </div>
 
                                 <div className="mt-2 flex justify-end">

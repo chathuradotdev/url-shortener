@@ -48,6 +48,9 @@ export interface Url {
     }[];
     burn_after_reading?: boolean;
     burn_visit_limit?: number; // Default 1
+    social_title?: string | null;
+    social_description?: string | null;
+    social_image?: string | null;
 }
 
 // Analytics Interface
