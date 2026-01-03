@@ -132,8 +132,6 @@ export default async function ShortCodePage({
     }
 
     // Time Targeting Logic
-    // We try to get the user's timezone from Vercel headers.
-    // If not available, we could default to UTC or skip.
     const timezone = headersList.get("x-vercel-ip-timezone");
 
     if (url.time_targeting && Array.isArray(url.time_targeting) && url.time_targeting.length > 0 && timezone) {
@@ -149,8 +147,6 @@ export default async function ShortCodePage({
                 if (!rule.days.includes(userDay)) return false;
 
                 // Check Time Range
-                // Simple string comparison works for "HH:MM" 24h format
-                // e.g. "09:00" <= "14:30" <= "17:00"
                 if (userTimeStr >= rule.startTime && userTimeStr <= rule.endTime) {
                     return true;
                 }
@@ -162,6 +158,32 @@ export default async function ShortCodePage({
             }
         } catch (e) {
             console.error("Time targeting error:", e);
+        }
+    }
+
+    // --- Traffic Splitting & Link Rotation Logic ---
+    if (url.rotation_enabled && url.rotation_rules && url.rotation_rules.length > 0) {
+        const rules = url.rotation_rules;
+        if (url.rotation_mode === 'sequential') {
+            // Sequential / Round Robin
+            const index = (url.clicks || 0) % rules.length;
+            if (rules[index]?.url) {
+                targetUrl = rules[index].url;
+            }
+        } else {
+            // Weighted Random (Default for Split Testing)
+            const totalWeight = rules.reduce((sum: number, rule: any) => sum + (rule.weight || 0), 0);
+
+            if (totalWeight > 0) {
+                let random = Math.random() * totalWeight;
+                for (const rule of rules) {
+                    if (random < (rule.weight || 0)) {
+                        targetUrl = rule.url;
+                        break;
+                    }
+                    random -= (rule.weight || 0);
+                }
+            }
         }
     }
 

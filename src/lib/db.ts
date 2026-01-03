@@ -51,6 +51,12 @@ export interface Url {
     social_title?: string | null;
     social_description?: string | null;
     social_image?: string | null;
+    rotation_enabled?: boolean;
+    rotation_mode?: 'weighted' | 'sequential'; // 'weighted' = random based on %, 'sequential' = round robin
+    rotation_rules?: {
+        url: string;
+        weight: number; // percentage (0-100)
+    }[];
 }
 
 // Analytics Interface

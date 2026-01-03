@@ -33,6 +33,8 @@ import {
     Download
 } from "lucide-react"
 
+import { TrafficRotatorConfig } from "./TrafficRotatorConfig"
+
 import { Button } from "./ui/button"
 import {
     DropdownMenu,
@@ -93,6 +95,12 @@ interface Url {
         endTime: string;
         days: string[];
         url: string;
+    }[];
+    rotation_enabled?: boolean;
+    rotation_mode?: 'weighted' | 'sequential';
+    rotation_rules?: {
+        url: string;
+        weight: number;
     }[];
 }
 
@@ -225,7 +233,10 @@ export function UrlDataTable({ data, baseUrl, onShowQrCode }: UrlDataTableProps)
                     interim_visit_limit: editingUrl.interim_visit_limit,
                     targeting_enabled: editingUrl.targeting_enabled,
                     geo_targeting: editingUrl.geo_targeting,
-                    time_targeting: editingUrl.time_targeting
+                    time_targeting: editingUrl.time_targeting,
+                    rotation_enabled: editingUrl.rotation_enabled,
+                    rotation_mode: editingUrl.rotation_mode,
+                    rotation_rules: editingUrl.rotation_rules
                 }),
             });
 
@@ -770,7 +781,7 @@ export function UrlDataTable({ data, baseUrl, onShowQrCode }: UrlDataTableProps)
 
             {/* Edit Dialog remains same */}
             <Dialog open={!!editingUrl} onOpenChange={(open) => !open && setEditingUrl(null)}>
-                <DialogContent>
+                <DialogContent className="max-h-[85vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle>Edit Link</DialogTitle>
                         <DialogDescription>
@@ -877,6 +888,17 @@ export function UrlDataTable({ data, baseUrl, onShowQrCode }: UrlDataTableProps)
                                         </div>
                                     </div>
                                 )}
+                            </div>
+
+                            <div className="space-y-4 pt-4 border-t">
+                                <TrafficRotatorConfig
+                                    enabled={editingUrl.rotation_enabled || false}
+                                    setEnabled={(v) => setEditingUrl({ ...editingUrl, rotation_enabled: v })}
+                                    mode={editingUrl.rotation_mode || 'weighted'}
+                                    setMode={(v) => setEditingUrl({ ...editingUrl, rotation_mode: v })}
+                                    rules={editingUrl.rotation_rules || []}
+                                    setRules={(v) => setEditingUrl({ ...editingUrl, rotation_rules: v })}
+                                />
                             </div>
 
                             <div className="space-y-4 pt-4 border-t">
