@@ -35,10 +35,15 @@ export async function POST(req: Request) {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
+        // 7 Day Free Trial
+        const trialEndsAt = new Date();
+        trialEndsAt.setDate(trialEndsAt.getDate() + 7);
+
         const user = await db.createUser({
             username,
             email,
             password_hash: hashedPassword,
+            trial_ends_at: trialEndsAt.toISOString(),
         });
 
         return NextResponse.json(

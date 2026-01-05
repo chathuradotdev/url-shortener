@@ -15,6 +15,7 @@ export interface User {
     reset_token?: string | null;
     reset_token_expiry?: string | null;
     last_login?: string | null;
+    trial_ends_at?: string | null;
 }
 
 // Url Interface
@@ -235,7 +236,14 @@ class SupabaseDB {
                 ...user,
                 role: 'user',
                 status: 'active',
-                plan: 'freemium'
+                plan: 'freemium',
+                // Default logic can be overridden by passed user object properties if I used spread ...user AFTER defaults, 
+                // but here ...user comes first. 
+                // Since user argument Omit excludes 'plan', we are good.
+                // However, I need to make sure trial_ends_at is PASSED in the user argument or I default it here?
+                // The interface Omit doesn't exclude trial_ends_at, so it can be passed in 'user'.
+                // So I don't strictly need to change the body if I pass it in.
+                // But I'll leave the function body as is, just reliant on the interface change above.
             }])
             .select()
             .single();

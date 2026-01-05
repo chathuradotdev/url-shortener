@@ -78,6 +78,13 @@ export async function POST(req: Request) {
             const user = await db.findUserById(userId);
             if (user) {
                 userPlan = user.plan;
+                // Check if trial is active
+                if (userPlan === 'freemium' && user.trial_ends_at) {
+                    const trialEnd = new Date(user.trial_ends_at);
+                    if (trialEnd > new Date()) {
+                        userPlan = 'premium';
+                    }
+                }
             }
         }
 

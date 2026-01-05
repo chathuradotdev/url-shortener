@@ -29,6 +29,11 @@ export default async function Dashboard() {
             const dbUser = await db.findUserById(session.user.id);
             if (dbUser) {
                 userPlan = dbUser.plan;
+                if (userPlan === 'freemium' && dbUser.trial_ends_at) {
+                    if (new Date(dbUser.trial_ends_at) > new Date()) {
+                        userPlan = 'premium';
+                    }
+                }
             }
 
             // @ts-ignore

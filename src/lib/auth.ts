@@ -69,6 +69,8 @@ export const authOptions: NextAuthOptions = {
                 session.user.plan = token.plan;
                 // @ts-ignore
                 session.user.last_login = token.last_login;
+                // @ts-ignore
+                session.user.trial_ends_at = token.trial_ends_at;
             }
             return session;
         },
@@ -100,10 +102,22 @@ export const authOptions: NextAuthOptions = {
                     token.sub = dbUser.id;
                     // @ts-ignore
                     token.role = dbUser.role;
+
+                    // Check for active trial
+                    let effectivePlan = dbUser.plan;
+                    if (dbUser.plan === 'freemium' && dbUser.trial_ends_at) {
+                        const trialEnd = new Date(dbUser.trial_ends_at);
+                        if (trialEnd > new Date()) {
+                            effectivePlan = 'premium';
+                        }
+                    }
+
                     // @ts-ignore
-                    token.plan = dbUser.plan;
+                    token.plan = effectivePlan;
                     // @ts-ignore
                     token.last_login = dbUser.last_login;
+                    // @ts-ignore
+                    token.trial_ends_at = dbUser.trial_ends_at;
                 }
             }
             return token;

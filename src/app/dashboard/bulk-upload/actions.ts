@@ -26,7 +26,14 @@ export async function processBulkUpload(formData: FormData) {
     // Double check premium status securely on server
     // @ts-ignore
     const dbUser = await db.findUserById(session.user.id);
-    if (!dbUser || dbUser.plan !== 'premium') {
+    let isPremium = dbUser?.plan === 'premium';
+    if (dbUser?.plan === 'freemium' && dbUser.trial_ends_at) {
+        if (new Date(dbUser.trial_ends_at) > new Date()) {
+            isPremium = true;
+        }
+    }
+
+    if (!dbUser || !isPremium) {
         throw new Error("Upgrade to Premium to access this feature.");
     }
 

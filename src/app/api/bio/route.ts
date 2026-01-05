@@ -38,7 +38,14 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "User not found" }, { status: 404 });
         }
 
-        if (user.plan !== 'premium' && user.role !== 'admin') {
+        let isPremium = user.plan === 'premium';
+        if (user.plan === 'freemium' && user.trial_ends_at) {
+            if (new Date(user.trial_ends_at) > new Date()) {
+                isPremium = true;
+            }
+        }
+
+        if (!isPremium && user.role !== 'admin') {
             return NextResponse.json({ error: "Premium required" }, { status: 403 });
         }
 

@@ -166,6 +166,9 @@ export default function FeaturesPageClient() {
                         </div>
                         <div className="p-8 bg-amber-50 border-b border-amber-100">
                             <h2 className="text-2xl font-bold text-gray-900 mb-2">Premium User</h2>
+                            <span className="inline-block bg-green-100 text-green-700 text-xs font-bold px-2 py-0.5 rounded-full mb-2 border border-green-200">
+                                7-Day Free Trial
+                            </span>
                             <p className="text-gray-600">Power tools for advanced users.</p>
                             <div className="mt-4 flex items-baseline">
                                 <span className="text-4xl font-extrabold text-gray-900">
@@ -198,6 +201,20 @@ export default function FeaturesPageClient() {
                                 </li>
                                 <li className="flex items-start">
                                     <svg className="w-6 h-6 text-amber-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <span className="text-gray-900 font-medium">Smart Targeting</span>
+                                    <p className="text-sm text-gray-500 ml-auto pl-4">Geo & Time</p>
+                                </li>
+                                <li className="flex items-start">
+                                    <svg className="w-6 h-6 text-amber-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                    <span className="text-gray-900 font-medium">Social Previews</span>
+                                    <p className="text-sm text-gray-500 ml-auto pl-4">Custom Metadata</p>
+                                </li>
+                                <li className="flex items-start">
+                                    <svg className="w-6 h-6 text-amber-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
                                     </svg>
                                     <span className="text-gray-900 font-medium">Mobile Deep Linking</span>
@@ -225,25 +242,15 @@ export default function FeaturesPageClient() {
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                     </svg>
                                     <span className="text-gray-900 font-medium">Permanent Redirect (301)</span>
-                                    <p className="text-sm text-gray-500 ml-auto pl-4">SEO Friendly</p>
-                                </li>
-                                <li className="flex items-start">
-                                    <svg className="w-6 h-6 text-amber-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                    </svg>
-                                    <span className="text-gray-900 font-medium">Priority Support</span>
-                                </li>
-                                <li className="flex items-start">
-                                    <svg className="w-6 h-6 text-amber-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    <span className="text-gray-900 font-medium">Ad-free Experience</span>
                                 </li>
                             </ul>
                             <div className="mt-8">
                                 <Link href="/register?plan=premium" className="block w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold py-3 px-4 rounded-xl text-center hover:from-amber-600 hover:to-orange-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all">
-                                    Get Premium
+                                    Start 7-Day Free Trial
                                 </Link>
+                                <p className="text-xs text-center text-gray-500 mt-3">
+                                    No credit card required. Cancel anytime.
+                                </p>
                             </div>
                         </div>
                     </div>

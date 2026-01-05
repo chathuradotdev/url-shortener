@@ -563,12 +563,17 @@ export default function ShortenerForm() {
                                     <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-xl shadow-lg transform hover:scale-[1.02] transition-all duration-300 relative overflow-hidden group">
                                         <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full blur-2xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
 
-                                        <h3 className="text-xl font-bold mb-4 flex items-center">
+                                        <h3 className="text-xl font-bold mb-1 flex items-center">
                                             <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
                                                 Why Upgrade onto Pro?
                                             </span>
                                             <span className="ml-2 text-xs bg-white/20 text-white px-2 py-0.5 rounded-full">PRO</span>
                                         </h3>
+                                        <div className="mb-4">
+                                            <span className="inline-block bg-green-500/20 text-green-300 text-xs font-bold px-2 py-0.5 rounded border border-green-500/30">
+                                                Now with 7-Day Free Trial! 🎁
+                                            </span>
+                                        </div>
 
                                         <ul className="space-y-3 mb-6">
                                             {[
@@ -587,10 +592,10 @@ export default function ShortenerForm() {
                                         </ul>
 
                                         <Link
-                                            href="/register"
+                                            href="/register?plan=premium"
                                             className="block w-full text-center bg-white text-gray-900 font-bold py-2.5 rounded-lg hover:bg-gray-100 transition-colors shadow-md"
                                         >
-                                            Upgrade - Only $1/Month
+                                            Start 7-Day Free Trial
                                         </Link>
                                     </div>
                                 )}

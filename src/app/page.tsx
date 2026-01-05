@@ -13,7 +13,7 @@ export default async function Home() {
         "@type": "WebApplication",
         "name": "URL Shortener",
         "url": process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
-        "description": "Free URL Shortener with advanced analytics, QR codes, and link management.",
+        "description": "The complete link platform. Smart Targeting, Bio Pages, Custom Social Previews, and Advanced Analytics.",
         "applicationCategory": "Utilities",
         "operatingSystem": "Any",
         "offers": {
@@ -52,7 +52,7 @@ export default async function Home() {
                             </span>
                         </h1>
                         <p className="mt-4 max-w-2xl mx-auto text-lg sm:text-xl text-gray-600 dark:text-gray-300 leading-relaxed px-2">
-                            Create short, manageable links, generate QR codes, and share them with ease.
+                            The complete link platform. Smart Targeting, Bio Pages, Custom Social Previews, and Advanced Analytics.
                         </p>
                     </div>
                 ) : (
