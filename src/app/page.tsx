@@ -3,7 +3,8 @@ import AdvancedFeaturesSection from "@/components/AdvancedFeaturesSection";
 import BioLinkShowcase from "@/components/BioLinkShowcase";
 import PremiumDashboardShowcase from "@/components/PremiumDashboardShowcase";
 import SocialProof from "@/components/SocialProof";
-import TypewriterText from "@/components/TypewriterText";
+import ActivityBubbles from "@/components/ActivityBubbles";
+
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
@@ -38,6 +39,8 @@ export default async function Home() {
                 <div className="absolute -bottom-8 left-1/2 w-72 h-72 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-4000"></div>
             </div>
 
+            <ActivityBubbles />
+
             <div className="relative max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
                 {!session ? (
                     <div className="text-center mb-10 animate-in fade-in slide-in-from-bottom-4">
@@ -48,11 +51,9 @@ export default async function Home() {
                         </div> */}
                         <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-gray-900 dark:text-white mb-6">
                             Shorten Your Links{" "}
-                            <TypewriterText
-                                text="Instantly"
-                                className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent"
-                                cursorClassName="bg-pink-500"
-                            />
+                            <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                                Instantly
+                            </span>
                         </h1>
                         <p className="mt-6 max-w-3xl mx-auto text-lg sm:text-xl text-gray-600 dark:text-gray-300 leading-relaxed px-2">
                             The complete link platform. <span className="font-semibold text-gray-800 dark:text-gray-100 transition-colors hover:text-blue-600">Smart Targeting</span>, <span className="font-semibold text-gray-800 dark:text-gray-100 transition-colors hover:text-purple-600">Bio Pages</span>, <span className="font-semibold text-gray-800 dark:text-gray-100 transition-colors hover:text-pink-600">Custom Social Previews</span>, and{" "}
