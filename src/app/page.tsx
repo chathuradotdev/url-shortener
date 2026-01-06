@@ -3,6 +3,7 @@ import AdvancedFeaturesSection from "@/components/AdvancedFeaturesSection";
 import BioLinkShowcase from "@/components/BioLinkShowcase";
 import PremiumDashboardShowcase from "@/components/PremiumDashboardShowcase";
 import SocialProof from "@/components/SocialProof";
+import TypewriterText from "@/components/TypewriterText";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
@@ -47,12 +48,19 @@ export default async function Home() {
                         </div> */}
                         <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-gray-900 dark:text-white mb-6">
                             Shorten Your Links{" "}
-                            <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                                Instantly
-                            </span>
+                            <TypewriterText
+                                text="Instantly"
+                                className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent"
+                                cursorClassName="bg-pink-500"
+                            />
                         </h1>
-                        <p className="mt-4 max-w-2xl mx-auto text-lg sm:text-xl text-gray-600 dark:text-gray-300 leading-relaxed px-2">
-                            The complete link platform. Smart Targeting, Bio Pages, Custom Social Previews, and Advanced Analytics.
+                        <p className="mt-6 max-w-3xl mx-auto text-lg sm:text-xl text-gray-600 dark:text-gray-300 leading-relaxed px-2">
+                            The complete link platform. <span className="font-semibold text-gray-800 dark:text-gray-100 transition-colors hover:text-blue-600">Smart Targeting</span>, <span className="font-semibold text-gray-800 dark:text-gray-100 transition-colors hover:text-purple-600">Bio Pages</span>, <span className="font-semibold text-gray-800 dark:text-gray-100 transition-colors hover:text-pink-600">Custom Social Previews</span>, and{" "}
+                            <span className="relative inline-block font-bold text-gray-900 dark:text-white cursor-help group">
+                                Advanced Analytics
+                                <span className="absolute left-0 bottom-0 w-full h-0.5 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600"></span>
+                                <span className="absolute left-0 bottom-0 w-full h-2 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 blur-md opacity-0 group-hover:opacity-40 transition-opacity duration-500"></span>
+                            </span>.
                         </p>
                     </div>
                 ) : (
