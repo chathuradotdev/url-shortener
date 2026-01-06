@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProUpgradeBanner from "@/components/ProUpgradeBanner";
 import SystemAlertBanner from "@/components/SystemAlertBanner";
+import ChatWidget from "@/components/ChatWidget";
 import { db } from "@/lib/db";
 import "./globals.css";
 import { getServerSession } from "next-auth";
@@ -60,6 +61,7 @@ export default async function RootLayout({
     const session = await getServerSession(authOptions);
     const audience = session?.user ? 'user' : 'guest';
     const alerts = await db.getSystemAlerts(true, audience);
+    const chatWidgetEnabled = await db.getChatWidgetEnabled();
     return (
         <html lang="en" suppressHydrationWarning>
             <body className={`${inter.className} bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 antialiased`}>
@@ -72,6 +74,7 @@ export default async function RootLayout({
                             {children}
                         </div>
                         <Footer />
+                        {chatWidgetEnabled && <ChatWidget />}
                     </div>
                     <Toaster />
                 </Providers>

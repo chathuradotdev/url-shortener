@@ -61,6 +61,12 @@ export default async function Home() {
                                 Advanced Analytics
                                 <span className="absolute left-0 bottom-0 w-full h-0.5 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600"></span>
                                 <span className="absolute left-0 bottom-0 w-full h-2 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 blur-md opacity-0 group-hover:opacity-40 transition-opacity duration-500"></span>
+
+                                {/* Tooltip */}
+                                <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-56 p-3 bg-gray-900/90 backdrop-blur-sm text-white text-xs font-medium rounded-xl shadow-xl border border-white/10 opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none z-20 text-center translate-y-2 group-hover:translate-y-0 block">
+                                    Create an account for more interactive features ✨
+                                    <span className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900/90"></span>
+                                </span>
                             </span>.
                         </p>
                     </div>

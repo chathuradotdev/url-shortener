@@ -8,6 +8,12 @@ export async function toggleMaintenanceMode(currentState: boolean) {
     revalidatePath("/admin");
 }
 
+export async function toggleChatWidget(currentState: boolean) {
+    await db.setChatWidgetEnabled(!currentState);
+    revalidatePath("/admin");
+    revalidatePath("/"); // Also revalidate home/layout
+}
+
 export async function updateStorageConfig(formData: FormData) {
     const config = {
         enabled: formData.get('storage_enabled') === 'on',

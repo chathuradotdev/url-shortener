@@ -527,6 +527,22 @@ class SupabaseDB {
         return data?.value === 'true';
     }
 
+    async getChatWidgetEnabled(): Promise<boolean> {
+        const { data } = await supabase
+            .from('settings')
+            .select('value')
+            .eq('key', 'chat_widget_enabled')
+            .maybeSingle();
+        return data?.value === 'true';
+    }
+
+    async setChatWidgetEnabled(enabled: boolean): Promise<void> {
+        const { error } = await supabase
+            .from('settings')
+            .upsert({ key: 'chat_widget_enabled', value: String(enabled) });
+        if (error) throw error;
+    }
+
     async getAdminNotificationEmails(): Promise<string[]> {
         const { data } = await supabase
             .from('settings')
