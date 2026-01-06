@@ -57,7 +57,7 @@ export default function SocialProof() {
                     ))}
                 </div>
                 <p className="text-sm font-medium text-gray-700 dark:text-gray-200 mt-1">
-                    Trusted by <span className="font-bold text-gray-900 dark:text-white">20,000+</span> Marketers & Agencies
+                    Trusted by <span className="font-bold text-gray-900 dark:text-white">20,000+</span> Happy Customers
                 </p>
             </div>
         </div>
