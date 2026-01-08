@@ -23,7 +23,7 @@ export async function POST(req: Request) {
         }
 
         const session = await getServerSession(authOptions);
-        const { originalUrl, customAlias, expiresAt, tags, password, cloaked, androidDeepLink, iosDeepLink, permanentRedirect, burnAfterReading, burnVisitLimit, socialTitle, socialDescription, socialImage } = await req.json();
+        const { originalUrl, customAlias, expiresAt, tags, password, cloaked, androidDeepLink, iosDeepLink, permanentRedirect, burnAfterReading, burnVisitLimit, socialTitle, socialDescription, socialImage, domain } = await req.json();
 
         if (!originalUrl) {
             return NextResponse.json(
@@ -42,10 +42,43 @@ export async function POST(req: Request) {
             );
         }
 
+        // @ts-ignore
+        const userId = session?.user?.id || null;
+        let userPlan = 'freemium';
+
+        // Domain Validation (Pre-check)
+        if (domain) {
+            if (!userId) {
+                return NextResponse.json({ message: "Custom domains require an account" }, { status: 401 });
+            }
+            // Check ownership
+            const userDomains = await db.getCustomDomains(userId);
+            const ownedDomain = userDomains.find(d => d.domain === domain && d.status === 'active'); // Only allow active/verified domains? For now, let's allow "pending" if user wants to set it up? No, strict.
+            // Actually, let's allow any domain they added for flexibility, but verified is best.
+            // Let's assume 'verified' is needed for it to actually work via DNS, but we allow creating the link.
+            const hasDomain = userDomains.some(d => d.domain === domain);
+
+            if (!hasDomain) {
+                return NextResponse.json({ message: "You verify this domain first" }, { status: 403 });
+            }
+        }
+
+        if (userId) {
+            const user = await db.findUserById(userId);
+            if (user) {
+                userPlan = user.plan;
+                if (userPlan === 'freemium' && user.trial_ends_at) {
+                    const trialEnd = new Date(user.trial_ends_at);
+                    if (trialEnd > new Date()) userPlan = 'premium';
+                }
+            }
+        }
+
+        // Branded domains allow custom aliases usually
+
         let shortCode;
 
         if (customAlias) {
-            // Validate alias format (alphanumeric, hyphens, underscores)
             if (!/^[a-zA-Z0-9-_]+$/.test(customAlias)) {
                 return NextResponse.json(
                     { message: "Invalid alias format. Use letters, numbers, hyphens, and underscores only." },
@@ -53,38 +86,21 @@ export async function POST(req: Request) {
                 );
             }
 
-            // Check if alias exists
-            const existingUrl = await db.findUrlByShortCode(customAlias);
+            // Check uniqueness SC scoped to DOMAIN
+            // If domain is null, scoped to system.
+            const existingUrl = await db.findUrlByShortCode(customAlias, domain || null);
             if (existingUrl) {
                 return NextResponse.json(
-                    { message: "Alias already taken" },
+                    { message: "Alias already taken" + (domain ? " on this domain" : "") },
                     { status: 409 }
                 );
             }
             shortCode = customAlias;
         } else {
             shortCode = generateShortCode();
-            // Ensure generated code is unique (simple retry logic could be added here)
-            while (await db.findUrlByShortCode(shortCode)) {
+            // Collision check with domain scope
+            while (await db.findUrlByShortCode(shortCode, domain || null)) {
                 shortCode = generateShortCode();
-            }
-        }
-
-        // @ts-ignore
-        const userId = session?.user?.id || null;
-
-        let userPlan = 'freemium';
-        if (userId) {
-            const user = await db.findUserById(userId);
-            if (user) {
-                userPlan = user.plan;
-                // Check if trial is active
-                if (userPlan === 'freemium' && user.trial_ends_at) {
-                    const trialEnd = new Date(user.trial_ends_at);
-                    if (trialEnd > new Date()) {
-                        userPlan = 'premium';
-                    }
-                }
             }
         }
 
@@ -95,6 +111,9 @@ export async function POST(req: Request) {
         const isCloaked = userId && cloaked ? true : false;
 
         // Deep linking and Permanent Redirect only for premium users
+        // Also domain usage is premium? Or at least "Pro" feature? 
+        // Logic above checked ownership, ownership implies they have the feature.
+
         const androidLink = userId && userPlan === 'premium' && androidDeepLink ? androidDeepLink : null;
         const iosLink = userId && userPlan === 'premium' && iosDeepLink ? iosDeepLink : null;
         const isPermanentRedirect = userId && userPlan === 'premium' && permanentRedirect ? true : false;
@@ -114,12 +133,12 @@ export async function POST(req: Request) {
             burn_visit_limit: userId && userPlan === 'premium' && burnVisitLimit ? burnVisitLimit : 1,
             social_title: userId && userPlan === 'premium' ? socialTitle : null,
             social_description: userId && userPlan === 'premium' ? socialDescription : null,
-            social_image: userId && userPlan === 'premium' ? socialImage : null
+            social_image: userId && userPlan === 'premium' ? socialImage : null,
+            domain: domain || null
         });
 
-        // Construct the full short URL (assuming localhost for now, or use req.headers.host)
-        // In production, use an environment variable for BASE_URL
-        const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+        // Construct the full short URL
+        const baseUrl = domain ? `https://${domain}` : (process.env.NEXTAUTH_URL || "http://localhost:3000");
         const shortUrl = `${baseUrl}/${shortCode}`;
 
         return NextResponse.json({

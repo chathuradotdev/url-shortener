@@ -5,6 +5,7 @@ import PremiumDashboardShowcase from "@/components/PremiumDashboardShowcase";
 import SocialProof from "@/components/SocialProof";
 import ActivityBubbles from "@/components/ActivityBubbles";
 
+import BrandedDomainsSection from "@/components/BrandedDomainsSection";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
@@ -190,6 +191,9 @@ export default async function Home() {
                                 </div>
                             </div>
                         </div>
+
+                        {/* Branded Domains Showcase */}
+                        <BrandedDomainsSection />
 
                         {/* Interactive Feature Showcase */}
                         <AdvancedFeaturesSection />

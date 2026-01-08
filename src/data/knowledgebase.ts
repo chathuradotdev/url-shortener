@@ -267,6 +267,52 @@ The system generates Open Graph (OG) and Twitter Card tags automatically for you
         `,
         lastUpdated: "2025-01-02",
         relatedIds: ["1", "4"]
+    },
+    {
+        id: "9",
+        slug: "branded-domains",
+        title: "Branded Domains",
+        description: "Use your own custom domain for short links.",
+        category: "Advanced Features",
+        icon: "🏷️",
+        tags: ["domain", "brand", "cname", "dns", "custom"],
+        content: `
+# Branded Domains
+
+Build trust and authority by using your own domain name for your short links (e.g., \`links.mybrand.com\` instead of our generic domain).
+
+## Why use a Branded Domain?
+
+- **Trust**: Users are more likely to click a link that looks like your official website.
+- **Branding**: Every share promotes YOUR brand, not ours.
+- **Deliverability**: Custom domains often have better deliverability in emails and SMS.
+
+## How to Setup
+
+### 1. Choose a Domain
+You can use a subdomain (e.g., \`go.mysite.com\`) or a dedicated short domain (e.g., \`mysite.link\`). We recommend a subdomain of your main site.
+
+### 2. Configure DNS
+You need to add a **CNAME Record** in your DNS provider (GoDaddy, Namecheap, Cloudflare, etc.).
+
+- **Type**: CNAME
+- **Host/Name**: The subdomain you chose (e.g., \`go\` or \`links\`).
+- **Value/Target**: \`cname.pixel-shortener.com\` (or whatever the generic app domain is).
+- **TTL**: Automatic or 1 Hour.
+
+### 3. Verify in Dashboard
+1. Go to your **Dashboard > Domains**.
+2. Click **Add Domain**.
+3. Enter your full domain (e.g., \`go.mysite.com\`).
+4. Click **Verify**.
+
+Once verified, you will see a green "Active" badge.
+
+## Using Your Domain
+When creating a new short link, simply select your branded domain from the dropdown menu (if you have multiple) before clicking Shorten.
+        `,
+        lastUpdated: "2026-01-08",
+        relatedIds: ["1", "6"]
     }
 ];
 

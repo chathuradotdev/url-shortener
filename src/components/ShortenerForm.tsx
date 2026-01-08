@@ -28,6 +28,8 @@ export default function ShortenerForm() {
     const [socialTitle, setSocialTitle] = useState("");
     const [socialDescription, setSocialDescription] = useState("");
     const [socialImage, setSocialImage] = useState("");
+    const [selectedDomain, setSelectedDomain] = useState("");
+    const [userDomains, setUserDomains] = useState<any[]>([]);
     const resultRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -35,6 +37,25 @@ export default function ShortenerForm() {
             resultRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
         }
     }, [shortUrl]);
+
+    useEffect(() => {
+        if (session?.user) {
+            // Fetch domains
+            fetch('/api/domains')
+                .then(res => {
+                    if (res.ok) return res.json();
+                    return [];
+                })
+                .then(data => {
+                    if (Array.isArray(data)) {
+                        // Filter only active/verified if you want strictness explanation
+                        // For now show all, maybe mark pending
+                        setUserDomains(data);
+                    }
+                })
+                .catch(err => console.error("Failed to fetch domains", err));
+        }
+    }, [session]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -65,7 +86,9 @@ export default function ShortenerForm() {
                     burnVisitLimit,
                     socialTitle,
                     socialDescription,
-                    socialImage
+                    socialImage,
+                    domain: selectedDomain || null
+
                 }),
             });
 
@@ -230,8 +253,25 @@ export default function ShortenerForm() {
                                 <div className="relative flex-1 group">
                                     <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-xl blur opacity-20 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
                                     <div className="relative flex items-center bg-white dark:bg-gray-900 rounded-xl shadow-md p-1.5 ring-1 ring-gray-900/5 dark:ring-white/10">
-                                        <div className="pl-3 text-gray-400 font-mono text-sm">
-                                            /
+                                        <div className="pl-3 text-gray-400 font-mono text-sm flex items-center">
+                                            {userDomains.length > 0 ? (
+                                                <select
+                                                    value={selectedDomain}
+                                                    onChange={(e) => setSelectedDomain(e.target.value)}
+                                                    className="bg-transparent border-none focus:ring-0 text-sm p-0 pr-8 cursor-pointer text-gray-600 dark:text-gray-300 font-medium appearance-none"
+                                                    style={{ backgroundImage: 'none' }}
+                                                >
+                                                    <option value="">Default</option>
+                                                    {userDomains.map(d => (
+                                                        <option key={d.id} value={d.domain}>
+                                                            {d.domain} {d.verified ? '' : '(Pending)'}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            ) : (
+                                                "/"
+                                            )}
+                                            {userDomains.length > 0 && <span className="mx-1 text-gray-300">/</span>}
                                         </div>
                                         <input
                                             type="text"

@@ -37,7 +37,45 @@ export default async function ShortCodePage({
     params: Promise<{ shortCode: string }>;
 }) {
     const { shortCode } = await params;
-    const url = await db.findUrlByShortCode(shortCode);
+    const headersList = await headers();
+    const host = headersList.get("host") || "";
+
+    // Determine if this is a custom domain
+    // We compare against the system domain (e.g. from env or hardcoded default)
+    // If NEXT_PUBLIC_APP_URL is "https://myapp.com", hostname is "myapp.com"
+
+    let domain: string | null = null;
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "";
+    let systemHost = "";
+
+    try {
+        if (appUrl) {
+            systemHost = new URL(appUrl).host;
+        }
+    } catch (e) {
+        // fallback if env is just a domain or invalid
+        systemHost = appUrl;
+    }
+
+    // Also handle localhost in dev
+    if (!host.includes("localhost") && host !== systemHost && !host.endsWith(".vercel.app")) {
+        // It's likely a custom domain
+        // However, if your system domain IS on vercel.app, we need to be careful.
+        // The safest way is: if user explicitly requested a branded domain, the DB will have it.
+        // We pass the host to DB. If it's the system host, we SHOULD pass null?
+        // Let's pass the host if it seems "custom".
+
+        // Simplified Logic: 
+        // If the host is NOT the system host, treat it as a potential custom domain.
+        // CAUTION: "www" subdomain might be system host too.
+
+        // Let's rely on exact match for simplicity for now.
+        if (host !== systemHost) {
+            domain = host;
+        }
+    }
+
+    const url = await db.findUrlByShortCode(shortCode, domain);
 
     if (!url) {
         notFound();
@@ -93,7 +131,7 @@ export default async function ShortCodePage({
     }
 
     // Analytics Tracking
-    const headersList = await headers();
+    // headersList is already defined above
     const userAgent = headersList.get("user-agent") || "Unknown";
     const referer = headersList.get("referer") || "Direct";
     const ip = headersList.get("x-forwarded-for") || "Unknown";

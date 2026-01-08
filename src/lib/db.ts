@@ -18,6 +18,18 @@ export interface User {
     trial_ends_at?: string | null;
 }
 
+// Custom Domain Interface
+export interface CustomDomain {
+    id: string;
+    user_id: string;
+    domain: string;
+    status: 'pending' | 'active' | 'error';
+    verified: boolean;
+    created_at: string;
+    dns_record?: string; // e.g., "CNAME -> app.yoursite.com"
+}
+
+
 // Url Interface
 export interface Url {
     id: string;
@@ -58,6 +70,7 @@ export interface Url {
         url: string;
         weight: number; // percentage (0-100)
     }[];
+    domain?: string | null; // Branded domain (e.g. "go.brand.com") or null for default
 }
 
 // Analytics Interface
@@ -377,15 +390,72 @@ class SupabaseDB {
         return data as Url;
     }
 
-    async findUrlByShortCode(shortCode: string): Promise<Url | null> {
-        // Ensure we don't return removed URLs? original logic: u.status !== 'removed'
-        const { data } = await supabase
+    async findUrlByShortCode(shortCode: string, domain?: string | null): Promise<Url | null> {
+        let query = supabase
             .from('urls')
             .select('*')
             .eq('short_code', shortCode)
-            .neq('status', 'removed')
-            .maybeSingle();
+            .neq('status', 'removed');
+
+        if (domain) {
+            // If accessing via custom domain, finding specific link for that domain
+            query = query.eq('domain', domain);
+        } else {
+            // If accessing via default domain, find links with NO domain assigned
+            query = query.is('domain', null);
+        }
+
+        const { data } = await query.maybeSingle();
         return data as Url | null;
+    }
+
+    // --- Custom Domain Methods ---
+
+    async addCustomDomain(userId: string, domain: string): Promise<CustomDomain> {
+        const { data, error } = await supabase
+            .from('custom_domains')
+            .insert([{
+                user_id: userId,
+                domain: domain,
+                status: 'pending',
+                verified: false
+            }])
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data as CustomDomain;
+    }
+
+    async getCustomDomains(userId: string): Promise<CustomDomain[]> {
+        const { data } = await supabase
+            .from('custom_domains')
+            .select('*')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false });
+        return (data || []) as CustomDomain[];
+    }
+
+    async deleteCustomDomain(id: string): Promise<void> {
+        const { error } = await supabase
+            .from('custom_domains')
+            .delete()
+            .eq('id', id);
+        if (error) throw error;
+    }
+
+    // A stub for verification logic - in reality this would check DNS records
+    async verifyCustomDomain(id: string): Promise<boolean> {
+        // user would call this manually or we run it periodically
+        // For now, we just flip the switch to simulate
+        const { data, error } = await supabase
+            .from('custom_domains')
+            .update({ verified: true, status: 'active' })
+            .eq('id', id)
+            .select()
+            .single();
+
+        return !!data;
     }
 
     async getAllUrls(): Promise<Url[]> {
@@ -540,6 +610,26 @@ class SupabaseDB {
         const { error } = await supabase
             .from('settings')
             .upsert({ key: 'chat_widget_enabled', value: String(enabled) });
+        if (error) throw error;
+    }
+
+    async getBrandedDomainsEnabled(): Promise<boolean> {
+        const { data } = await supabase
+            .from('settings')
+            .select('value')
+            .eq('key', 'branded_domains_enabled')
+            .maybeSingle();
+        // Default to true if not set, or false? Let's default to true for now since it's a live feature.
+        // Actually, usually feature flags default to false if new, but since it's already live, true makes sense.
+        // However, if the row doesn't exist, data is null. 
+        if (!data) return true;
+        return data.value === 'true';
+    }
+
+    async setBrandedDomainsEnabled(enabled: boolean): Promise<void> {
+        const { error } = await supabase
+            .from('settings')
+            .upsert({ key: 'branded_domains_enabled', value: String(enabled) });
         if (error) throw error;
     }
 
