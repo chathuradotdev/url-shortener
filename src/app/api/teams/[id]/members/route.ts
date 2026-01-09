@@ -46,12 +46,17 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
             return NextResponse.json({ error: "Email is required" }, { status: 400 });
         }
 
-        const success = await db.addTeamMember(teamId, email, role);
-        if (!success) {
-            return NextResponse.json({ error: "User not found or already in team" }, { status: 404 });
+        const targetUser = await db.findUserByEmail(email);
+        if (!targetUser) {
+            return NextResponse.json({ error: "User not found" }, { status: 404 });
         }
 
-        return NextResponse.json({ success: true });
+        try {
+            await db.addTeamMember(teamId, targetUser.id, role);
+            return NextResponse.json({ success: true });
+        } catch (e) {
+            return NextResponse.json({ error: "User already in team or error occurred" }, { status: 400 });
+        }
     } catch (error) {
         console.error("Failed to add team member:", error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

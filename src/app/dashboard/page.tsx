@@ -22,18 +22,14 @@ export default async function Dashboard({
         redirect("/login");
     }
 
-    // @ts-ignore
     let urls: any[] = [];
     let domains: any[] = [];
     let teams: any[] = [];
-    // @ts-ignore
-    let userPlan = session.user?.plan || 'freemium';
+    let userPlan = session.user.plan || 'freemium';
 
     try {
-        // @ts-ignore
-        if (session?.user?.id) {
+        if (session.user.id) {
             // Fetch fresh user data to ensure plan is up to date
-            // @ts-ignore
             const dbUser = await db.findUserById(session.user.id);
             if (dbUser) {
                 userPlan = dbUser.plan;
@@ -50,13 +46,10 @@ export default async function Dashboard({
                 rawUrls = await db.getTeamUrls(teamId);
                 domains = await db.getTeamCustomDomains(teamId);
             } else {
-                // @ts-ignore
                 rawUrls = await db.getUserUrls(session.user.id);
-                // @ts-ignore
                 domains = await db.getCustomDomains(session.user.id);
             }
 
-            // @ts-ignore
             teams = await db.getTeams(session.user.id);
 
             console.log(`Dashboard: Found ${rawUrls.length} URLs in ${teamId ? 'team' : 'personal'} context`);
@@ -89,7 +82,6 @@ export default async function Dashboard({
                                 ) : (
                                     <>Welcome back, <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent ml-2">{session.user?.name}</span></>
                                 )}
-                                {/* @ts-ignore */}
                                 {userPlan === 'premium' ? (
                                     <span title="Premium User" className="ml-2 flex items-center justify-center w-6 h-6 bg-yellow-100 rounded-full shadow-sm border border-yellow-200">
                                         <svg className="w-3.5 h-3.5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
@@ -104,10 +96,8 @@ export default async function Dashboard({
                                     </span>
                                 )}
                             </h1>
-                            {/* @ts-ignore */}
-                            {session?.user?.last_login && (
+                            {session.user.last_login && (
                                 <p className="text-xs text-gray-500 mt-1">
-                                    {/* @ts-ignore */}
                                     Last login: {new Date(session.user.last_login).toLocaleString("en-US", {
                                         year: 'numeric',
                                         month: 'long',
@@ -120,7 +110,6 @@ export default async function Dashboard({
                             )}
                         </div>
                         <div className="flex items-center space-x-4">
-                            {/* @ts-ignore */}
                             {session.user.role === 'admin' && (
                                 <Link
                                     href="/admin"
@@ -267,7 +256,6 @@ export default async function Dashboard({
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-sm font-medium text-gray-600 mb-1">Teams</p>
-                                    {/* @ts-ignore */}
                                     <p className="text-3xl font-bold text-gray-900">{teams.length || 0}</p>
                                 </div>
                                 <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
