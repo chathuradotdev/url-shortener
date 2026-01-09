@@ -27,8 +27,7 @@ export default function ProUpgradeBanner() {
     if (!isMounted || status === 'loading' || !session) return null;
 
     // Check for trial status
-    // @ts-ignore
-    const trialEndsAt = session.user?.trial_ends_at;
+    const trialEndsAt = session.user.trial_ends_at;
     const isTrial = !!trialEndsAt;
 
     // Calculate remaining days
@@ -36,15 +35,14 @@ export default function ProUpgradeBanner() {
     const isTrialExpired = daysRemaining <= 0;
 
     // Normal plan check
-    // @ts-ignore
-    const userPlan = session.user?.plan;
+    const userPlan = session.user.plan;
 
     // Logic to decide what to show
     // 1. If PRO/PREMIUM (non-trial), show nothing.
     // 2. If TRIAL ACTIVE, show "Trial ends in X days".
     // 3. If FREEMIUM (or expired trial), show "Upgrade now".
 
-    if ((userPlan === "pro" || userPlan === "premium") && !isTrial) return null;
+    if (userPlan === "premium" && !isTrial) return null;
 
     // If trial is expired, they are effectively freemium, so showing the standard upgrade banner is fine.
     // But we might want a specific "Trial Expired" message?
