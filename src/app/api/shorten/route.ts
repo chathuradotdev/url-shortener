@@ -23,7 +23,7 @@ export async function POST(req: Request) {
         }
 
         const session = await getServerSession(authOptions);
-        const { originalUrl, customAlias, expiresAt, tags, password, cloaked, androidDeepLink, iosDeepLink, permanentRedirect, burnAfterReading, burnVisitLimit, socialTitle, socialDescription, socialImage, domain } = await req.json();
+        const { originalUrl, customAlias, expiresAt, tags, password, cloaked, androidDeepLink, iosDeepLink, permanentRedirect, burnAfterReading, burnVisitLimit, socialTitle, socialDescription, socialImage, domain, teamId } = await req.json();
 
         if (!originalUrl) {
             return NextResponse.json(
@@ -51,15 +51,20 @@ export async function POST(req: Request) {
             if (!userId) {
                 return NextResponse.json({ message: "Custom domains require an account" }, { status: 401 });
             }
-            // Check ownership
-            const userDomains = await db.getCustomDomains(userId);
-            const ownedDomain = userDomains.find(d => d.domain === domain && d.status === 'active'); // Only allow active/verified domains? For now, let's allow "pending" if user wants to set it up? No, strict.
-            // Actually, let's allow any domain they added for flexibility, but verified is best.
-            // Let's assume 'verified' is needed for it to actually work via DNS, but we allow creating the link.
+            // Check ownership (Personal or Team)
+            const userDomains = await db.getAccessibleCustomDomains(userId);
             const hasDomain = userDomains.some(d => d.domain === domain);
 
             if (!hasDomain) {
-                return NextResponse.json({ message: "You verify this domain first" }, { status: 403 });
+                return NextResponse.json({ message: "You must add and verify this domain first" }, { status: 403 });
+            }
+        }
+
+        // Team Membership verification
+        if (teamId && userId) {
+            const isMember = await db.isUserInTeam(userId, teamId);
+            if (!isMember) {
+                return NextResponse.json({ message: "Unauthorized team access" }, { status: 403 });
             }
         }
 
@@ -134,7 +139,8 @@ export async function POST(req: Request) {
             social_title: userId && userPlan === 'premium' ? socialTitle : null,
             social_description: userId && userPlan === 'premium' ? socialDescription : null,
             social_image: userId && userPlan === 'premium' ? socialImage : null,
-            domain: domain || null
+            domain: domain || null,
+            team_id: teamId || null
         });
 
         // Construct the full short URL

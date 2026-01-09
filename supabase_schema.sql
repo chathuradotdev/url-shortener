@@ -74,8 +74,43 @@ create table if not exists bio_links (
   bio_page_id uuid references bio_pages(id) on delete cascade not null,
   title text not null,
   url text not null,
+  type text default 'link',
   icon text,
   position integer default 0,
   is_active boolean default true,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
+
+-- Custom Domains Table
+create table if not exists custom_domains (
+  id uuid default uuid_generate_v4() primary key,
+  user_id uuid references users(id) on delete cascade not null,
+  domain text not null unique,
+  status text check (status in ('pending', 'active', 'error')) default 'pending',
+  verified boolean default false,
+  dns_record text,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- Teams Table
+create table if not exists teams (
+  id uuid default uuid_generate_v4() primary key,
+  name text not null,
+  owner_id uuid references users(id) on delete cascade not null,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- Team Members Table
+create table if not exists team_members (
+  id uuid default uuid_generate_v4() primary key,
+  team_id uuid references teams(id) on delete cascade not null,
+  user_id uuid references users(id) on delete cascade not null,
+  role text check (role in ('owner', 'admin', 'member', 'viewer')) default 'member',
+  joined_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  unique(team_id, user_id)
+);
+
+-- Add team_id to existing resources
+alter table urls add column if not exists team_id uuid references teams(id) on delete set null;
+alter table custom_domains add column if not exists team_id uuid references teams(id) on delete set null;
+alter table bio_pages add column if not exists team_id uuid references teams(id) on delete set null;

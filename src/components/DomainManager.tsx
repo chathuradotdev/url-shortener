@@ -1,13 +1,24 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface CustomDomain {
     id: string;
     domain: string;
-    status: 'pending' | 'active' | 'error';
     verified: boolean;
     created_at: string;
+    team_id?: string | null;
 }
 
 export default function DomainManager({ userPlan, isEnabled }: { userPlan: string, isEnabled: boolean }) {
@@ -16,12 +27,32 @@ export default function DomainManager({ userPlan, isEnabled }: { userPlan: strin
     const [loading, setLoading] = useState(false);
     const [adding, setAdding] = useState(false);
     const [error, setError] = useState('');
+    const [host, setHost] = useState('your-app-domain.com');
+    const [userTeams, setUserTeams] = useState<any[]>([]);
+    const [selectedTeamId, setSelectedTeamId] = useState("");
+
+    useEffect(() => {
+        setHost(window.location.host);
+    }, []);
 
     useEffect(() => {
         if (userPlan === 'premium' && isEnabled) {
             fetchDomains();
+            fetchTeams();
         }
     }, [userPlan, isEnabled]);
+
+    const fetchTeams = async () => {
+        try {
+            const res = await fetch('/api/teams');
+            if (res.ok) {
+                const data = await res.json();
+                setUserTeams(data);
+            }
+        } catch (e) {
+            console.error("Failed to fetch teams", e);
+        }
+    };
 
     const fetchDomains = async () => {
         setLoading(true);
@@ -47,7 +78,10 @@ export default function DomainManager({ userPlan, isEnabled }: { userPlan: strin
             const res = await fetch('/api/domains', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ domain: newDomain })
+                body: JSON.stringify({
+                    domain: newDomain,
+                    teamId: selectedTeamId || null
+                })
             });
 
             const data = await res.json();
@@ -66,7 +100,8 @@ export default function DomainManager({ userPlan, isEnabled }: { userPlan: strin
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm("Are you sure you want to delete this domain? Links using it may stop working.")) return;
+        // Confirmation is now handled by the AlertDialog UI
+
 
         try {
             const res = await fetch(`/api/domains/${id}`, { method: 'DELETE' });
@@ -123,6 +158,28 @@ export default function DomainManager({ userPlan, isEnabled }: { userPlan: strin
         <div className="space-y-6 text-black">
             <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200">
                 <h2 className="text-xl font-bold text-gray-900 mb-4">Add Custom Domain</h2>
+
+                {userTeams.length > 0 && (
+                    <div className="mb-4 flex items-center gap-3 bg-gray-50 p-3 rounded-lg border border-gray-200 shadow-sm animate-in fade-in slide-in-from-left-4">
+                        <div className="flex items-center gap-2 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                            </svg>
+                            Workspace:
+                        </div>
+                        <select
+                            value={selectedTeamId}
+                            onChange={(e) => setSelectedTeamId(e.target.value)}
+                            className="bg-transparent border-none focus:ring-0 text-sm font-bold text-blue-600 cursor-pointer p-0 pr-8"
+                        >
+                            <option value="">Personal</option>
+                            {userTeams.map(team => (
+                                <option key={team.id} value={team.id}>{team.name}</option>
+                            ))}
+                        </select>
+                    </div>
+                )}
+
                 <form onSubmit={handleAdd} className="flex gap-4">
                     <div className="flex-1">
                         <label htmlFor="domain" className="sr-only">Domain</label>
@@ -154,7 +211,7 @@ export default function DomainManager({ userPlan, isEnabled }: { userPlan: strin
                     <div className="bg-white p-3 rounded border border-blue-200 font-mono text-sm text-gray-700">
                         Type: CNAME<br />
                         Name: {newDomain.split('.')[0] || "subdomain"} (e.g. 'link')<br />
-                        Value: {typeof window !== 'undefined' ? window.location.host : 'your-app-domain.com'}
+                        Value: {host}
                     </div>
                 </div>
             </div>
@@ -178,6 +235,11 @@ export default function DomainManager({ userPlan, isEnabled }: { userPlan: strin
                                         }`}>
                                         {domain.verified ? 'Verified' : 'Pending Verification'}
                                     </span>
+                                    {domain.team_id && (
+                                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                            Team Owned
+                                        </span>
+                                    )}
                                     <span className="text-xs text-gray-400">Added on {new Date(domain.created_at).toLocaleDateString()}</span>
                                 </div>
                             </div>
@@ -190,12 +252,29 @@ export default function DomainManager({ userPlan, isEnabled }: { userPlan: strin
                                         Check DNS
                                     </button>
                                 )}
-                                <button
-                                    onClick={() => handleDelete(domain.id)}
-                                    className="text-sm text-red-600 hover:text-red-800 hover:bg-red-50 px-3 py-1.5 rounded-lg transition-colors"
-                                >
-                                    Delete
-                                </button>
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <button
+                                            className="text-sm text-red-600 hover:text-red-800 hover:bg-red-50 px-3 py-1.5 rounded-lg transition-colors"
+                                        >
+                                            Delete
+                                        </button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                All the created domains will be deleted with this process and process cannot be undone. URLs created with this domain will be disabled.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                            <AlertDialogAction onClick={() => handleDelete(domain.id)} className="bg-red-600 hover:bg-red-700 focus:ring-red-600 text-white">
+                                                Delete Domain
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
                             </div>
                         </div>
                     ))}

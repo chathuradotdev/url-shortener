@@ -24,7 +24,7 @@ export async function GET(req: Request) {
     }
 
     // @ts-ignore
-    const domains = await db.getCustomDomains(session.user.id);
+    const domains = await db.getAccessibleCustomDomains(session.user.id);
     return NextResponse.json(domains);
 }
 
@@ -47,7 +47,7 @@ export async function POST(req: Request) {
         return NextResponse.json({ message: "Upgrade to Premium to add custom domains" }, { status: 403 });
     }
 
-    const { domain } = await req.json();
+    const { domain, teamId } = await req.json();
 
     if (!domain) {
         return NextResponse.json({ message: "Domain is required" }, { status: 400 });
@@ -67,7 +67,7 @@ export async function POST(req: Request) {
 
     try {
         // @ts-ignore
-        const newDomain = await db.addCustomDomain(session.user.id, domain);
+        const newDomain = await db.addCustomDomain(session.user.id, domain, teamId);
         return NextResponse.json(newDomain);
     } catch (e: any) {
         if (e.code === '23505') { // Postgres unique violation

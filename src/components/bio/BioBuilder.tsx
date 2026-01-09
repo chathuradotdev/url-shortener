@@ -5,6 +5,7 @@ import { BioPage, BioLink } from "@/lib/db";
 import BioPreview from "./BioPreview";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { LayoutTemplate, Palette, Share2, PlusCircle, Instagram, Twitter, Globe, Github, Youtube, Music, Link as LinkIcon, Type } from "lucide-react";
 
 export default function BioBuilder() {
     const router = useRouter();
@@ -12,13 +13,28 @@ export default function BioBuilder() {
     const [bioPage, setBioPage] = useState<Partial<BioPage>>({ theme: {} });
     const [links, setLinks] = useState<BioLink[]>([]);
     const [saving, setSaving] = useState(false);
+    const [userTeams, setUserTeams] = useState<any[]>([]);
+    const [selectedTeamId, setSelectedTeamId] = useState("");
 
     // Form states
     const [activeTab, setActiveTab] = useState<'profile' | 'links' | 'design'>('links');
 
     useEffect(() => {
         fetchData();
+        fetchTeams();
     }, []);
+
+    const fetchTeams = async () => {
+        try {
+            const res = await fetch("/api/teams");
+            if (res.ok) {
+                const data = await res.json();
+                setUserTeams(data);
+            }
+        } catch (e) {
+            console.error("Failed to fetch teams", e);
+        }
+    };
 
     const fetchData = async () => {
         try {
@@ -58,7 +74,10 @@ export default function BioBuilder() {
             const res = await fetch("/api/bio", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(bioPage)
+                body: JSON.stringify({
+                    ...bioPage,
+                    teamId: selectedTeamId || null
+                })
             });
 
             if (!res.ok) throw new Error(await res.text());
@@ -73,7 +92,7 @@ export default function BioBuilder() {
         }
     };
 
-    const handleAddLink = async () => {
+    const handleAddLink = async (type: 'link' | 'youtube' | 'spotify' = 'link') => {
         setSaving(true);
         try {
             // Ensure bio page exists first
@@ -88,8 +107,9 @@ export default function BioBuilder() {
             // Let's assume user explicitly creates profile/saves first or we auto-save.
 
             const newLink = {
-                title: "New Link",
-                url: "https://",
+                title: type === 'youtube' ? 'My Video' : type === 'spotify' ? 'My Music' : 'New Link',
+                url: "",
+                type,
                 position: links.length
             };
 
@@ -160,6 +180,27 @@ export default function BioBuilder() {
                     </a>
                 </div>
 
+                {userTeams.length > 0 && !bioPage.id && (
+                    <div className="mb-6 flex items-center gap-3 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm p-3 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm animate-in fade-in slide-in-from-left-4">
+                        <div className="flex items-center gap-2 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                            </svg>
+                            Workspace:
+                        </div>
+                        <select
+                            value={selectedTeamId}
+                            onChange={(e) => setSelectedTeamId(e.target.value)}
+                            className="bg-transparent border-none focus:ring-0 text-sm font-bold text-blue-600 dark:text-blue-400 cursor-pointer p-0 pr-8"
+                        >
+                            <option value="">Personal</option>
+                            {userTeams.map(team => (
+                                <option key={team.id} value={team.id}>{team.name}</option>
+                            ))}
+                        </select>
+                    </div>
+                )}
+
                 {/* Tabs */}
                 <div className="flex space-x-1 mb-6 bg-gray-200 dark:bg-gray-800 p-1 rounded-lg">
                     {['links', 'profile', 'design'].map(tab => (
@@ -167,8 +208,8 @@ export default function BioBuilder() {
                             key={tab}
                             onClick={() => setActiveTab(tab as any)}
                             className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${activeTab === tab
-                                    ? 'bg-white dark:bg-gray-700 shadow text-blue-600 dark:text-blue-400'
-                                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900'
+                                ? 'bg-white dark:bg-gray-700 shadow text-blue-600 dark:text-blue-400'
+                                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900'
                                 }`}
                         >
                             {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -315,16 +356,38 @@ export default function BioBuilder() {
 
                 {activeTab === 'links' && (
                     <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
-                        <button
-                            onClick={handleAddLink}
-                            disabled={saving}
-                            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 mb-6"
-                        >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                            </svg>
-                            Add New Link
-                        </button>
+                        <div className="grid grid-cols-3 gap-3 mb-6">
+                            <button
+                                onClick={() => handleAddLink('link')}
+                                disabled={saving}
+                                className="flex flex-col items-center justify-center p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all gap-2"
+                            >
+                                <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
+                                    <LinkIcon className="w-5 h-5" />
+                                </div>
+                                <span className="text-xs font-semibold">Link</span>
+                            </button>
+                            <button
+                                onClick={() => handleAddLink('youtube')}
+                                disabled={saving}
+                                className="flex flex-col items-center justify-center p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all gap-2"
+                            >
+                                <div className="p-2 bg-red-100 text-red-600 rounded-lg">
+                                    <Youtube className="w-5 h-5" />
+                                </div>
+                                <span className="text-xs font-semibold">YouTube</span>
+                            </button>
+                            <button
+                                onClick={() => handleAddLink('spotify')}
+                                disabled={saving}
+                                className="flex flex-col items-center justify-center p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all gap-2"
+                            >
+                                <div className="p-2 bg-green-100 text-green-600 rounded-lg">
+                                    <Music className="w-5 h-5" />
+                                </div>
+                                <span className="text-xs font-semibold">Spotify</span>
+                            </button>
+                        </div>
 
                         <div className="space-y-3">
                             {links.map((link) => (
@@ -344,12 +407,19 @@ export default function BioBuilder() {
                                                 className="block w-full px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-800 bg-transparent font-medium"
                                                 placeholder="Title"
                                             />
+                                            {/* Badge for Type */}
+                                            {link.type && link.type !== 'link' && (
+                                                <span className={`text-[10px] uppercase font-bold px-1.5 py-0.5 rounded ${link.type === 'youtube' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+                                                    {link.type}
+                                                </span>
+                                            )}
+
                                             <input
                                                 type="url"
                                                 value={link.url}
                                                 onChange={e => handleUpdateLink(link.id, { url: e.target.value })}
                                                 className="block w-full px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-800 bg-transparent text-sm text-gray-500"
-                                                placeholder="URL"
+                                                placeholder={link.type === 'youtube' ? "https://youtube.com/watch?v=..." : link.type === 'spotify' ? "https://open.spotify.com/track/..." : "https://example.com"}
                                             />
                                         </div>
                                         <div className="flex flex-col gap-2">

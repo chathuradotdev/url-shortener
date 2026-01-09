@@ -29,6 +29,9 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     }
 
     try {
+        // Disable associated URLs first
+        await db.disableUrlsByDomain(domain.user_id, domain.domain);
+
         await db.deleteCustomDomain(id);
         return NextResponse.json({ message: "Domain deleted" });
     } catch (e) {

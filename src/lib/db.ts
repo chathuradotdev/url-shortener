@@ -27,6 +27,7 @@ export interface CustomDomain {
     verified: boolean;
     created_at: string;
     dns_record?: string; // e.g., "CNAME -> app.yoursite.com"
+    team_id?: string | null;
 }
 
 
@@ -71,6 +72,7 @@ export interface Url {
         weight: number; // percentage (0-100)
     }[];
     domain?: string | null; // Branded domain (e.g. "go.brand.com") or null for default
+    team_id?: string | null;
 }
 
 // Analytics Interface
@@ -121,6 +123,7 @@ export interface BioPage {
     avatar_url?: string;
     theme?: any;
     created_at: string;
+    team_id?: string | null;
 }
 
 // Bio Link Interface
@@ -133,6 +136,24 @@ export interface BioLink {
     position: number;
     is_active: boolean;
     created_at: string;
+}
+
+// Team Interface
+export interface Team {
+    id: string;
+    name: string;
+    owner_id: string;
+    created_at: string;
+}
+
+// Team Member Interface
+export interface TeamMember {
+    id: string;
+    team_id: string;
+    user_id: string;
+    role: 'owner' | 'admin' | 'member' | 'viewer';
+    joined_at: string;
+    user?: User; // Joined user data
 }
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -152,11 +173,27 @@ class SupabaseDB {
 
     // --- Bio Page Methods ---
 
-    async getBioPageByUserId(userId: string): Promise<BioPage | null> {
+    async getBioPageByUserId(userId: string, teamId?: string | null): Promise<BioPage | null> {
+        let query = supabase
+            .from('bio_pages')
+            .select('*')
+            .eq('user_id', userId);
+
+        if (teamId) {
+            query = query.eq('team_id', teamId);
+        } else {
+            query = query.is('team_id', null);
+        }
+
+        const { data } = await query.maybeSingle();
+        return data as BioPage | null;
+    }
+
+    async getTeamBioPage(teamId: string): Promise<BioPage | null> {
         const { data } = await supabase
             .from('bio_pages')
             .select('*')
-            .eq('user_id', userId)
+            .eq('team_id', teamId)
             .maybeSingle();
         return data as BioPage | null;
     }
@@ -181,13 +218,19 @@ class SupabaseDB {
         return data as BioPage;
     }
 
-    async updateBioPage(userId: string, updates: Partial<BioPage>): Promise<BioPage> {
-        const { data, error } = await supabase
+    async updateBioPage(userId: string, updates: Partial<BioPage>, teamId?: string | null): Promise<BioPage> {
+        let query = supabase
             .from('bio_pages')
             .update(updates)
-            .eq('user_id', userId)
-            .select()
-            .single();
+            .eq('user_id', userId);
+
+        if (teamId) {
+            query = query.eq('team_id', teamId);
+        } else {
+            query = query.is('team_id', null);
+        }
+
+        const { data, error } = await query.select().single();
 
         if (error) throw error;
         return data as BioPage;
@@ -411,14 +454,15 @@ class SupabaseDB {
 
     // --- Custom Domain Methods ---
 
-    async addCustomDomain(userId: string, domain: string): Promise<CustomDomain> {
+    async addCustomDomain(userId: string, domain: string, teamId?: string | null): Promise<CustomDomain> {
         const { data, error } = await supabase
             .from('custom_domains')
             .insert([{
                 user_id: userId,
                 domain: domain,
                 status: 'pending',
-                verified: false
+                verified: false,
+                team_id: teamId || null
             }])
             .select()
             .single();
@@ -432,7 +476,35 @@ class SupabaseDB {
             .from('custom_domains')
             .select('*')
             .eq('user_id', userId)
+            .is('team_id', null)
             .order('created_at', { ascending: false });
+        return (data || []) as CustomDomain[];
+    }
+
+    async getTeamCustomDomains(teamId: string): Promise<CustomDomain[]> {
+        const { data } = await supabase
+            .from('custom_domains')
+            .select('*')
+            .eq('team_id', teamId)
+            .order('created_at', { ascending: false });
+        return (data || []) as CustomDomain[];
+    }
+
+    async getAccessibleCustomDomains(userId: string): Promise<CustomDomain[]> {
+        // 1. Get teams user is in
+        const teams = await this.getTeams(userId);
+        const teamIds = teams.map((t: Team) => t.id);
+
+        // 2. Query personal domains OR team domains
+        let query = supabase.from('custom_domains').select('*');
+
+        if (teamIds.length > 0) {
+            query = query.or(`user_id.eq.${userId},team_id.in.(${teamIds.join(',')})`);
+        } else {
+            query = query.eq('user_id', userId).is('team_id', null);
+        }
+
+        const { data } = await query.order('created_at', { ascending: false });
         return (data || []) as CustomDomain[];
     }
 
@@ -497,7 +569,38 @@ class SupabaseDB {
             .from('urls')
             .select('*')
             .eq('user_id', userId)
+            .is('team_id', null)
             .neq('status', 'removed');
+        return (data || []) as Url[];
+    }
+
+    async getTeamUrls(teamId: string): Promise<Url[]> {
+        const { data } = await supabase
+            .from('urls')
+            .select('*')
+            .eq('team_id', teamId)
+            .neq('status', 'removed');
+        return (data || []) as Url[];
+    }
+
+    async getAccessibleUrls(userId: string): Promise<Url[]> {
+        // First get teams the user belongs to
+        const { data: memberOf } = await supabase
+            .from('team_members')
+            .select('team_id')
+            .eq('user_id', userId);
+
+        const teamIds = (memberOf || []).map(m => m.team_id);
+
+        let query = supabase.from('urls').select('*').neq('status', 'removed');
+
+        if (teamIds.length > 0) {
+            query = query.or(`user_id.eq.${userId},team_id.in.(${teamIds.join(',')})`);
+        } else {
+            query = query.eq('user_id', userId).is('team_id', null);
+        }
+
+        const { data } = await query;
         return (data || []) as Url[];
     }
 
@@ -819,6 +922,92 @@ class SupabaseDB {
     async setFileStoragePath(path: string): Promise<void> {
         // Alias to new config
         return this.setStorageConfig({ enabled: !!path, provider: 'local', localPath: path });
+    }
+
+    // --- Team Methods ---
+
+    async createTeam(name: string, ownerId: string): Promise<Team> {
+        const { data: team, error: teamError } = await supabase
+            .from('teams')
+            .insert([{ name, owner_id: ownerId }])
+            .select()
+            .single();
+
+        if (teamError) throw teamError;
+
+        // Add owner as member
+        const { error: memberError } = await supabase
+            .from('team_members')
+            .insert([{
+                team_id: team.id,
+                user_id: ownerId,
+                role: 'owner'
+            }]);
+
+        if (memberError) throw memberError;
+
+        return team as Team;
+    }
+
+    async getTeams(userId: string): Promise<Team[]> {
+        const { data, error } = await supabase
+            .from('team_members')
+            .select('team:teams(*)')
+            .eq('user_id', userId);
+
+        if (error) throw error;
+        // Transform joined data
+        return (data || []).map((m: any) => m.team) as Team[];
+    }
+
+    async getTeam(teamId: string): Promise<Team | null> {
+        const { data } = await supabase
+            .from('teams')
+            .select('*')
+            .eq('id', teamId)
+            .maybeSingle();
+        return data as Team | null;
+    }
+
+    async getTeamMembers(teamId: string): Promise<TeamMember[]> {
+        const { data, error } = await supabase
+            .from('team_members')
+            .select('*, user:users(*)')
+            .eq('team_id', teamId);
+
+        if (error) throw error;
+        return data as TeamMember[];
+    }
+
+    async addTeamMember(teamId: string, userId: string, role: TeamMember['role'] = 'member'): Promise<void> {
+        const { error } = await supabase
+            .from('team_members')
+            .insert([{ team_id: teamId, user_id: userId, role }]);
+        if (error) throw error;
+    }
+
+    async removeTeamMember(teamId: string, userId: string): Promise<void> {
+        const { error } = await supabase
+            .from('team_members')
+            .delete()
+            .eq('team_id', teamId)
+            .eq('user_id', userId);
+        if (error) throw error;
+    }
+
+    async getUserTeamRole(teamId: string, userId: string): Promise<TeamMember['role'] | null> {
+        const { data } = await supabase
+            .from('team_members')
+            .select('role')
+            .eq('team_id', teamId)
+            .eq('user_id', userId)
+            .maybeSingle();
+        return (data?.role as TeamMember['role']) || null;
+    }
+
+    async isUserInTeam(teamId: string, userId: string): Promise<boolean> {
+        const role = await this.getUserTeamRole(teamId, userId);
+        return !!role;
     }
 }
 

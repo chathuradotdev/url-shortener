@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Menu, X } from "lucide-react";
 
 import { ThemeToggle } from "@/components/ThemeToggle";
+import WorkspaceSelector from "@/components/WorkspaceSelector";
 
 export default function Navbar() {
     const { data: session } = useSession();
@@ -35,6 +36,7 @@ export default function Navbar() {
 
                     {/* Desktop Menu */}
                     <div className="hidden md:flex items-center space-x-6">
+                        {session && <WorkspaceSelector />}
                         <ThemeToggle />
 
                         <Link href="/features" className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
@@ -43,6 +45,11 @@ export default function Navbar() {
                         <Link href="/analytics" className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                             Analytics
                         </Link>
+                        {session && (
+                            <Link href="/dashboard/teams" className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                                Teams
+                            </Link>
+                        )}
                         <Link href="/help" className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                             Help Center
                         </Link>
@@ -93,6 +100,7 @@ export default function Navbar() {
 
                     {/* Mobile Menu Button */}
                     <div className="flex md:hidden items-center space-x-4">
+                        {session && <WorkspaceSelector />}
                         <ThemeToggle />
                         <button
                             onClick={toggleMenu}
@@ -127,6 +135,15 @@ export default function Navbar() {
                         >
                             Analytics
                         </Link>
+                        {session && (
+                            <Link
+                                href="/dashboard/teams"
+                                onClick={() => setIsOpen(false)}
+                                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                            >
+                                Teams
+                            </Link>
+                        )}
                         <Link
                             href="/help"
                             onClick={() => setIsOpen(false)}

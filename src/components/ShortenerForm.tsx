@@ -30,6 +30,8 @@ export default function ShortenerForm() {
     const [socialImage, setSocialImage] = useState("");
     const [selectedDomain, setSelectedDomain] = useState("");
     const [userDomains, setUserDomains] = useState<any[]>([]);
+    const [selectedTeamId, setSelectedTeamId] = useState("");
+    const [userTeams, setUserTeams] = useState<any[]>([]);
     const resultRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -42,18 +44,15 @@ export default function ShortenerForm() {
         if (session?.user) {
             // Fetch domains
             fetch('/api/domains')
-                .then(res => {
-                    if (res.ok) return res.json();
-                    return [];
-                })
-                .then(data => {
-                    if (Array.isArray(data)) {
-                        // Filter only active/verified if you want strictness explanation
-                        // For now show all, maybe mark pending
-                        setUserDomains(data);
-                    }
-                })
+                .then(res => res.ok ? res.json() : [])
+                .then(data => setUserDomains(Array.isArray(data) ? data : []))
                 .catch(err => console.error("Failed to fetch domains", err));
+
+            // Fetch teams
+            fetch('/api/teams')
+                .then(res => res.ok ? res.json() : [])
+                .then(data => setUserTeams(Array.isArray(data) ? data : []))
+                .catch(err => console.error("Failed to fetch teams", err));
         }
     }, [session]);
 
@@ -87,8 +86,8 @@ export default function ShortenerForm() {
                     socialTitle,
                     socialDescription,
                     socialImage,
-                    domain: selectedDomain || null
-
+                    domain: selectedDomain || null,
+                    teamId: selectedTeamId || null
                 }),
             });
 
@@ -167,23 +166,45 @@ export default function ShortenerForm() {
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
                         {session ? (
-                            <div className="relative group mb-4">
-                                <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-xl blur opacity-30 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
-                                <div className="relative flex items-center bg-white dark:bg-gray-900 rounded-xl shadow-xl p-2 ring-1 ring-gray-900/5 dark:ring-white/10">
-                                    <div className="pl-4 text-gray-400 group-focus-within:text-blue-600 transition-colors">
-                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                                        </svg>
+                            <div className="space-y-4">
+                                {userTeams.length > 0 && (
+                                    <div className="flex items-center gap-3 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm p-3 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm animate-in fade-in slide-in-from-left-4">
+                                        <div className="flex items-center gap-2 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                            </svg>
+                                            Workspace:
+                                        </div>
+                                        <select
+                                            value={selectedTeamId}
+                                            onChange={(e) => setSelectedTeamId(e.target.value)}
+                                            className="bg-transparent border-none focus:ring-0 text-sm font-bold text-blue-600 dark:text-blue-400 cursor-pointer p-0 pr-8"
+                                        >
+                                            <option value="">Personal</option>
+                                            {userTeams.map(team => (
+                                                <option key={team.id} value={team.id}>{team.name}</option>
+                                            ))}
+                                        </select>
                                     </div>
-                                    <input
-                                        type="url"
-                                        id="url"
-                                        required
-                                        placeholder="Paste your long URL here..."
-                                        value={originalUrl}
-                                        onChange={(e) => setOriginalUrl(e.target.value)}
-                                        className="flex-1 w-full px-4 py-4 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 bg-transparent border-none focus:ring-0 focus:outline-none text-lg font-medium"
-                                    />
+                                )}
+                                <div className="relative group mb-4">
+                                    <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-xl blur opacity-30 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
+                                    <div className="relative flex items-center bg-white dark:bg-gray-900 rounded-xl shadow-xl p-2 ring-1 ring-gray-900/5 dark:ring-white/10">
+                                        <div className="pl-4 text-gray-400 group-focus-within:text-blue-600 transition-colors">
+                                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                                            </svg>
+                                        </div>
+                                        <input
+                                            type="url"
+                                            id="url"
+                                            required
+                                            placeholder="Paste your long URL here..."
+                                            value={originalUrl}
+                                            onChange={(e) => setOriginalUrl(e.target.value)}
+                                            className="flex-1 w-full px-4 py-4 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 bg-transparent border-none focus:ring-0 focus:outline-none text-lg font-medium"
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         ) : (
@@ -527,8 +548,8 @@ export default function ShortenerForm() {
                             <span>e.g. my-campaign</span>
                             {session && <span>Expiration, Tags & Password (optional)</span>}
                         </div>
-                    </div >
-                </form >
+                    </div>
+                </form>
 
                 {
                     error && (
@@ -694,7 +715,7 @@ export default function ShortenerForm() {
                         </div>
                     )
                 }
-            </div >
-        </div >
+            </div>
+        </div>
     );
 }
