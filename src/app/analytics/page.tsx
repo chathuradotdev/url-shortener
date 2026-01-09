@@ -14,7 +14,8 @@ import {
     ExternalLink,
     Clock,
     Monitor,
-    Map
+    Map,
+    Link as LinkIcon
 } from "lucide-react";
 
 interface AnalyticsData {
@@ -241,7 +242,7 @@ function AnalyticsContent() {
                     <div className="bg-white rounded-2xl border border-gray-200 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <div className="flex items-start gap-4">
                             <div className="p-3 bg-blue-50 rounded-xl">
-                                <Link className="w-6 h-6 text-blue-600" />
+                                <LinkIcon className="w-6 h-6 text-blue-600" />
                             </div>
                             <div>
                                 <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
