@@ -135,6 +135,7 @@ export interface BioLink {
     icon?: string;
     position: number;
     is_active: boolean;
+    type?: 'link' | 'youtube' | 'spotify' | 'header';
     created_at: string;
 }
 
