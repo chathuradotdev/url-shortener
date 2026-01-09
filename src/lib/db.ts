@@ -516,6 +516,15 @@ class SupabaseDB {
         if (error) throw error;
     }
 
+    async disableUrlsByDomain(userId: string, domain: string): Promise<void> {
+        const { error } = await supabase
+            .from('urls')
+            .update({ status: 'removed' })
+            .eq('user_id', userId)
+            .eq('domain', domain);
+        if (error) throw error;
+    }
+
     // A stub for verification logic - in reality this would check DNS records
     async verifyCustomDomain(id: string): Promise<boolean> {
         // user would call this manually or we run it periodically
