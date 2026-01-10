@@ -36,7 +36,7 @@ export async function createCheckoutSession(variantId?: string) {
             activeVariantId,
             {
                 checkoutData: {
-                    email: session.user.email,
+                    email: session.user.email ?? undefined,
                     custom: {
                         user_id: session.user.id
                     }
