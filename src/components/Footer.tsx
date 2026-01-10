@@ -25,11 +25,6 @@ export default function Footer() {
                         <h3 className="text-sm font-semibold text-gray-900 dark:text-white tracking-wider uppercase mb-4">Product</h3>
                         <ul className="space-y-3">
                             <li>
-                                <Link href="/" className="text-base text-gray-500 hover:text-blue-600 transition-colors">
-                                    Features
-                                </Link>
-                            </li>
-                            <li>
                                 <Link href="/pricing" className="text-base text-gray-500 hover:text-blue-600 transition-colors">
                                     Pricing
                                 </Link>

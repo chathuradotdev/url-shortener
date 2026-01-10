@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 
-export default function FeaturesPageClient() {
+export default function PricingPageContent() {
     const [showBioSample, setShowBioSample] = useState(false);
     const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
 
@@ -13,10 +13,10 @@ export default function FeaturesPageClient() {
             <div className="bg-gradient-to-br from-blue-50 via-white to-purple-50 py-20 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-7xl mx-auto text-center">
                     <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6">
-                        Powerful Features for Everyone
+                        Powerful Plans for Everyone
                     </h1>
                     <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-10">
-                        Whether you're a casual user or a power user, we have the right tools for you.
+                        Whether you're a casual user or a power user, we have the right plan for you.
                         Compare our Guest and Registered plans below.
                     </p>
 
@@ -264,7 +264,7 @@ export default function FeaturesPageClient() {
                 </div>
             </div>
 
-            {/* Feature Details */}
+            {/* Plan Details */}
             <div className="bg-gray-50 py-16">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-12">

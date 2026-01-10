@@ -13,7 +13,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
     try {
         // Verify user is in the team
-        const role = await db.getUserTeamRole(session.user.id, teamId);
+        const role = await db.getUserTeamRole(teamId, session.user.id);
         if (!role) {
             return NextResponse.json({ error: "Access denied" }, { status: 403 });
         }
@@ -36,7 +36,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
     try {
         // Only owner or admin can add members
-        const userRole = await db.getUserTeamRole(session.user.id, teamId);
+        const userRole = await db.getUserTeamRole(teamId, session.user.id);
         if (userRole !== 'owner' && userRole !== 'admin') {
             return NextResponse.json({ error: "Permission denied" }, { status: 403 });
         }

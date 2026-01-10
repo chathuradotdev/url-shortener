@@ -62,7 +62,7 @@ export async function POST(req: Request) {
 
         // Team Membership verification
         if (teamId && userId) {
-            const isMember = await db.isUserInTeam(userId, teamId);
+            const isMember = await db.isUserInTeam(teamId, userId);
             if (!isMember) {
                 return NextResponse.json({ message: "Unauthorized team access" }, { status: 403 });
             }

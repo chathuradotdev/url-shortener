@@ -17,6 +17,7 @@ import {
     Map,
     Link as LinkIcon
 } from "lucide-react";
+import VisitorsMap from "@/components/VisitorsMap";
 
 interface AnalyticsData {
     clicks: number;
@@ -298,6 +299,8 @@ function AnalyticsContent() {
                         />
                     </div>
 
+
+
                     {/* Main Charts */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <div className="lg:col-span-2">
@@ -312,6 +315,9 @@ function AnalyticsContent() {
                             />
                         </div>
                     </div>
+
+                    {/* World Map */}
+                    <VisitorsMap data={stats.analytics.countries} />
 
                     {/* Secondary Grids */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

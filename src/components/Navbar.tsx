@@ -3,7 +3,13 @@
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ChevronDown } from "lucide-react";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 import { ThemeToggle } from "@/components/ThemeToggle";
 import WorkspaceSelector from "@/components/WorkspaceSelector";
@@ -39,16 +45,37 @@ export default function Navbar() {
                         {session && <WorkspaceSelector />}
                         <ThemeToggle />
 
-                        <Link href="/features" className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                            Features
+                        <Link href="/pricing" className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                            Pricing
                         </Link>
                         <Link href="/analytics" className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                             Analytics
                         </Link>
                         {session && (
-                            <Link href="/dashboard/teams" className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                                Teams
-                            </Link>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger className="flex items-center space-x-1 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors focus:outline-none">
+                                    <span>Features</span>
+                                    <ChevronDown className="w-4 h-4" />
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-48">
+                                    <DropdownMenuItem asChild>
+                                        <Link href="/dashboard/bio" className="flex items-center justify-between cursor-pointer w-full">
+                                            <span>Link in Bio</span>
+                                            <span className="text-[10px] bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-1.5 py-0.5 rounded-full">PRO</span>
+                                        </Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem asChild>
+                                        <Link href="/dashboard/teams" className="cursor-pointer w-full">
+                                            Teams
+                                        </Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem asChild>
+                                        <Link href="/tools/utm-builder" className="cursor-pointer w-full">
+                                            UTM Builder
+                                        </Link>
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
                         )}
                         <Link href="/help" className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                             Help Center
@@ -58,12 +85,6 @@ export default function Navbar() {
                         </Link>
                         {session ? (
                             <>
-                                <Link href="/tools/utm-builder" className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                                    UTM Builder
-                                </Link>
-                                <Link href="/dashboard/bio" className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                                    Link in Bio <span className="text-xs bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-1.5 py-0.5 rounded-full ml-1">PRO</span>
-                                </Link>
                                 <Link href="/profile" className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                                     My Profile
                                 </Link>
@@ -118,108 +139,110 @@ export default function Navbar() {
             </div>
 
             {/* Mobile Menu Dropdown */}
-            {isOpen && (
-                <div className="md:hidden bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 animate-in slide-in-from-top-5 duration-200">
-                    <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 flex flex-col">
-                        <Link
-                            href="/features"
-                            onClick={() => setIsOpen(false)}
-                            className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                        >
-                            Features
-                        </Link>
-                        <Link
-                            href="/analytics"
-                            onClick={() => setIsOpen(false)}
-                            className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                        >
-                            Analytics
-                        </Link>
-                        {session && (
+            {
+                isOpen && (
+                    <div className="md:hidden bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 animate-in slide-in-from-top-5 duration-200">
+                        <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 flex flex-col">
                             <Link
-                                href="/dashboard/teams"
+                                href="/pricing"
                                 onClick={() => setIsOpen(false)}
                                 className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                             >
-                                Teams
+                                Pricing
                             </Link>
-                        )}
-                        <Link
-                            href="/help"
-                            onClick={() => setIsOpen(false)}
-                            className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                        >
-                            Help Center
-                        </Link>
-                        <Link
-                            href="/contact"
-                            onClick={() => setIsOpen(false)}
-                            className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                        >
-                            Contact
-                        </Link>
+                            <Link
+                                href="/analytics"
+                                onClick={() => setIsOpen(false)}
+                                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                            >
+                                Analytics
+                            </Link>
+                            {session && (
+                                <Link
+                                    href="/dashboard/teams"
+                                    onClick={() => setIsOpen(false)}
+                                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                                >
+                                    Teams
+                                </Link>
+                            )}
+                            <Link
+                                href="/help"
+                                onClick={() => setIsOpen(false)}
+                                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                            >
+                                Help Center
+                            </Link>
+                            <Link
+                                href="/contact"
+                                onClick={() => setIsOpen(false)}
+                                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                            >
+                                Contact
+                            </Link>
 
-                        {session ? (
-                            <>
-                                <Link
-                                    href="/tools/utm-builder"
-                                    onClick={() => setIsOpen(false)}
-                                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                                >
-                                    UTM Builder
-                                </Link>
-                                <Link
-                                    href="/dashboard/bio"
-                                    onClick={() => setIsOpen(false)}
-                                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                                >
-                                    Link in Bio <span className="text-xs bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-1.5 py-0.5 rounded-full ml-1">PRO</span>
-                                </Link>
-                                <Link
-                                    href="/profile"
-                                    onClick={() => setIsOpen(false)}
-                                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                                >
-                                    My Profile
-                                </Link>
-                                <Link
-                                    href="/dashboard"
-                                    onClick={() => setIsOpen(false)}
-                                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                                >
-                                    Dashboard
-                                </Link>
-                                <button
-                                    onClick={() => {
-                                        signOut({ callbackUrl: "/" });
-                                        setIsOpen(false);
-                                    }}
-                                    className="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
-                                >
-                                    Sign Out
-                                </button>
-                            </>
-                        ) : (
-                            <div className="pt-4 flex flex-col space-y-2 px-3">
-                                <Link
-                                    href="/login"
-                                    onClick={() => setIsOpen(false)}
-                                    className="block w-full text-center px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 transition-colors"
-                                >
-                                    Login
-                                </Link>
-                                <Link
-                                    href="/register"
-                                    onClick={() => setIsOpen(false)}
-                                    className="block w-full text-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-lg transition-transform shadow-sm active:scale-95"
-                                >
-                                    Get Started
-                                </Link>
-                            </div>
-                        )}
+                            {session ? (
+                                <>
+                                    <Link
+                                        href="/tools/utm-builder"
+                                        onClick={() => setIsOpen(false)}
+                                        className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                                    >
+                                        UTM Builder
+                                    </Link>
+                                    <Link
+                                        href="/dashboard/bio"
+                                        onClick={() => setIsOpen(false)}
+                                        className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                                    >
+                                        Link in Bio <span className="text-xs bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-1.5 py-0.5 rounded-full ml-1">PRO</span>
+                                    </Link>
+                                    <Link
+                                        href="/profile"
+                                        onClick={() => setIsOpen(false)}
+                                        className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                                    >
+                                        My Profile
+                                    </Link>
+                                    <Link
+                                        href="/dashboard"
+                                        onClick={() => setIsOpen(false)}
+                                        className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                                    >
+                                        Dashboard
+                                    </Link>
+                                    <button
+                                        onClick={() => {
+                                            signOut({ callbackUrl: "/" });
+                                            setIsOpen(false);
+                                        }}
+                                        className="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
+                                    >
+                                        Sign Out
+                                    </button>
+                                </>
+                            ) : (
+                                <div className="pt-4 flex flex-col space-y-2 px-3">
+                                    <Link
+                                        href="/login"
+                                        onClick={() => setIsOpen(false)}
+                                        className="block w-full text-center px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 transition-colors"
+                                    >
+                                        Login
+                                    </Link>
+                                    <Link
+                                        href="/register"
+                                        onClick={() => setIsOpen(false)}
+                                        className="block w-full text-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-lg transition-transform shadow-sm active:scale-95"
+                                    >
+                                        Get Started
+                                    </Link>
+                                </div>
+                            )}
+                        </div>
                     </div>
-                </div>
-            )}
-        </nav>
+                )
+            }
+        </nav >
     );
 }

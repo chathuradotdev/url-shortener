@@ -10,10 +10,11 @@ export const dynamic = 'force-dynamic';
 export default async function Dashboard({
     searchParams,
 }: {
-    searchParams: { [key: string]: string | string[] | undefined };
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
     const session = await getServerSession(authOptions);
-    const teamId = typeof searchParams.teamId === 'string' ? searchParams.teamId : undefined;
+    const resolvedSearchParams = await searchParams;
+    const teamId = typeof resolvedSearchParams.teamId === 'string' ? resolvedSearchParams.teamId : undefined;
 
     console.log("Dashboard Server Session:", JSON.stringify(session, null, 2));
 

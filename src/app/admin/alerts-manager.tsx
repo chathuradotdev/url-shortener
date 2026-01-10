@@ -107,7 +107,7 @@ export function AlertsManager({ alerts }: AlertsManagerProps) {
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="action_url">Button URL</Label>
-                                        <Input id="action_url" name="action_url" placeholder="e.g. /features" />
+                                        <Input id="action_url" name="action_url" placeholder="e.g. /pricing" />
                                     </div>
                                 </div>
                             </div>

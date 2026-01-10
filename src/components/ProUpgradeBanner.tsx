@@ -90,7 +90,7 @@ export default function ProUpgradeBanner() {
                                     <>
                                         <span className="opacity-90">Unlock limitless power!</span>
                                         <span className="mx-2 hidden sm:inline opacity-50">|</span>
-                                        <span className="block sm:inline mt-0.5 sm:mt-0 font-semibold group cursor-pointer" onClick={() => window.location.href = '/features'}>
+                                        <span className="block sm:inline mt-0.5 sm:mt-0 font-semibold group cursor-pointer" onClick={() => window.location.href = '/pricing'}>
                                             Upgrade to <span className="text-yellow-300 underline decoration-yellow-300/50 underline-offset-4 decoration-2 transition-all hover:decoration-yellow-300">Pro level</span> for just <span className="text-white bg-white/20 px-1.5 py-0.5 rounded text-xs ml-1">$5/month</span>
                                         </span>
                                     </>
@@ -105,7 +105,7 @@ export default function ProUpgradeBanner() {
                                 className="bg-white/10 hover:bg-white/20 text-white border border-white/10 hover:border-white/30 backdrop-blur-md h-8 text-xs font-semibold px-4 rounded-full transition-all duration-300 shadow-lg shadow-purple-900/20 group"
                                 asChild
                             >
-                                <Link href="/features">
+                                <Link href="/pricing">
                                     {showTrialMessage ? "Upgrade to Premium" : "Upgrade Now"}
                                     <ArrowRight className="w-3 h-3 ml-1.5 group-hover:translate-x-0.5 transition-transform" />
                                 </Link>

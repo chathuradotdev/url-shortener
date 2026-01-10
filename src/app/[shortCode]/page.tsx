@@ -233,7 +233,7 @@ export default async function ShortCodePage({
         browser,
         device,
         os,
-        country: "Unknown",
+        country: country !== "Unknown" ? country : "Unknown", // store the code
         city: "Unknown"
     });
 

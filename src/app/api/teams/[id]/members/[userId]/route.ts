@@ -15,13 +15,13 @@ export async function DELETE(
     const { id: teamId, userId: targetUserId } = await params;
 
     try {
-        const userRole = await db.getUserTeamRole(session.user.id, teamId);
+        const userRole = await db.getUserTeamRole(teamId, session.user.id);
 
         // Owner can remove anyone. Admin can remove members/viewers.
         // Users can remove themselves (leave team).
 
         const isSelf = session.user.id === targetUserId;
-        const targetRole = await db.getUserTeamRole(targetUserId, teamId);
+        const targetRole = await db.getUserTeamRole(teamId, targetUserId);
 
         if (!targetRole) {
             return NextResponse.json({ error: "User is not in this team" }, { status: 404 });
