@@ -6,6 +6,8 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { createCheckoutSession } from "@/app/actions/billing";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 function BioSampleModal({ onClose }: { onClose: () => void }) {
     return (
@@ -79,6 +81,8 @@ export default function PricingPageContent() {
         }
     };
 
+    const isPremium = session?.user?.plan === 'premium';
+
     return (
         <div className="min-h-screen bg-white">
             <div className="bg-gradient-to-br from-blue-50 via-white to-purple-50 py-20 px-4 sm:px-6 lg:px-8">
@@ -97,6 +101,7 @@ export default function PricingPageContent() {
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    {/* Guest Plan */}
                     <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow duration-300">
                         <div className="p-8 bg-gray-50 border-b border-gray-100">
                             <h2 className="text-2xl font-bold text-gray-900 mb-2">Guest User</h2>
@@ -116,6 +121,7 @@ export default function PricingPageContent() {
                         </div>
                     </div>
 
+                    {/* Registered Plan */}
                     <div className="bg-white rounded-2xl shadow-xl border-2 border-blue-100 overflow-hidden hover:border-blue-500 transition-colors duration-300">
                         <div className="p-8 bg-blue-50 border-b border-blue-100">
                             <h2 className="text-2xl font-bold text-gray-900 mb-2">Registered User</h2>
@@ -128,15 +134,24 @@ export default function PricingPageContent() {
                                     <li key={i} className="flex items-start"><svg className="w-6 h-6 text-blue-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg><span className="text-gray-900 font-medium">{feat}</span></li>
                                 ))}
                             </ul>
-                            <div className="mt-8"><Link href="/register" className="block w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-xl text-center hover:bg-blue-700 shadow-md hover:shadow-lg transition-all">Create Free Account</Link></div>
+                            <div className="mt-8">
+                                {session ? (
+                                    <span className="block w-full bg-gray-50 text-gray-400 font-bold py-3 px-4 rounded-xl text-center border border-gray-200">Current Plan</span>
+                                ) : (
+                                    <Link href="/register" className="block w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-xl text-center hover:bg-blue-700 shadow-md hover:shadow-lg transition-all">Create Free Account</Link>
+                                )}
+                            </div>
                         </div>
                     </div>
 
+                    {/* Premium Plan */}
                     <div className="bg-white rounded-2xl shadow-xl border-2 border-amber-500 overflow-hidden transform md:scale-105 z-10 transition-transform duration-300 relative">
                         <div className="absolute top-0 right-0 bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg uppercase tracking-wider">Best Value</div>
                         <div className="p-8 bg-amber-50 border-b border-amber-100">
                             <h2 className="text-2xl font-bold text-gray-900 mb-2">Premium User</h2>
-                            <span className="inline-block bg-green-100 text-green-700 text-xs font-bold px-2 py-0.5 rounded-full mb-2 border border-green-200">7-Day Free Trial</span>
+                            {!isPremium && (
+                                <span className="inline-block bg-green-100 text-green-700 text-xs font-bold px-2 py-0.5 rounded-full mb-2 border border-green-200">7-Day Free Trial</span>
+                            )}
                             <p className="text-gray-600">Power tools for advanced users.</p>
                             <div className="mt-4 flex items-baseline">
                                 <span className="text-4xl font-extrabold text-gray-900">{billingCycle === 'monthly' ? '$1' : '$10.80'}</span>
@@ -165,10 +180,21 @@ export default function PricingPageContent() {
                                 <li className="flex items-start"><svg className="w-6 h-6 text-amber-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg><span className="text-gray-900 font-medium">Permanent Redirect (301)</span></li>
                             </ul>
                             <div className="mt-8">
-                                <button onClick={handleUpgrade} disabled={isLoading} className="block w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold py-3 px-4 rounded-xl text-center hover:from-amber-600 hover:to-orange-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all disabled:opacity-70 disabled:cursor-not-allowed">
-                                    {isLoading ? 'Processing...' : session ? 'Upgrade to Premium' : 'Start 7-Day Free Trial'}
+                                <button
+                                    onClick={handleUpgrade}
+                                    disabled={isLoading || isPremium}
+                                    className={cn(
+                                        "block w-full font-bold py-3 px-4 rounded-xl text-center shadow-lg transform transition-all disabled:opacity-70",
+                                        isPremium
+                                            ? "bg-gray-100 text-gray-400 border border-gray-200 cursor-default"
+                                            : "bg-gradient-to-r from-amber-500 to-orange-600 text-white hover:from-amber-600 hover:to-orange-700 hover:shadow-xl hover:-translate-y-0.5"
+                                    )}
+                                >
+                                    {isLoading ? 'Processing...' : isPremium ? 'Current Plan' : (session ? 'Upgrade to Premium' : 'Start 7-Day Free Trial')}
                                 </button>
-                                <p className="text-xs text-center text-gray-500 mt-3">No credit card required. Cancel anytime.</p>
+                                <p className="text-xs text-center text-gray-500 mt-3">
+                                    {isPremium ? 'Welcome to the Pro family!' : 'No credit card required. Cancel anytime.'}
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -188,8 +214,16 @@ export default function PricingPageContent() {
                             { title: "Centralized Dashboard", desc: "Keep all your links organized in one place. Search, sort, and filter to find exactly what you need in seconds.", icon: "M12 4v16m8-8H4", color: "green" }
                         ].map((f, i) => (
                             <div key={i} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                                <div className={`w-12 h-12 bg-${f.color}-100 rounded-lg flex items-center justify-center mb-4`}>
-                                    <svg className={`w-6 h-6 text-${f.color}-600`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={f.icon} /></svg>
+                                <div className={cn("w-12 h-12 rounded-lg flex items-center justify-center mb-4", {
+                                    "bg-blue-100": f.color === "blue",
+                                    "bg-purple-100": f.color === "purple",
+                                    "bg-green-100": f.color === "green"
+                                })}>
+                                    <svg className={cn("w-6 h-6", {
+                                        "text-blue-600": f.color === "blue",
+                                        "text-purple-600": f.color === "purple",
+                                        "text-green-600": f.color === "green"
+                                    })} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={f.icon} /></svg>
                                 </div>
                                 <h3 className="text-xl font-bold text-gray-900 mb-2">{f.title}</h3>
                                 <p className="text-gray-600">{f.desc}</p>
