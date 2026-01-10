@@ -18,6 +18,8 @@ import {
     Link as LinkIcon
 } from "lucide-react";
 import VisitorsMap from "@/components/VisitorsMap";
+import { useSession } from "next-auth/react";
+import { Lock } from "lucide-react";
 
 interface AnalyticsData {
     clicks: number;
@@ -127,6 +129,7 @@ function DailyActivityChart({ data }: { data: { date: string; count: number }[] 
 
 function AnalyticsContent() {
     const searchParams = useSearchParams();
+    const { data: session } = useSession();
     const initialCode = searchParams.get("code") || "";
     const [code, setCode] = useState(initialCode);
     const [stats, setStats] = useState<AnalyticsData | null>(null);
@@ -134,13 +137,35 @@ function AnalyticsContent() {
     const [error, setError] = useState("");
     const [origin, setOrigin] = useState("");
 
+
+    // @ts-ignore - Plan property exists on session user extended type
+    const isPremium = session?.user?.plan === 'premium';
+    const showMap = isPremium;
+
+    // Live update state
+    const [isLive, setIsLive] = useState(false);
+    const [systemLiveEnabled, setSystemLiveEnabled] = useState(false);
+
     useEffect(() => {
-        setOrigin(window.location.host); // Just host looks cleaner usually
+        setOrigin(window.location.host);
+
+        // Check if realtime analytics is enabled system-wide
+        fetch('/api/settings/realtime-analytics')
+            .then(res => res.json())
+            .then(data => {
+                setSystemLiveEnabled(data.enabled);
+                if (data.enabled) setIsLive(true);
+            })
+            .catch(() => setSystemLiveEnabled(true)); // Default to true on error
     }, []);
 
     const fetchStats = async (shortCode: string) => {
         if (!shortCode) return;
-        setLoading(true);
+        setLoading(prev => !prev); // Only show loading on initial fetch or maybe keep it subtle? 
+        // Actually for live updates we don't want to flash loading state every time.
+        // Let's modify loading logic slightly.
+        if (!stats) setLoading(true); // Only blocking load if no stats yet
+
         setError("");
 
         try {
@@ -160,11 +185,23 @@ function AnalyticsContent() {
         }
     };
 
+    // Initial load
     useEffect(() => {
         if (initialCode) {
             fetchStats(initialCode);
         }
     }, [initialCode]);
+
+    // Live polling
+    useEffect(() => {
+        let interval: NodeJS.Timeout;
+        if (isLive && code) {
+            interval = setInterval(() => {
+                fetchStats(code);
+            }, 5000); // Poll every 5 seconds
+        }
+        return () => clearInterval(interval);
+    }, [isLive, code]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -179,6 +216,8 @@ function AnalyticsContent() {
             }
         } catch (e) { }
 
+        // If user manually submits, we update code and fetch immediately
+        setCode(cleanCode); // Ensure state matches cleaned
         fetchStats(cleanCode);
         // Update URL without reload
         window.history.pushState({}, '', `/analytics?code=${cleanCode}`);
@@ -188,7 +227,21 @@ function AnalyticsContent() {
         <div className="max-w-6xl mx-auto">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Analytics Dashboard</h1>
+                    <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+                        Analytics Dashboard
+                        {stats && systemLiveEnabled && (
+                            <button
+                                onClick={() => setIsLive(!isLive)}
+                                className={`text-xs font-mono px-2 py-1 rounded-full border flex items-center gap-2 transition-all ${isLive ? 'bg-green-50 border-green-200 text-green-700' : 'bg-gray-50 border-gray-200 text-gray-500'}`}
+                            >
+                                <span className={`relative flex h-2 w-2`}>
+                                    {isLive && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>}
+                                    <span className={`relative inline-flex rounded-full h-2 w-2 ${isLive ? 'bg-green-500' : 'bg-gray-400'}`}></span>
+                                </span>
+                                {isLive ? 'LIVE' : 'PAUSED'}
+                            </button>
+                        )}
+                    </h1>
                     <p className="text-gray-500 mt-1">Real-time insights for your links</p>
                 </div>
 
@@ -316,8 +369,48 @@ function AnalyticsContent() {
                         </div>
                     </div>
 
-                    {/* World Map */}
-                    <VisitorsMap data={stats.analytics.countries} />
+                    {/* World Map - Gated for Premium */}
+                    <div className="relative">
+                        <div className={!showMap ? "filter blur-[1px] pointer-events-none select-none opacity-60" : ""}>
+                            <VisitorsMap data={!showMap ? [
+                                { name: "US", value: 120 },
+                                { name: "DE", value: 50 },
+                                { name: "GB", value: 75 },
+                                { name: "FR", value: 40 },
+                                { name: "IN", value: 90 },
+                                { name: "BR", value: 60 },
+                                { name: "AU", value: 30 },
+                                { name: "CA", value: 45 },
+                                { name: "JP", value: 80 },
+                                { name: "CN", value: 70 },
+                                { name: "RU", value: 35 },
+                                { name: "ZA", value: 25 },
+                                { name: "MX", value: 40 },
+                                { name: "IT", value: 55 },
+                                { name: "ES", value: 48 }
+                            ] : stats.analytics.countries} />
+                        </div>
+
+                        {!showMap && (
+                            <div className="absolute inset-0 flex items-center justify-center z-10">
+                                <div className="bg-white/90 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-gray-100 max-w-md text-center">
+                                    <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-orange-500/20">
+                                        <Lock className="w-6 h-6 text-white" />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-gray-900 mb-2">Detailed Geo Map</h3>
+                                    <p className="text-gray-600 mb-6">
+                                        Upgrade to Premium to visualize your traffic sources on an interactive global heat map.
+                                    </p>
+                                    <Link
+                                        href="/pricing"
+                                        className="inline-flex items-center justify-center px-6 py-2.5 text-sm font-semibold text-white bg-gray-900 rounded-xl hover:bg-gray-800 transition-all shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
+                                    >
+                                        Upgrade to Premium
+                                    </Link>
+                                </div>
+                            </div>
+                        )}
+                    </div>
 
                     {/* Secondary Grids */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

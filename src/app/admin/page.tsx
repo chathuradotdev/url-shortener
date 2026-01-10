@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 import Link from "next/link";
 import { UsersTable } from "./users-table";
 import { UrlsTable } from "./urls-table";
-import { toggleMaintenanceMode, updateNotificationEmails, toggleChatWidget, toggleBrandedDomains } from "./settings-actions";
+import { toggleMaintenanceMode, updateNotificationEmails, toggleChatWidget, toggleBrandedDomains, toggleRealtimeAnalytics } from "./settings-actions";
 import { AlertsManager } from "./alerts-manager"; // Import AlertsManager
 import { StorageSettings } from "./storage-settings";
 
@@ -19,7 +19,7 @@ export default async function AdminDashboard() {
         redirect("/dashboard");
     }
 
-    const [users, urls, stats, analytics, maintenanceMode, alerts, storageConfig, notificationEmails, chatWidgetEnabled, brandedDomainsEnabled] = await Promise.all([
+    const [users, urls, stats, analytics, maintenanceMode, alerts, storageConfig, notificationEmails, chatWidgetEnabled, brandedDomainsEnabled, realtimeAnalyticsEnabled] = await Promise.all([
         db.getAllUsers(),
         db.getAllUrls(),
         db.getSystemStats(),
@@ -29,7 +29,8 @@ export default async function AdminDashboard() {
         db.getStorageConfig(),
         db.getAdminNotificationEmails(),
         db.getChatWidgetEnabled(),
-        db.getBrandedDomainsEnabled()
+        db.getBrandedDomainsEnabled(),
+        db.getRealtimeAnalyticsEnabled()
     ]);
 
     // Daily Clicks (Last 30 Days)
@@ -172,6 +173,29 @@ export default async function AdminDashboard() {
                                         <span
                                             aria-hidden="true"
                                             className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${brandedDomainsEnabled ? 'translate-x-5' : 'translate-x-0'}`}
+                                        />
+                                    </button>
+                                </form>
+                            </div>
+
+                            <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
+                                <div>
+                                    <h3 className="text-sm font-medium text-gray-900">Real-time Analytics</h3>
+                                    <p className="text-sm text-gray-500">
+                                        Enable live polling for user analytics dashboards.
+                                        {!realtimeAnalyticsEnabled && <span className="text-red-500 font-medium ml-1">(Disabled)</span>}
+                                    </p>
+                                </div>
+                                <form action={toggleRealtimeAnalytics.bind(null, realtimeAnalyticsEnabled)}>
+                                    <button
+                                        type="submit"
+                                        className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 ${realtimeAnalyticsEnabled ? 'bg-green-600' : 'bg-gray-200'}`}
+                                        role="switch"
+                                        aria-checked={realtimeAnalyticsEnabled}
+                                    >
+                                        <span
+                                            aria-hidden="true"
+                                            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${realtimeAnalyticsEnabled ? 'translate-x-5' : 'translate-x-0'}`}
                                         />
                                     </button>
                                 </form>

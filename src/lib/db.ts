@@ -746,6 +746,24 @@ class SupabaseDB {
         if (error) throw error;
     }
 
+    async getRealtimeAnalyticsEnabled(): Promise<boolean> {
+        const { data } = await supabase
+            .from('settings')
+            .select('value')
+            .eq('key', 'realtime_analytics_enabled')
+            .maybeSingle();
+        // Default to true
+        if (!data) return true;
+        return data.value === 'true';
+    }
+
+    async setRealtimeAnalyticsEnabled(enabled: boolean): Promise<void> {
+        const { error } = await supabase
+            .from('settings')
+            .upsert({ key: 'realtime_analytics_enabled', value: String(enabled) });
+        if (error) throw error;
+    }
+
     async getAdminNotificationEmails(): Promise<string[]> {
         const { data } = await supabase
             .from('settings')

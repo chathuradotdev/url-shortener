@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import Link from "next/link";
 import UrlList from "@/components/UrlList";
+import GuestLinkClaimer from "@/components/GuestLinkClaimer";
 
 export const dynamic = 'force-dynamic';
 
@@ -72,6 +73,7 @@ export default async function Dashboard({
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-12">
+            <GuestLinkClaimer />
             <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header */}
                 <div className="mb-8">

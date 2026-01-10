@@ -20,6 +20,12 @@ export async function toggleBrandedDomains(currentState: boolean) {
     revalidatePath("/dashboard/domains"); // Revalidate domains page
 }
 
+export async function toggleRealtimeAnalytics(currentState: boolean) {
+    await db.setRealtimeAnalyticsEnabled(!currentState);
+    revalidatePath("/admin");
+    revalidatePath("/analytics"); // Revalidate analytics page
+}
+
 export async function updateStorageConfig(formData: FormData) {
     const config = {
         enabled: formData.get('storage_enabled') === 'on',

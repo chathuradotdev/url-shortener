@@ -50,7 +50,7 @@
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
     "@types/d3-scale": "^4.0.9",
-    "@types/node": "^20.10.0",
+    "@types/node": "^20.19.28",
     "@types/nodemailer": "^6.4.14",
     "@types/qrcode": "^1.5.5",
     "@types/react": "^19.2.7",

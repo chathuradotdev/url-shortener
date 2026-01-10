@@ -99,6 +99,15 @@ export default function ShortenerForm() {
 
             setShortUrl(data.shortUrl);
 
+            // Save guest links to local storage for later claiming
+            if (!session && data.shortCode) {
+                const guestLinks = JSON.parse(localStorage.getItem('guest_links') || '[]');
+                if (!guestLinks.includes(data.shortCode)) {
+                    guestLinks.push(data.shortCode);
+                    localStorage.setItem('guest_links', JSON.stringify(guestLinks));
+                }
+            }
+
         } catch (err: any) {
             setError(err.message);
         } finally {
