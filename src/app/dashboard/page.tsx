@@ -1,3 +1,4 @@
+
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
@@ -5,6 +6,7 @@ import { db } from "@/lib/db";
 import Link from "next/link";
 import UrlList from "@/components/UrlList";
 import GuestLinkClaimer from "@/components/GuestLinkClaimer";
+import CheckoutSuccessToast from "@/components/CheckoutSuccessToast";
 
 export const dynamic = 'force-dynamic';
 
@@ -74,6 +76,7 @@ export default async function Dashboard({
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-12">
             <GuestLinkClaimer />
+            <CheckoutSuccessToast />
             <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header */}
                 <div className="mb-8">
@@ -244,7 +247,7 @@ export default async function Dashboard({
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm font-medium text-gray-600 mb-1">Total Clicks</p>
-                                <p className="text-3xl font-bold text-gray-900">{urls.reduce((sum, url) => sum + url.clicks, 0)}</p>
+                                <p className="text-3xl font-bold text-gray-900">{urls.reduce((sum: any, url: any) => sum + url.clicks, 0)}</p>
                             </div>
                             <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
                                 <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">

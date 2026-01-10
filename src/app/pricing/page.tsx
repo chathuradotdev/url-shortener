@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import PricingPageContent from "@/components/PricingPageContent";
+import PricingPageContent from "@/components/PricingContent";
 
 export const metadata: Metadata = {
     title: "Pricing - Powerful URL Shortening Tools",

@@ -16,6 +16,8 @@ export interface User {
     reset_token_expiry?: string | null;
     last_login?: string | null;
     trial_ends_at?: string | null;
+    subscription_id?: string | null; // Lemon Squeezy Subscription ID
+    customer_id?: string | null;     // Lemon Squeezy Customer ID
 }
 
 // Custom Domain Interface
@@ -375,6 +377,13 @@ class SupabaseDB {
         await supabase
             .from('users')
             .update({ plan })
+            .eq('id', userId);
+    }
+
+    async updateUserSubscription(userId: string, data: { plan?: 'freemium' | 'premium', subscription_id?: string | null, customer_id?: string | null, trial_ends_at?: string | null }): Promise<void> {
+        await supabase
+            .from('users')
+            .update(data)
             .eq('id', userId);
     }
 
