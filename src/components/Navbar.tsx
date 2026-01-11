@@ -65,6 +65,11 @@ export default function Navbar() {
                                         </Link>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem asChild>
+                                        <Link href="/dashboard/billing" className="cursor-pointer w-full">
+                                            Billing & Invoices
+                                        </Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem asChild>
                                         <Link href="/dashboard/teams" className="cursor-pointer w-full">
                                             Teams
                                         </Link>
@@ -158,13 +163,22 @@ export default function Navbar() {
                                 Analytics
                             </Link>
                             {session && (
-                                <Link
-                                    href="/dashboard/teams"
-                                    onClick={() => setIsOpen(false)}
-                                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                                >
-                                    Teams
-                                </Link>
+                                <>
+                                    <Link
+                                        href="/dashboard/billing"
+                                        onClick={() => setIsOpen(false)}
+                                        className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                                    >
+                                        Billing & Invoices
+                                    </Link>
+                                    <Link
+                                        href="/dashboard/teams"
+                                        onClick={() => setIsOpen(false)}
+                                        className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                                    >
+                                        Teams
+                                    </Link>
+                                </>
                             )}
                             <Link
                                 href="/help"

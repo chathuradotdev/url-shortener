@@ -403,11 +403,19 @@ class SupabaseDB {
             .update({ plan })
             .eq('id', userId);
     }
-
     async recordPayment(payment: Omit<PaymentRecord, 'id' | 'created_at'>): Promise<void> {
         await supabase
             .from('payments')
             .insert([payment]);
+    }
+
+    async getPaymentHistory(userId: string): Promise<PaymentRecord[]> {
+        const { data } = await supabase
+            .from('payments')
+            .select('*')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false });
+        return (data || []) as PaymentRecord[];
     }
 
     async updateUserSubscription(userId: string, data: {
