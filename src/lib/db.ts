@@ -18,6 +18,14 @@ export interface User {
     trial_ends_at?: string | null;
     subscription_id?: string | null; // Lemon Squeezy Subscription ID
     customer_id?: string | null;     // Lemon Squeezy Customer ID
+    subscription_status?: string | null;
+    subscription_renews_at?: string | null;
+    subscription_ends_at?: string | null;
+    subscription_amount?: number | null;
+    subscription_currency?: string | null;
+    card_brand?: string | null;
+    card_last_four?: string | null;
+    billing_country?: string | null;
 }
 
 // Custom Domain Interface
@@ -138,6 +146,22 @@ export interface BioLink {
     position: number;
     is_active: boolean;
     type?: 'link' | 'youtube' | 'spotify' | 'header';
+    created_at: string;
+}
+
+// Payment/Transaction Record Interface
+export interface PaymentRecord {
+    id: string;
+    user_id: string;
+    subscription_id: string;
+    customer_id: string;
+    event_name: string; // subscription_created, subscription_payment_success, etc.
+    amount: number;
+    currency: string;
+    status: string;
+    card_brand?: string | null;
+    card_last_four?: string | null;
+    billing_country?: string | null;
     created_at: string;
 }
 
@@ -380,7 +404,26 @@ class SupabaseDB {
             .eq('id', userId);
     }
 
-    async updateUserSubscription(userId: string, data: { plan?: 'freemium' | 'premium', subscription_id?: string | null, customer_id?: string | null, trial_ends_at?: string | null }): Promise<void> {
+    async recordPayment(payment: Omit<PaymentRecord, 'id' | 'created_at'>): Promise<void> {
+        await supabase
+            .from('payments')
+            .insert([payment]);
+    }
+
+    async updateUserSubscription(userId: string, data: {
+        plan?: 'freemium' | 'premium',
+        subscription_id?: string | null,
+        customer_id?: string | null,
+        trial_ends_at?: string | null,
+        subscription_status?: string | null,
+        subscription_renews_at?: string | null,
+        subscription_ends_at?: string | null,
+        subscription_amount?: number | null,
+        subscription_currency?: string | null,
+        card_brand?: string | null,
+        card_last_four?: string | null,
+        billing_country?: string | null
+    }): Promise<void> {
         await supabase
             .from('users')
             .update(data)

@@ -68,6 +68,24 @@ export const authOptions: NextAuthOptions = {
                 // @ts-ignore
                 session.user.plan = token.plan;
                 // @ts-ignore
+                session.user.subscription_id = token.subscription_id;
+                // @ts-ignore
+                session.user.subscription_status = token.subscription_status;
+                // @ts-ignore
+                session.user.subscription_renews_at = token.subscription_renews_at;
+                // @ts-ignore
+                session.user.subscription_ends_at = token.subscription_ends_at;
+                // @ts-ignore
+                session.user.subscription_amount = token.subscription_amount;
+                // @ts-ignore
+                session.user.subscription_currency = token.subscription_currency;
+                // @ts-ignore
+                session.user.card_brand = token.card_brand;
+                // @ts-ignore
+                session.user.card_last_four = token.card_last_four;
+                // @ts-ignore
+                session.user.billing_country = token.billing_country;
+                // @ts-ignore
                 session.user.last_login = token.last_login;
                 // @ts-ignore
                 session.user.trial_ends_at = token.trial_ends_at;
@@ -114,6 +132,24 @@ export const authOptions: NextAuthOptions = {
 
                     // @ts-ignore
                     token.plan = effectivePlan;
+                    // @ts-ignore
+                    token.subscription_id = dbUser.subscription_id;
+                    // @ts-ignore
+                    token.subscription_status = dbUser.subscription_status;
+                    // @ts-ignore
+                    token.subscription_renews_at = dbUser.subscription_renews_at;
+                    // @ts-ignore
+                    token.subscription_ends_at = dbUser.subscription_ends_at;
+                    // @ts-ignore
+                    token.subscription_amount = dbUser.subscription_amount;
+                    // @ts-ignore
+                    token.subscription_currency = dbUser.subscription_currency;
+                    // @ts-ignore
+                    token.card_brand = dbUser.card_brand;
+                    // @ts-ignore
+                    token.card_last_four = dbUser.card_last_four;
+                    // @ts-ignore
+                    token.billing_country = dbUser.billing_country;
                     // @ts-ignore
                     token.last_login = dbUser.last_login;
                     // @ts-ignore

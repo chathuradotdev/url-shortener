@@ -49,19 +49,61 @@ export async function POST(req: Request) {
                     plan: 'premium',
                     subscription_id: data.id,
                     customer_id: attributes.customer_id.toString(),
-                    trial_ends_at: attributes.trial_ends_at || null
+                    trial_ends_at: attributes.trial_ends_at || null,
+                    subscription_status: status,
+                    subscription_renews_at: attributes.renews_at || null,
+                    subscription_ends_at: attributes.ends_at || null,
+                    subscription_amount: attributes.total || null,
+                    subscription_currency: attributes.currency || null,
+                    card_brand: attributes.card_brand || null,
+                    card_last_four: attributes.card_last_four || null,
+                    billing_country: attributes.user_country || null
                 });
+
+                // Record initial payment if it's a new subscription
+                if (eventName === "subscription_created") {
+                    await db.recordPayment({
+                        user_id,
+                        subscription_id: data.id,
+                        customer_id: attributes.customer_id.toString(),
+                        event_name: eventName,
+                        amount: attributes.total || 0,
+                        currency: attributes.currency || "USD",
+                        status: status,
+                        card_brand: attributes.card_brand || null,
+                        card_last_four: attributes.card_last_four || null,
+                        billing_country: attributes.user_country || null
+                    });
+                }
             } else {
-                // past_due, unpaid, etc. maybe downgrade or just keep tracking stats?
-                // For now, let's leave it as is, or maybe downgrade if extremely past due?
-                // Let's stick to simple logic: active = premium.
+                await db.updateUserSubscription(user_id, {
+                    subscription_status: status
+                });
             }
+
+        } else if (eventName === "subscription_payment_success") {
+            const attributes = data.attributes;
+            // For recurring payments, we keep them premium and record the transaction
+            await db.recordPayment({
+                user_id,
+                subscription_id: attributes.subscription_id.toString(),
+                customer_id: attributes.customer_id.toString(),
+                event_name: eventName,
+                amount: attributes.total || 0,
+                currency: attributes.currency || "USD",
+                status: "paid",
+                card_brand: attributes.card_brand || null,
+                card_last_four: attributes.card_last_four || null,
+                billing_country: attributes.user_country || null
+            });
 
         } else if (eventName === "subscription_cancelled" || eventName === "subscription_expired") {
             await db.updateUserSubscription(user_id, {
                 plan: 'freemium',
                 subscription_id: null,
-                trial_ends_at: null
+                trial_ends_at: null,
+                subscription_status: eventName === "subscription_cancelled" ? "cancelled" : "expired",
+                subscription_renews_at: null
             });
         }
 

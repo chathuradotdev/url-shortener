@@ -81,7 +81,10 @@ export default function PricingPageContent() {
         }
     };
 
-    const isPremium = session?.user?.plan === 'premium';
+    // A user is a paid subscriber if they have a subscription_id.
+    // A user is on a trial if they have the premium plan but NO subscription_id.
+    const isPaidSubscriber = session?.user?.plan === 'premium' && !!session?.user?.subscription_id;
+    const isTrialUser = session?.user?.plan === 'premium' && !session?.user?.subscription_id;
 
     return (
         <div className="min-h-screen bg-white">
@@ -135,7 +138,9 @@ export default function PricingPageContent() {
                                 ))}
                             </ul>
                             <div className="mt-8">
-                                {session ? (
+                                {isPaidSubscriber || isTrialUser ? (
+                                    <span className="block w-full bg-gray-50 text-gray-400 font-bold py-3 px-4 rounded-xl text-center border border-gray-200">Free Tier Account</span>
+                                ) : session ? (
                                     <span className="block w-full bg-gray-50 text-gray-400 font-bold py-3 px-4 rounded-xl text-center border border-gray-200">Current Plan</span>
                                 ) : (
                                     <Link href="/register" className="block w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-xl text-center hover:bg-blue-700 shadow-md hover:shadow-lg transition-all">Create Free Account</Link>
@@ -149,7 +154,10 @@ export default function PricingPageContent() {
                         <div className="absolute top-0 right-0 bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg uppercase tracking-wider">Best Value</div>
                         <div className="p-8 bg-amber-50 border-b border-amber-100">
                             <h2 className="text-2xl font-bold text-gray-900 mb-2">Premium User</h2>
-                            {!isPremium && (
+                            {isTrialUser && (
+                                <span className="inline-block bg-orange-100 text-orange-700 text-xs font-bold px-2 py-0.5 rounded-full mb-2 border border-orange-200">Free Trial Active</span>
+                            )}
+                            {!session && (
                                 <span className="inline-block bg-green-100 text-green-700 text-xs font-bold px-2 py-0.5 rounded-full mb-2 border border-green-200">7-Day Free Trial</span>
                             )}
                             <p className="text-gray-600">Power tools for advanced users.</p>
@@ -182,18 +190,18 @@ export default function PricingPageContent() {
                             <div className="mt-8">
                                 <button
                                     onClick={handleUpgrade}
-                                    disabled={isLoading || isPremium}
+                                    disabled={isLoading || isPaidSubscriber}
                                     className={cn(
                                         "block w-full font-bold py-3 px-4 rounded-xl text-center shadow-lg transform transition-all disabled:opacity-70",
-                                        isPremium
+                                        isPaidSubscriber
                                             ? "bg-gray-100 text-gray-400 border border-gray-200 cursor-default"
                                             : "bg-gradient-to-r from-amber-500 to-orange-600 text-white hover:from-amber-600 hover:to-orange-700 hover:shadow-xl hover:-translate-y-0.5"
                                     )}
                                 >
-                                    {isLoading ? 'Processing...' : isPremium ? 'Current Plan' : (session ? 'Upgrade to Premium' : 'Start 7-Day Free Trial')}
+                                    {isLoading ? 'Processing...' : isPaidSubscriber ? 'Current Plan' : isTrialUser ? 'Upgrade to Paid Plan' : (session ? 'Upgrade to Premium' : 'Start 7-Day Free Trial')}
                                 </button>
                                 <p className="text-xs text-center text-gray-500 mt-3">
-                                    {isPremium ? 'Welcome to the Pro family!' : 'No credit card required. Cancel anytime.'}
+                                    {isPaidSubscriber ? 'Welcome to the Pro family!' : isTrialUser ? 'Your trial features are active. Upgrade anytime.' : 'No credit card required. Cancel anytime.'}
                                 </p>
                             </div>
                         </div>

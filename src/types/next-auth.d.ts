@@ -10,6 +10,15 @@ declare module "next-auth" {
             id: string;
             role?: 'admin' | 'user';
             plan?: 'freemium' | 'premium';
+            subscription_id?: string | null;
+            subscription_status?: string | null;
+            subscription_renews_at?: string | null;
+            subscription_ends_at?: string | null;
+            subscription_amount?: number | null;
+            subscription_currency?: string | null;
+            card_brand?: string | null;
+            card_last_four?: string | null;
+            billing_country?: string | null;
             last_login?: string | null;
             trial_ends_at?: string | null;
         } & DefaultSession["user"]
@@ -19,6 +28,15 @@ declare module "next-auth" {
         id: string;
         role?: 'admin' | 'user';
         plan?: 'freemium' | 'premium';
+        subscription_id?: string | null;
+        subscription_status?: string | null;
+        subscription_renews_at?: string | null;
+        subscription_ends_at?: string | null;
+        subscription_amount?: number | null;
+        subscription_currency?: string | null;
+        card_brand?: string | null;
+        card_last_four?: string | null;
+        billing_country?: string | null;
         last_login?: string | null;
         trial_ends_at?: string | null;
     }
@@ -28,6 +46,15 @@ declare module "next-auth/jwt" {
     interface JWT {
         role?: 'admin' | 'user';
         plan?: 'freemium' | 'premium';
+        subscription_id?: string | null;
+        subscription_status?: string | null;
+        subscription_renews_at?: string | null;
+        subscription_ends_at?: string | null;
+        subscription_amount?: number | null;
+        subscription_currency?: string | null;
+        card_brand?: string | null;
+        card_last_four?: string | null;
+        billing_country?: string | null;
         last_login?: string | null;
         trial_ends_at?: string | null;
     }

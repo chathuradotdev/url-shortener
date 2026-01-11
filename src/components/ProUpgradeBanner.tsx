@@ -26,26 +26,25 @@ export default function ProUpgradeBanner() {
 
     if (!isMounted || status === 'loading' || !session) return null;
 
-    // Check for trial status
-    const trialEndsAt = session.user.trial_ends_at;
-    const isTrial = !!trialEndsAt;
+    // Logic to decide what to show
+    // 1. If PAID subscriber (has subscription_id), show nothing.
+    // @ts-ignore
+    if (session.user.subscription_id) return null;
 
-    // Calculate remaining days
-    const daysRemaining = isTrial && trialEndsAt ? Math.ceil((new Date(trialEndsAt).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) : 0;
-    const isTrialExpired = daysRemaining <= 0;
-
-    // Normal plan check
+    // Plan check (this is the effective plan: 'premium' for both paid and trial users)
     const userPlan = session.user.plan;
 
-    // Logic to decide what to show
-    // 1. If PRO/PREMIUM (we check plan specifically), show nothing.
-    if (userPlan === "premium") return null;
+    // Trial check: If they have premium features but NO subscription_id, they are on a FREE TRIAL.
+    // @ts-ignore
+    const isTrial = userPlan === 'premium' && !session.user.subscription_id;
 
-    // If trial is expired, they are effectively freemium, so showing the standard upgrade banner is fine.
-    // But we might want a specific "Trial Expired" message?
-    // User requested: "Once the user in the 7 day trial.. need to show Trial Ends in 6 days kind of messgae"
+    // Calculate remaining days if trial_ends_at exists
+    const trialEndsAt = session.user.trial_ends_at;
+    const daysRemaining = trialEndsAt
+        ? Math.ceil((new Date(trialEndsAt).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+        : 0;
 
-    // If trial active (daysRemaining > 0)
+    // Show trial message only if they are actually in the trial period
     const showTrialMessage = isTrial && daysRemaining > 0;
 
     const handleDismiss = () => {
@@ -88,7 +87,7 @@ export default function ProUpgradeBanner() {
                                         <span className="opacity-90">Unlock limitless power!</span>
                                         <span className="mx-2 hidden sm:inline opacity-50">|</span>
                                         <span className="block sm:inline mt-0.5 sm:mt-0 font-semibold group cursor-pointer" onClick={() => window.location.href = '/pricing'}>
-                                            Upgrade to <span className="text-yellow-300 underline decoration-yellow-300/50 underline-offset-4 decoration-2 transition-all hover:decoration-yellow-300">Pro level</span> for just <span className="text-white bg-white/20 px-1.5 py-0.5 rounded text-xs ml-1">$5/month</span>
+                                            Upgrade to <span className="text-yellow-300 underline decoration-yellow-300/50 underline-offset-4 decoration-2 transition-all hover:decoration-yellow-300">Pro level</span> for just <span className="text-white bg-white/20 px-1.5 py-0.5 rounded text-xs ml-1">$1/month</span>
                                         </span>
                                     </>
                                 )}
@@ -102,7 +101,7 @@ export default function ProUpgradeBanner() {
                                 className="bg-white/10 hover:bg-white/20 text-white border border-white/10 hover:border-white/30 backdrop-blur-md h-8 text-xs font-semibold px-4 rounded-full transition-all duration-300 shadow-lg shadow-purple-900/20 group"
                                 asChild
                             >
-                                <Link href="/pricing">
+                                <Link href="/pricing" onClick={() => sessionStorage.removeItem("pro-banner-dismissed")}>
                                     {showTrialMessage ? "Upgrade to Premium" : "Upgrade Now"}
                                     <ArrowRight className="w-3 h-3 ml-1.5 group-hover:translate-x-0.5 transition-transform" />
                                 </Link>
