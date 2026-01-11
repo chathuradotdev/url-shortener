@@ -5,19 +5,163 @@ import { BioPage, BioLink } from "@/lib/db";
 import BioPreview from "./BioPreview";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { LayoutTemplate, Palette, Share2, PlusCircle, Instagram, Twitter, Globe, Github, Youtube, Music, Link as LinkIcon, Type } from "lucide-react";
+import { LayoutTemplate, Palette, Share2, PlusCircle, Instagram, Twitter, Globe, Github, Youtube, Music, Link as LinkIcon, Type, X, ChevronRight, CheckCircle2 } from "lucide-react";
 
 export default function BioBuilder() {
     const router = useRouter();
     const [loading, setLoading] = useState(true);
-    const [bioPage, setBioPage] = useState<Partial<BioPage>>({ theme: {} });
+    const [bioPage, setBioPage] = useState<Partial<BioPage>>({
+        title: "",
+        description: "",
+        slug: "",
+        theme: {
+            backgroundColor: "#ffffff",
+            textColor: "#000000",
+            buttonBgColor: "#f3f4f6",
+            buttonTextColor: "#1f2937",
+            buttonStyle: "rounded-full",
+            fontFamily: "Inter"
+        }
+    });
     const [links, setLinks] = useState<BioLink[]>([]);
     const [saving, setSaving] = useState(false);
     const [userTeams, setUserTeams] = useState<any[]>([]);
     const [selectedTeamId, setSelectedTeamId] = useState("");
 
-    // Form states
-    const [activeTab, setActiveTab] = useState<'profile' | 'links' | 'design'>('links');
+    const [activeTab, setActiveTab] = useState<'templates' | 'links' | 'socials' | 'profile' | 'design'>('templates');
+
+    const TEMPLATES: any[] = [
+        {
+            id: 'artisan',
+            name: 'Artisan',
+            description: 'Professional product-focused layout.',
+            theme: {
+                backgroundColor: '#fdfbf7',
+                textColor: '#4a1d4a',
+                buttonBgColor: '#ffffff',
+                buttonTextColor: '#4a1d4a',
+                buttonStyle: 'rounded-lg',
+                fontFamily: 'Outfit',
+                headerImage: 'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=800',
+                isVerified: false
+            }
+        },
+        {
+            id: 'gamer',
+            name: 'Gamer',
+            description: 'High-energy dark mode with neon accents.',
+            theme: {
+                backgroundColor: '#0f172a',
+                textColor: '#f8fafc',
+                buttonBgColor: '#8b5cf6',
+                buttonTextColor: '#ffffff',
+                buttonStyle: 'rounded-none',
+                fontFamily: 'Inter',
+                headerColor: '#1e293b',
+                isVerified: true
+            }
+        },
+        {
+            id: 'boho',
+            name: 'Boho',
+            description: 'Warm, natural tones and soft textures.',
+            theme: {
+                backgroundColor: '#f1e8e0',
+                textColor: '#4a3728',
+                buttonBgColor: '#a67c52',
+                buttonTextColor: '#ffffff',
+                buttonStyle: 'rounded-lg',
+                fontFamily: 'Outfit',
+                backgroundImage: 'https://images.unsplash.com/photo-1544070078-a212eda27b49?q=80&w=800'
+            }
+        },
+        {
+            id: 'cyber',
+            name: 'Cyber',
+            description: 'Futuristic blue-scale design.',
+            theme: {
+                backgroundColor: '#020617',
+                textColor: '#38bdf8',
+                buttonBgColor: '#0f172a',
+                buttonTextColor: '#38bdf8',
+                buttonStyle: 'rounded-none',
+                fontFamily: 'Inter',
+                headerImage: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=800'
+            }
+        },
+        {
+            id: 'luxe',
+            name: 'Luxe',
+            description: 'Minimalist card layout for a premium feel.',
+            theme: {
+                backgroundColor: '#f8fafc',
+                textColor: '#0f172a',
+                buttonBgColor: '#0f172a',
+                buttonTextColor: '#ffffff',
+                buttonStyle: 'rounded-full',
+                fontFamily: 'Outfit',
+                cardMode: true,
+                headerColor: '#0f172a'
+            }
+        },
+        {
+            id: 'organic',
+            name: 'Organic',
+            description: 'Full-page natural texture and soft greens.',
+            theme: {
+                backgroundColor: '#d1e2c4',
+                textColor: '#1a3c34',
+                buttonBgColor: 'rgba(255, 255, 255, 0.4)',
+                buttonTextColor: '#1a3c34',
+                buttonStyle: 'rounded-lg',
+                fontFamily: 'Inter',
+                backgroundImage: 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?q=80&w=800'
+            }
+        },
+        {
+            id: 'vcard',
+            name: 'Digital Card',
+            description: 'Dark purple business card style.',
+            theme: {
+                backgroundColor: '#3b163e',
+                textColor: '#ffffff',
+                buttonBgColor: '#f2e8cf',
+                buttonTextColor: '#3b163e',
+                buttonStyle: 'rounded-lg',
+                fontFamily: 'Inter',
+                headerImage: 'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=800',
+                cardMode: false
+            }
+        },
+        {
+            id: 'influencer',
+            name: 'Influencer',
+            description: 'Minimalist & soft, perfect for creators.',
+            theme: {
+                backgroundColor: '#fdf2f8',
+                textColor: '#831843',
+                buttonBgColor: '#ffffff',
+                buttonTextColor: '#be185d',
+                buttonStyle: 'rounded-full',
+                fontFamily: 'Outfit',
+                isVerified: true
+            }
+        },
+        {
+            id: 'academy',
+            name: 'Academy',
+            description: 'Professional layout with header banner.',
+            theme: {
+                backgroundColor: '#f0f9ff',
+                textColor: '#075985',
+                buttonBgColor: '#0ea5e9',
+                buttonTextColor: '#ffffff',
+                buttonStyle: 'rounded-lg',
+                fontFamily: 'Inter',
+                headerImage: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=800'
+            }
+        }
+    ];
 
     useEffect(() => {
         fetchData();
@@ -40,29 +184,19 @@ export default function BioBuilder() {
         try {
             const bioRes = await fetch("/api/bio");
             if (bioRes.status === 403) {
-                // Not premium
-                toast.error("Premium required for Bio Pages");
+                toast.error("Premium required");
                 router.push("/dashboard");
                 return;
             }
 
             const bioData = await bioRes.json();
-
-            if (bioData.exists === false) {
-                // Initialize empty? or create on save?
-                // Let's keep it partial
-            } else {
+            if (bioData.id) {
                 setBioPage(bioData);
-
-                // Fetch links only if bio page exists
                 const linksRes = await fetch("/api/bio/links");
-                if (linksRes.ok) {
-                    setLinks(await linksRes.json());
-                }
+                if (linksRes.ok) setLinks(await linksRes.json());
             }
         } catch (e) {
             console.error(e);
-            toast.error("Failed to load bio data");
         } finally {
             setLoading(false);
         }
@@ -74,37 +208,55 @@ export default function BioBuilder() {
             const res = await fetch("/api/bio", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    ...bioPage,
-                    teamId: selectedTeamId || null
-                })
+                body: JSON.stringify({ ...bioPage, teamId: selectedTeamId || null })
             });
-
             if (!res.ok) throw new Error(await res.text());
-
             const updated = await res.json();
             setBioPage(updated);
-            toast.success("Profile saved!");
+            toast.success("Published successfully!");
         } catch (e: any) {
-            toast.error("Failed to save: " + e.message);
+            toast.error(e.message);
         } finally {
             setSaving(false);
         }
     };
 
+    const handleApplyTemplate = (template: any) => {
+        setBioPage({
+            ...bioPage,
+            theme: {
+                backgroundColor: '#ffffff',
+                textColor: '#000000',
+                buttonBgColor: '#f3f4f6',
+                buttonTextColor: '#1f2937',
+                buttonStyle: 'rounded-full',
+                fontFamily: 'Inter',
+                headerImage: undefined,
+                headerColor: undefined,
+                backgroundImage: undefined,
+                cardMode: false,
+                isVerified: false,
+                socials: bioPage.theme?.socials || {},
+                ...template.theme
+            }
+        });
+        toast.success(`Applied ${template.name} template!`);
+        setActiveTab('links');
+    };
+
     const handleAddLink = async (type: 'link' | 'youtube' | 'spotify' = 'link') => {
         setSaving(true);
         try {
-            // Ensure bio page exists first
             if (!bioPage.id) {
-                await handleSaveProfile(); // This might fail if validation fails, handled in catch
+                const res = await fetch("/api/bio", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ ...bioPage })
+                });
+                if (!res.ok) throw new Error("Failed");
+                const updated = await res.json();
+                setBioPage(updated);
             }
-            // Need to reload bioPage to get ID if it was just created? 
-            // handleSaveProfile updates state, but async state updates... 
-            // Better to chain properly or just save profile first if new.
-
-            // Actually handleSaveProfile waits for response. state update might be pending.
-            // Let's assume user explicitly creates profile/saves first or we auto-save.
 
             const newLink = {
                 title: type === 'youtube' ? 'My Video' : type === 'spotify' ? 'My Music' : 'New Link',
@@ -119,12 +271,12 @@ export default function BioBuilder() {
                 body: JSON.stringify(newLink)
             });
 
-            if (!res.ok) throw new Error(await res.text());
-
-            const savedLink = await res.json();
-            setLinks([...links, savedLink]);
-            toast.success("Link added");
-        } catch (e: any) {
+            if (res.ok) {
+                const saved = await res.json();
+                setLinks([...links, saved]);
+                toast.success("Link added");
+            }
+        } catch (e) {
             toast.error("Error adding link");
         } finally {
             setSaving(false);
@@ -132,10 +284,7 @@ export default function BioBuilder() {
     };
 
     const handleUpdateLink = async (id: string, updates: Partial<BioLink>) => {
-        // Optimistic update
-        const oldLinks = [...links];
         setLinks(links.map(l => l.id === id ? { ...l, ...updates } : l));
-
         try {
             await fetch(`/api/bio/links/${id}`, {
                 method: "PUT",
@@ -143,323 +292,217 @@ export default function BioBuilder() {
                 body: JSON.stringify(updates)
             });
         } catch (e) {
-            setLinks(oldLinks);
-            toast.error("Failed to update link");
+            toast.error("Update failed");
         }
     };
 
     const handleDeleteLink = async (id: string) => {
-        if (!confirm("Delete this link?")) return;
-
-        const oldLinks = [...links];
+        if (!confirm("Delete?")) return;
         setLinks(links.filter(l => l.id !== id));
-
         try {
             await fetch(`/api/bio/links/${id}`, { method: "DELETE" });
-            toast.success("Link deleted");
         } catch (e) {
-            setLinks(oldLinks);
-            toast.error("Failed to delete link");
+            toast.error("Delete failed");
         }
     };
 
-    if (loading) return <div className="p-10 flex justify-center"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div></div>;
+    if (loading) return <div className="p-20 flex justify-center"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div></div>;
 
     return (
         <div className="flex flex-col lg:flex-row h-[calc(100vh-64px)] overflow-hidden">
-            {/* Left Panel - Editor */}
-            <div className="w-full lg:w-1/2 p-6 overflow-y-auto border-r border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950">
-                <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-bold">Bio Builder</h2>
-                    <a
-                        href={`/bio/${bioPage.slug || ''}`}
-                        target="_blank"
-                        className={`text-sm text-blue-600 hover:underline ${!bioPage.slug ? 'hidden' : ''}`}
+            {/* Editor Panel */}
+            <div className="w-full lg:w-1/2 p-6 overflow-y-auto border-r border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 no-scrollbar">
+                <div className="flex items-center justify-between mb-8">
+                    <h2 className="text-2xl font-black">Bio Builder</h2>
+                    <button
+                        onClick={handleSaveProfile}
+                        disabled={saving}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl text-sm font-bold shadow-lg shadow-blue-500/20"
                     >
-                        View Live
-                    </a>
+                        {saving ? '...' : 'Publish'}
+                    </button>
                 </div>
 
-                {userTeams.length > 0 && !bioPage.id && (
-                    <div className="mb-6 flex items-center gap-3 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm p-3 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm animate-in fade-in slide-in-from-left-4">
-                        <div className="flex items-center gap-2 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                            </svg>
-                            Workspace:
-                        </div>
-                        <select
-                            value={selectedTeamId}
-                            onChange={(e) => setSelectedTeamId(e.target.value)}
-                            className="bg-transparent border-none focus:ring-0 text-sm font-bold text-blue-600 dark:text-blue-400 cursor-pointer p-0 pr-8"
-                        >
-                            <option value="">Personal</option>
-                            {userTeams.map(team => (
-                                <option key={team.id} value={team.id}>{team.name}</option>
-                            ))}
-                        </select>
-                    </div>
-                )}
-
-                {/* Tabs */}
-                <div className="flex space-x-1 mb-6 bg-gray-200 dark:bg-gray-800 p-1 rounded-lg">
-                    {['links', 'profile', 'design'].map(tab => (
+                <div className="flex space-x-1 mb-8 bg-gray-200/50 dark:bg-gray-800/50 p-1.5 rounded-2xl overflow-x-auto no-scrollbar">
+                    {['templates', 'links', 'socials', 'profile', 'design'].map(tab => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab as any)}
-                            className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${activeTab === tab
-                                ? 'bg-white dark:bg-gray-700 shadow text-blue-600 dark:text-blue-400'
-                                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900'
-                                }`}
+                            className={`flex-none px-5 py-2.5 text-xs font-bold rounded-xl transition-all ${activeTab === tab ? 'bg-white dark:bg-gray-700 shadow text-blue-600' : 'text-gray-500'}`}
                         >
                             {tab.charAt(0).toUpperCase() + tab.slice(1)}
                         </button>
                     ))}
                 </div>
 
-                {/* Content */}
-                {activeTab === 'profile' && (
-                    <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
-                        <div>
-                            <label className="block text-sm font-medium mb-1">Page Slug (URL)</label>
-                            <div className="flex">
-                                <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-gray-500 text-sm">
-                                    /bio/
-                                </span>
-                                <input
-                                    type="text"
-                                    value={bioPage.slug || ''}
-                                    onChange={e => setBioPage({ ...bioPage, slug: e.target.value })}
-                                    className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                    placeholder="your-name"
-                                />
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium mb-1">Display Name</label>
-                            <input
-                                type="text"
-                                value={bioPage.title || ''}
-                                onChange={e => setBioPage({ ...bioPage, title: e.target.value })}
-                                className="block w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                placeholder="Your Name"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium mb-1">Description</label>
-                            <textarea
-                                value={bioPage.description || ''}
-                                onChange={e => setBioPage({ ...bioPage, description: e.target.value })}
-                                rows={3}
-                                className="block w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                placeholder="Tell us about yourself..."
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium mb-1">Avatar URL</label>
-                            <input
-                                type="url"
-                                value={bioPage.avatar_url || ''}
-                                onChange={e => setBioPage({ ...bioPage, avatar_url: e.target.value })}
-                                className="block w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                placeholder="https://example.com/avatar.jpg"
-                            />
-                        </div>
-
-                        <button
-                            onClick={handleSaveProfile}
-                            disabled={saving}
-                            className="w-full bg-black dark:bg-white text-white dark:text-black py-2 rounded-md font-bold mt-4 disabled:opacity-50"
-                        >
-                            {saving ? 'Saving...' : 'Save Profile'}
-                        </button>
-                    </div>
-                )}
-
-                {activeTab === 'design' && (
-                    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2">
-                        {/* Background */}
-                        <div>
-                            <label className="block text-sm font-medium mb-2">Background Color</label>
-                            <div className="flex items-center gap-3">
-                                <input
-                                    type="color"
-                                    value={bioPage.theme?.backgroundColor || '#ffffff'}
-                                    onChange={e => setBioPage({ ...bioPage, theme: { ...bioPage.theme, backgroundColor: e.target.value } })}
-                                    className="h-10 w-20 rounded cursor-pointer"
-                                />
-                                <span className="text-sm font-mono">{bioPage.theme?.backgroundColor || '#ffffff'}</span>
-                            </div>
-                        </div>
-
-                        {/* Text Color */}
-                        <div>
-                            <label className="block text-sm font-medium mb-2">Text Color</label>
-                            <div className="flex items-center gap-3">
-                                <input
-                                    type="color"
-                                    value={bioPage.theme?.textColor || '#000000'}
-                                    onChange={e => setBioPage({ ...bioPage, theme: { ...bioPage.theme, textColor: e.target.value } })}
-                                    className="h-10 w-20 rounded cursor-pointer"
-                                />
-                            </div>
-                        </div>
-
-                        {/* Button Style */}
-                        <div>
-                            <label className="block text-sm font-medium mb-2">Button Style</label>
-                            <select
-                                value={bioPage.theme?.buttonStyle || 'rounded-full'}
-                                onChange={e => setBioPage({ ...bioPage, theme: { ...bioPage.theme, buttonStyle: e.target.value } })}
-                                className="block w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900"
-                            >
-                                <option value="rounded-full">Rounded Full</option>
-                                <option value="rounded-lg">Rounded Box</option>
-                                <option value="rounded-none">Sharp</option>
-                            </select>
-                        </div>
-
-                        {/* Button Colors */}
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium mb-2">Button Background</label>
-                                <input
-                                    type="color"
-                                    value={bioPage.theme?.buttonBgColor || '#f3f4f6'}
-                                    onChange={e => setBioPage({ ...bioPage, theme: { ...bioPage.theme, buttonBgColor: e.target.value } })}
-                                    className="h-10 w-full rounded cursor-pointer"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium mb-2">Button Text</label>
-                                <input
-                                    type="color"
-                                    value={bioPage.theme?.buttonTextColor || '#1f2937'}
-                                    onChange={e => setBioPage({ ...bioPage, theme: { ...bioPage.theme, buttonTextColor: e.target.value } })}
-                                    className="h-10 w-full rounded cursor-pointer"
-                                />
-                            </div>
-                        </div>
-
-                        <button
-                            onClick={handleSaveProfile}
-                            disabled={saving}
-                            className="w-full bg-black dark:bg-white text-white dark:text-black py-2 rounded-md font-bold mt-4 disabled:opacity-50"
-                        >
-                            {saving ? 'Saving...' : 'Save Design'}
-                        </button>
-                    </div>
-                )}
-
-                {activeTab === 'links' && (
-                    <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
-                        <div className="grid grid-cols-3 gap-3 mb-6">
-                            <button
-                                onClick={() => handleAddLink('link')}
-                                disabled={saving}
-                                className="flex flex-col items-center justify-center p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all gap-2"
-                            >
-                                <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
-                                    <LinkIcon className="w-5 h-5" />
-                                </div>
-                                <span className="text-xs font-semibold">Link</span>
-                            </button>
-                            <button
-                                onClick={() => handleAddLink('youtube')}
-                                disabled={saving}
-                                className="flex flex-col items-center justify-center p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all gap-2"
-                            >
-                                <div className="p-2 bg-red-100 text-red-600 rounded-lg">
-                                    <Youtube className="w-5 h-5" />
-                                </div>
-                                <span className="text-xs font-semibold">YouTube</span>
-                            </button>
-                            <button
-                                onClick={() => handleAddLink('spotify')}
-                                disabled={saving}
-                                className="flex flex-col items-center justify-center p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all gap-2"
-                            >
-                                <div className="p-2 bg-green-100 text-green-600 rounded-lg">
-                                    <Music className="w-5 h-5" />
-                                </div>
-                                <span className="text-xs font-semibold">Spotify</span>
-                            </button>
-                        </div>
-
-                        <div className="space-y-3">
-                            {links.map((link) => (
-                                <div key={link.id} className="bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm group">
-                                    <div className="flex items-start gap-3">
-                                        <div className="cursor-move text-gray-400 pt-2">
-                                            {/* Drag Handle Icon - functionality requires dnd lib, skipping for now */}
-                                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
-                                            </svg>
+                <div className="min-h-0">
+                    {activeTab === 'templates' && (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 animate-in fade-in slide-in-from-bottom-4">
+                            {TEMPLATES.map(template => (
+                                <button
+                                    key={template.id}
+                                    onClick={() => handleApplyTemplate(template)}
+                                    className="group relative flex flex-col bg-white dark:bg-gray-900 border-2 border-gray-100 dark:border-gray-800 rounded-[2rem] p-5 hover:border-blue-500 transition-all text-left"
+                                >
+                                    <div className="w-full h-32 rounded-2xl mb-4 overflow-hidden relative border bg-gray-50" style={{ backgroundColor: template.theme.backgroundColor }}>
+                                        {template.theme.headerImage && <img src={template.theme.headerImage} className="w-full h-1/2 object-cover" />}
+                                        {template.theme.headerColor && <div className="w-full h-1/3" style={{ backgroundColor: template.theme.headerColor }}></div>}
+                                        <div className="flex flex-col items-center pt-2 gap-1 px-4">
+                                            <div className="w-6 h-6 rounded-full bg-gray-300" />
+                                            <div className="w-full h-2 rounded bg-gray-200" />
+                                            <div className="w-full h-2 rounded opacity-50" style={{ backgroundColor: template.theme.buttonBgColor }} />
                                         </div>
-                                        <div className="flex-1 space-y-3">
-                                            <input
-                                                type="text"
-                                                value={link.title}
-                                                onChange={e => handleUpdateLink(link.id, { title: e.target.value })}
-                                                className="block w-full px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-800 bg-transparent font-medium"
-                                                placeholder="Title"
-                                            />
-                                            {/* Badge for Type */}
-                                            {link.type && link.type !== 'link' && (
-                                                <span className={`text-[10px] uppercase font-bold px-1.5 py-0.5 rounded ${link.type === 'youtube' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
-                                                    {link.type}
-                                                </span>
-                                            )}
+                                    </div>
+                                    <h3 className="font-bold text-gray-900 dark:text-white">{template.name}</h3>
+                                    <p className="text-[10px] text-gray-400">{template.description}</p>
+                                </button>
+                            ))}
+                        </div>
+                    )}
 
-                                            <input
-                                                type="url"
-                                                value={link.url}
-                                                onChange={e => handleUpdateLink(link.id, { url: e.target.value })}
-                                                className="block w-full px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-800 bg-transparent text-sm text-gray-500"
-                                                placeholder={link.type === 'youtube' ? "https://youtube.com/watch?v=..." : link.type === 'spotify' ? "https://open.spotify.com/track/..." : "https://example.com"}
-                                            />
-                                        </div>
-                                        <div className="flex flex-col gap-2">
+                    {activeTab === 'links' && (
+                        <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4">
+                            <div className="grid grid-cols-3 gap-3">
+                                <button onClick={() => handleAddLink('link')} className="p-4 bg-white dark:bg-gray-900 border-2 border-dashed rounded-2xl flex flex-col items-center gap-1 hover:border-blue-500">
+                                    <LinkIcon className="w-5 h-5 text-blue-600" />
+                                    <span className="text-[9px] font-bold uppercase">Link</span>
+                                </button>
+                                <button onClick={() => handleAddLink('youtube')} className="p-4 bg-white dark:bg-gray-900 border-2 border-dashed rounded-2xl flex flex-col items-center gap-1 hover:border-red-500">
+                                    <Youtube className="w-5 h-5 text-red-600" />
+                                    <span className="text-[9px] font-bold uppercase">Video</span>
+                                </button>
+                                <button onClick={() => handleAddLink('spotify')} className="p-4 bg-white dark:bg-gray-900 border-2 border-dashed rounded-2xl flex flex-col items-center gap-1 hover:border-green-500">
+                                    <Music className="w-5 h-5 text-green-600" />
+                                    <span className="text-[9px] font-bold uppercase">Music</span>
+                                </button>
+                            </div>
+                            {links.map(link => (
+                                <div key={link.id} className="bg-white dark:bg-gray-900 p-4 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <input value={link.title} onChange={e => handleUpdateLink(link.id, { title: e.target.value })} className="font-bold bg-transparent border-none text-sm p-0 focus:ring-0" />
+                                        <div className="flex items-center gap-2">
                                             <label className="relative inline-flex items-center cursor-pointer">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={link.is_active}
-                                                    onChange={e => handleUpdateLink(link.id, { is_active: e.target.checked })}
-                                                    className="sr-only peer"
-                                                />
-                                                <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-green-500"></div>
+                                                <input type="checkbox" checked={link.is_active} onChange={e => handleUpdateLink(link.id, { is_active: e.target.checked })} className="sr-only peer" />
+                                                <div className="w-8 h-4 bg-gray-200 rounded-full peer peer-checked:bg-green-500 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-full" />
                                             </label>
-                                            <button
-                                                onClick={() => handleDeleteLink(link.id)}
-                                                className="text-gray-400 hover:text-red-500 p-1"
-                                            >
-                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                </svg>
-                                            </button>
+                                            <button onClick={() => handleDeleteLink(link.id)} className="text-gray-300 hover:text-red-500"><X className="w-4 h-4" /></button>
                                         </div>
+                                    </div>
+                                    <div className="flex items-center gap-2 px-3 py-1 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                                        <LinkIcon className="w-3 h-3 text-gray-400" />
+                                        <input value={link.url} onChange={e => handleUpdateLink(link.id, { url: e.target.value })} className="flex-1 text-[10px] bg-transparent border-none p-0 focus:ring-0 text-blue-500" />
                                     </div>
                                 </div>
                             ))}
-                            {links.length === 0 && (
-                                <div className="text-center py-8 text-gray-500">
-                                    No links yet. Click the button above to add one.
-                                </div>
-                            )}
                         </div>
-                    </div>
-                )}
+                    )}
+
+                    {activeTab === 'design' && (
+                        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
+                            <div className="bg-white dark:bg-gray-900 p-6 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm space-y-6">
+                                <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-4">Appearance</h3>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black uppercase text-gray-400">Page BG</label>
+                                        <div className="flex gap-2">
+                                            <input
+                                                value={bioPage.theme?.backgroundImage || ''}
+                                                onChange={e => setBioPage({ ...bioPage, theme: { ...(bioPage.theme || {}), backgroundImage: e.target.value } })}
+                                                className="flex-1 px-3 py-2 bg-gray-50 dark:bg-gray-800 rounded-xl text-[10px] border-none"
+                                                placeholder="Image URL"
+                                            />
+                                            <input type="color" value={bioPage.theme?.backgroundColor || '#ffffff'} onChange={e => setBioPage({ ...bioPage, theme: { ...(bioPage.theme || {}), backgroundColor: e.target.value } })} className="w-10 h-10 border-none p-0 bg-transparent cursor-pointer" />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black uppercase text-gray-400">Banner</label>
+                                        <div className="flex gap-2">
+                                            <input
+                                                value={bioPage.theme?.headerImage || ''}
+                                                onChange={e => setBioPage({ ...bioPage, theme: { ...(bioPage.theme || {}), headerImage: e.target.value, headerColor: undefined } })}
+                                                className="flex-1 px-3 py-2 bg-gray-50 dark:bg-gray-800 rounded-xl text-[10px] border-none"
+                                                placeholder="Image URL"
+                                            />
+                                            <input
+                                                type="color"
+                                                value={bioPage.theme?.headerColor || '#ffffff'}
+                                                onChange={e => setBioPage({ ...bioPage, theme: { ...(bioPage.theme || {}), headerColor: e.target.value, headerImage: undefined } })}
+                                                className="w-10 h-10 border-none p-0 bg-transparent cursor-pointer"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2 pt-4 border-t">
+                                    <label className="text-[10px] font-black uppercase text-gray-400">Buttons</label>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <input type="color" value={bioPage.theme?.buttonBgColor || '#000000'} onChange={e => setBioPage({ ...bioPage, theme: { ...(bioPage.theme || {}), buttonBgColor: e.target.value } })} className="w-full h-10 border-none p-0 bg-transparent cursor-pointer" />
+                                        <select value={bioPage.theme?.buttonStyle || 'rounded-full'} onChange={e => setBioPage({ ...bioPage, theme: { ...(bioPage.theme || {}), buttonStyle: e.target.value } })} className="bg-gray-50 border-none rounded-xl text-xs">
+                                            <option value="rounded-full">Pill</option>
+                                            <option value="rounded-lg">Rounded</option>
+                                            <option value="rounded-none">Sharp</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center justify-between pt-4 border-t">
+                                    <label className="text-[10px] font-black uppercase text-gray-400">Card Layout</label>
+                                    <input type="checkbox" checked={bioPage.theme?.cardMode} onChange={e => setBioPage({ ...bioPage, theme: { ...(bioPage.theme || {}), cardMode: e.target.checked } })} />
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'socials' && (
+                        <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4">
+                            <div className="bg-white dark:bg-gray-900 p-8 rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm space-y-6">
+                                {['instagram', 'twitter', 'github', 'youtube'].map(key => (
+                                    <div key={key} className="flex flex-col gap-1">
+                                        <label className="text-[10px] font-black uppercase text-gray-400">{key}</label>
+                                        <input
+                                            value={bioPage.theme?.socials?.[key] || ''}
+                                            onChange={e => setBioPage({ ...bioPage, theme: { ...(bioPage.theme || {}), socials: { ...(bioPage.theme?.socials || {}), [key]: e.target.value } } })}
+                                            className="px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-xl text-xs border-none"
+                                            placeholder={`https://${key}.com/username`}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'profile' && (
+                        <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4">
+                            <div className="bg-white dark:bg-gray-900 p-8 rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm space-y-6">
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-black uppercase text-gray-400">Display Name</label>
+                                    <input value={bioPage.title || ''} onChange={e => setBioPage({ ...bioPage, title: e.target.value })} className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 rounded-2xl border-none font-bold" />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-black uppercase text-gray-400">Short Bio</label>
+                                    <textarea value={bioPage.description || ''} onChange={e => setBioPage({ ...bioPage, description: e.target.value })} className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 rounded-2xl border-none min-h-[100px]" />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-black uppercase text-gray-400">Avatar URL</label>
+                                    <input value={bioPage.avatar_url || ''} onChange={e => setBioPage({ ...bioPage, avatar_url: e.target.value })} className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 rounded-2xl border-none text-blue-500 underline text-xs" />
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <label className="text-[10px] font-black uppercase text-gray-400">Verified Badge</label>
+                                    <input type="checkbox" checked={bioPage.theme?.isVerified} onChange={e => setBioPage({ ...bioPage, theme: { ...(bioPage.theme || {}), isVerified: e.target.checked } })} />
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
 
-            {/* Right Panel - Preview */}
-            <div className="w-full lg:w-1/2 bg-gray-100 dark:bg-black flex items-center justify-center p-8 relative">
-                <div className="absolute top-4 right-4 bg-white dark:bg-gray-900 px-4 py-2 rounded-full shadow text-sm font-medium opacity-50">
-                    Live Preview
+            {/* Preview Panel */}
+            <div className="w-full lg:w-1/2 bg-gray-100 dark:bg-black p-8 flex items-center justify-center relative overflow-hidden">
+                <div className="absolute top-10 right-10 bg-white/10 backdrop-blur px-4 py-2 rounded-full border border-white/10 text-[9px] font-black uppercase text-gray-400">Live Preview</div>
+                <div className="scale-75 lg:scale-100 transition-all">
+                    <BioPreview bioPage={bioPage} links={links} />
                 </div>
-                <BioPreview bioPage={bioPage} links={links} />
             </div>
         </div>
     );
