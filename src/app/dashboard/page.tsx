@@ -103,7 +103,7 @@ export default async function Dashboard({
                                 )}
                             </h1>
                             {session.user.last_login && (
-                                <p className="text-xs text-gray-500 mt-1">
+                                <p className="text-xs text-gray-500 mt-1" suppressHydrationWarning>
                                     Last login: {new Date(session.user.last_login).toLocaleString("en-US", {
                                         year: 'numeric',
                                         month: 'long',

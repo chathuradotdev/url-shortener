@@ -115,6 +115,9 @@ export default async function ShortCodePage({
     }
 
     if (url.expires_at && new Date(url.expires_at) < new Date()) {
+        if (url.expiration_redirect_url) {
+            redirect(url.expiration_redirect_url);
+        }
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-100">
                 <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full text-center">

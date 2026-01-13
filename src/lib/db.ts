@@ -83,6 +83,7 @@ export interface Url {
     }[];
     domain?: string | null; // Branded domain (e.g. "go.brand.com") or null for default
     team_id?: string | null;
+    expiration_redirect_url?: string | null;
 }
 
 // Analytics Interface

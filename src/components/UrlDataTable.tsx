@@ -82,6 +82,8 @@ interface Url {
     expires_at?: string | null;
     hasPassword?: boolean;
     cloaked?: boolean;
+    burn_after_reading?: boolean;
+    burn_visit_limit?: number;
     subRows?: Url[]; // For grouping
     isBatchParent?: boolean;
     interim_page_enabled?: boolean;
@@ -102,6 +104,7 @@ interface Url {
         url: string;
         weight: number;
     }[];
+    expiration_redirect_url?: string | null;
 }
 
 interface UrlDataTableProps {
@@ -236,7 +239,10 @@ export function UrlDataTable({ data, baseUrl, onShowQrCode }: UrlDataTableProps)
                     time_targeting: editingUrl.time_targeting,
                     rotation_enabled: editingUrl.rotation_enabled,
                     rotation_mode: editingUrl.rotation_mode,
-                    rotation_rules: editingUrl.rotation_rules
+                    rotation_rules: editingUrl.rotation_rules,
+                    expiration_redirect_url: editingUrl.expiration_redirect_url,
+                    burn_after_reading: editingUrl.burn_after_reading,
+                    burn_visit_limit: editingUrl.burn_visit_limit
                 }),
             });
 
@@ -779,7 +785,7 @@ export function UrlDataTable({ data, baseUrl, onShowQrCode }: UrlDataTableProps)
                 </div>
             </div>
 
-            {/* Edit Dialog remains same */}
+            {/* Edit Dialog */}
             <Dialog open={!!editingUrl} onOpenChange={(open) => !open && setEditingUrl(null)}>
                 <DialogContent className="max-h-[85vh] overflow-y-auto">
                     <DialogHeader>
@@ -799,31 +805,82 @@ export function UrlDataTable({ data, baseUrl, onShowQrCode }: UrlDataTableProps)
                                     required
                                 />
                             </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="expires_at">Expiration Date</Label>
-                                <div className="relative">
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="expires_at">Expiration Date</Label>
+                                    <div className="relative">
+                                        <Input
+                                            id="expires_at"
+                                            type="datetime-local"
+                                            value={editingUrl.expires_at ? new Date(editingUrl.expires_at).toISOString().slice(0, 16) : ""}
+                                            onChange={(e) => setEditingUrl({ ...editingUrl, expires_at: e.target.value || null })}
+                                        />
+                                        {editingUrl.expires_at && (
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="sm"
+                                                className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 p-0"
+                                                onClick={() => setEditingUrl({ ...editingUrl, expires_at: null })}
+                                                title="Clear expiration"
+                                            >
+                                                <span className="text-muted-foreground hover:text-red-500">×</span>
+                                            </Button>
+                                        )}
+                                    </div>
+                                    <p className="text-[0.8rem] text-muted-foreground">
+                                        Leave empty for no expiration.
+                                    </p>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="expiration_redirect_url">Custom Expiration Redirect</Label>
                                     <Input
-                                        id="expires_at"
-                                        type="datetime-local"
-                                        value={editingUrl.expires_at ? new Date(editingUrl.expires_at).toISOString().slice(0, 16) : ""}
-                                        onChange={(e) => setEditingUrl({ ...editingUrl, expires_at: e.target.value || null })}
+                                        id="expiration_redirect_url"
+                                        type="url"
+                                        placeholder="https://example.com/expired"
+                                        value={editingUrl.expiration_redirect_url || ""}
+                                        onChange={(e) => setEditingUrl({ ...editingUrl, expiration_redirect_url: e.target.value || null })}
                                     />
-                                    {editingUrl.expires_at && (
-                                        <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="sm"
-                                            className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 p-0"
-                                            onClick={() => setEditingUrl({ ...editingUrl, expires_at: null })}
-                                            title="Clear expiration"
-                                        >
-                                            <span className="text-muted-foreground hover:text-red-500">×</span>
-                                        </Button>
+                                    <p className="text-[0.8rem] text-muted-foreground">
+                                        Redirect users here after expiration.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="space-y-4 pt-4 border-t">
+                                <h4 className="flex items-center text-sm font-medium text-gray-900">
+                                    Privacy & Safety
+                                </h4>
+                                <div className="space-y-3">
+                                    <div className="flex items-center space-x-2">
+                                        <input
+                                            type="checkbox"
+                                            id="burn_after_reading"
+                                            checked={editingUrl.burn_after_reading || false}
+                                            onChange={(e) => setEditingUrl({ ...editingUrl, burn_after_reading: e.target.checked })}
+                                            className="h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500"
+                                        />
+                                        <Label htmlFor="burn_after_reading" className="text-sm font-normal text-gray-700">
+                                            Burn After Reading 🔥 (Self-destruct after visits)
+                                        </Label>
+                                    </div>
+
+                                    {editingUrl.burn_after_reading && (
+                                        <div className="pl-6">
+                                            <Label htmlFor="burn_visit_limit" className="text-xs">Self-destruct after N visits</Label>
+                                            <Input
+                                                id="burn_visit_limit"
+                                                type="number"
+                                                min={1}
+                                                className="mt-1 h-8 w-24"
+                                                value={editingUrl.burn_visit_limit || 1}
+                                                onChange={(e) => setEditingUrl({ ...editingUrl, burn_visit_limit: parseInt(e.target.value) || 1 })}
+                                            />
+                                        </div>
                                     )}
                                 </div>
-                                <p className="text-[0.8rem] text-muted-foreground">
-                                    Leave empty for no expiration.
-                                </p>
                             </div>
 
                             <div className="space-y-4 pt-4 border-t">
@@ -1138,6 +1195,6 @@ export function UrlDataTable({ data, baseUrl, onShowQrCode }: UrlDataTableProps)
                     )}
                 </DialogContent>
             </Dialog>
-        </div >
+        </div>
     )
 }
