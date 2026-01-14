@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, ReactNode } from "react";
 import { BioPage, BioLink } from "@/lib/db";
 import BioPreview from "./BioPreview";
 import { useRouter } from "next/navigation";
@@ -521,7 +521,9 @@ export default function BioBuilder() {
                     <div>
                         <h4 className="font-bold text-xs mb-4 flex items-center justify-between">
                             General Styles
-                            <RotateCcw className="w-3 h-3 text-gray-400 cursor-pointer hover:text-blue-500" title="Reset" />
+                            <button title="Reset" className="transition-colors hover:text-blue-500">
+                                <RotateCcw className="w-3 h-3 text-gray-400" />
+                            </button>
                         </h4>
                         <div className="space-y-4">
                             <ColorPicker
@@ -613,7 +615,16 @@ export default function BioBuilder() {
 
 // --- Sub Components ---
 
-function Section({ title, isOpen, onToggle, children, icon, action }: any) {
+interface SectionProps {
+    title: string;
+    isOpen: boolean;
+    onToggle: () => void;
+    children: ReactNode;
+    icon?: ReactNode;
+    action?: ReactNode;
+}
+
+function Section({ title, isOpen, onToggle, children, icon, action }: SectionProps) {
     return (
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden shadow-sm transition-all hover:shadow-md">
             <div
@@ -634,7 +645,13 @@ function Section({ title, isOpen, onToggle, children, icon, action }: any) {
     );
 }
 
-function ColorPicker({ label, value, onChange }: any) {
+interface ColorPickerProps {
+    label: string;
+    value: string;
+    onChange: (value: string) => void;
+}
+
+function ColorPicker({ label, value, onChange }: ColorPickerProps) {
     return (
         <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-gray-500">{label}</span>
@@ -652,7 +669,15 @@ function ColorPicker({ label, value, onChange }: any) {
     );
 }
 
-function Slider({ label, value, onChange, min = 0, max = 100 }: any) {
+interface SliderProps {
+    label: string;
+    value: number;
+    onChange: (value: number) => void;
+    min?: number;
+    max?: number;
+}
+
+function Slider({ label, value, onChange, min = 0, max = 100 }: SliderProps) {
     return (
         <div className="space-y-2">
             <div className="flex justify-between">

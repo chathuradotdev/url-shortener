@@ -31,14 +31,16 @@ export default function QrCodeDisplay({ url, altText = "QR Code", options, varia
     };
 
     useEffect(() => {
+        let isMounted = true;
         if (url) {
             QRCode.toDataURL(url, qrOptions, (err, dataUrl) => {
-                if (!err) {
+                if (isMounted && !err) {
                     setQrDataUrl(dataUrl);
                 }
             });
         }
-    }, [url, options]);
+        return () => { isMounted = false; };
+    }, [url, options?.width, options?.margin, options?.color?.dark, options?.color?.light]);
 
     const handleDownloadPng = () => {
         if (!qrDataUrl) return;
