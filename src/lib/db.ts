@@ -133,6 +133,7 @@ export interface BioPage {
     description?: string;
     avatar_url?: string;
     theme?: any;
+    views?: number;
     created_at: string;
     team_id?: string | null;
 }
@@ -146,6 +147,7 @@ export interface BioLink {
     icon?: string;
     position: number;
     is_active: boolean;
+    clicks?: number;
     type?: 'link' | 'youtube' | 'spotify' | 'header';
     created_at: string;
 }
@@ -262,6 +264,18 @@ class SupabaseDB {
 
         if (error) throw error;
         return data as BioPage;
+        if (error) throw error;
+        return data as BioPage;
+    }
+
+    async incrementBioPageViews(id: string): Promise<void> {
+        // Optimistic update or fetch-then-update. 
+        // Ideally use RPC: await supabase.rpc('increment_bio_page_views', { page_id: id });
+        // But for compatibility without strict RPC requirement:
+        const { data } = await supabase.from('bio_pages').select('views').eq('id', id).single();
+        if (data) {
+            await supabase.from('bio_pages').update({ views: (data.views || 0) + 1 }).eq('id', id);
+        }
     }
 
     // --- Bio Link Methods ---
@@ -309,6 +323,13 @@ class SupabaseDB {
             .delete()
             .eq('id', id);
         if (error) throw error;
+    }
+
+    async incrementBioLinkClicks(id: string): Promise<void> {
+        const { data } = await supabase.from('bio_links').select('clicks').eq('id', id).single();
+        if (data) {
+            await supabase.from('bio_links').update({ clicks: (data.clicks || 0) + 1 }).eq('id', id);
+        }
     }
 
     // --- User Methods ---

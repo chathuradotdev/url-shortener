@@ -31,6 +31,9 @@ export default async function BioPage({ params }: Props) {
 
     const links = await db.getBioLinks(bioPage.id);
 
+    // Track View (Fire and forget, don't await)
+    db.incrementBioPageViews(bioPage.id).catch(console.error);
+
     return (
         <main className="min-h-screen">
             <BioRenderer bioPage={bioPage} links={links} />

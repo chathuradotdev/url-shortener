@@ -78,6 +78,11 @@ export default async function ShortCodePage({
     const url = await db.findUrlByShortCode(shortCode, domain);
 
     if (!url) {
+        // Try to find a bio page
+        const bioPage = await db.getBioPageBySlug(shortCode);
+        if (bioPage) {
+            redirect(`/bio/${shortCode}`);
+        }
         notFound();
     }
 

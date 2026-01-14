@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import QRCode from "qrcode";
+import { Download, Printer, FileImage } from "lucide-react";
 
 interface QrCodeDisplayProps {
     url: string;
@@ -14,9 +15,10 @@ interface QrCodeDisplayProps {
             light?: string;
         };
     };
+    variant?: 'default' | 'minimal' | 'mobile-sheet';
 }
 
-export default function QrCodeDisplay({ url, altText = "QR Code", options }: QrCodeDisplayProps) {
+export default function QrCodeDisplay({ url, altText = "QR Code", options, variant = 'default' }: QrCodeDisplayProps) {
     const [qrDataUrl, setQrDataUrl] = useState<string>("");
 
     const qrOptions = {
@@ -114,6 +116,43 @@ export default function QrCodeDisplay({ url, altText = "QR Code", options }: QrC
 
     if (!qrDataUrl) return null;
 
+    if (variant === 'mobile-sheet') {
+        return (
+            <div className="flex flex-col items-center gap-6 w-full">
+                <div className="bg-white p-4 rounded-3xl border border-gray-100 shadow-sm relative">
+                    {/* Add visual corners or clean generic card look */}
+                    <div className="absolute inset-0 rounded-3xl border border-gray-100/50 pointer-events-none"></div>
+                    <img src={qrDataUrl} alt={altText} className="w-full h-auto max-w-[180px] rounded-lg mix-blend-multiply" />
+                </div>
+
+                <div className="flex flex-col gap-3 w-full max-w-[220px]">
+                    <button
+                        onClick={handleDownloadPng}
+                        className="flex items-center justify-center w-full px-4 py-3 text-xs font-bold text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm"
+                    >
+                        <Download className="w-4 h-4 mr-2 text-gray-500" />
+                        Download PNG
+                    </button>
+                    <button
+                        onClick={handleDownloadSvg}
+                        className="flex items-center justify-center w-full px-4 py-3 text-xs font-bold text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm"
+                    >
+                        <FileImage className="w-4 h-4 mr-2 text-gray-500" />
+                        Download SVG
+                    </button>
+                    <button
+                        onClick={handlePrint}
+                        className="flex items-center justify-center w-full px-4 py-3 text-xs font-bold text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm"
+                    >
+                        <Printer className="w-4 h-4 mr-2 text-gray-500" />
+                        Print Code
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    // Default View
     return (
         <div className="flex flex-col items-center gap-4">
             <div className="bg-white p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
@@ -126,9 +165,7 @@ export default function QrCodeDisplay({ url, altText = "QR Code", options }: QrC
                     className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700"
                     title="Download PNG"
                 >
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
+                    <Download className="w-4 h-4 mr-2" />
                     PNG
                 </button>
                 <button
@@ -136,9 +173,7 @@ export default function QrCodeDisplay({ url, altText = "QR Code", options }: QrC
                     className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700"
                     title="Download SVG"
                 >
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
+                    <FileImage className="w-4 h-4 mr-2" />
                     SVG
                 </button>
                 <button
@@ -146,9 +181,7 @@ export default function QrCodeDisplay({ url, altText = "QR Code", options }: QrC
                     className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700"
                     title="Print QR Code"
                 >
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                    </svg>
+                    <Printer className="w-4 h-4 mr-2" />
                     Print
                 </button>
             </div>

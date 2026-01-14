@@ -1,24 +1,50 @@
+"use client";
+
+import { useState } from "react";
 import { BioPage, BioLink } from "@/lib/db";
-import { Instagram, Twitter, Github, Youtube, Globe, CheckCircle2 } from "lucide-react";
+import {
+    Instagram, Twitter, Github, Youtube, Globe, CheckCircle2,
+    UserPlus, Share2, Search, Menu, X, QrCode, Copy,
+    Facebook, Linkedin, Check, ChevronLeft
+} from "lucide-react";
+import QrCodeDisplay from "../QrCodeDisplay";
 
 interface BioRendererProps {
     bioPage: Partial<BioPage>;
     links: BioLink[];
+    variant?: 'public' | 'preview';
 }
 
-export default function BioRenderer({ bioPage, links }: BioRendererProps) {
+export default function BioRenderer({ bioPage, links, variant = 'public' }: BioRendererProps) {
+    const [showShare, setShowShare] = useState(false);
+    const [viewMode, setViewMode] = useState<'share' | 'qr'>('share');
+    const [isCopied, setIsCopied] = useState(false);
+
     const theme = bioPage.theme || {};
+
+    // Core Colors
     const bgColor = theme.backgroundColor || '#ffffff';
     const textColor = theme.textColor || '#000000';
     const buttonBgColor = theme.buttonBgColor || '#f3f4f6';
     const buttonTextColor = theme.buttonTextColor || '#1f2937';
+
+    // Formatting
     const buttonStyle = theme.buttonStyle || 'rounded-full';
     const fontFamily = theme.fontFamily || 'Inter';
-    const socials = theme.socials || {};
+    const cardMode = theme.cardMode;
+
+    // Backgrounds
+    const backgroundImage = theme.backgroundImage;
     const headerImage = theme.headerImage;
     const headerColor = theme.headerColor;
-    const cardMode = theme.cardMode;
-    const backgroundImage = theme.backgroundImage;
+
+    // Advanced styles
+    const shadowType = theme.shadowType || 'soft'; // 'soft' | 'solid'
+    const profileShadow = theme.profileShadow || 0; // 0-20
+    const profileBorder = theme.profileBorder || 0; // 0-10
+    const socialSize = theme.socialSize || 24; // px
+
+    const socials = theme.socials || {};
 
     const buttonClass =
         buttonStyle === 'rounded-full' ? 'rounded-full' :
@@ -26,170 +52,305 @@ export default function BioRenderer({ bioPage, links }: BioRendererProps) {
                 buttonStyle === 'rounded-none' ? 'rounded-none' :
                     'border-2 bg-transparent';
 
-    return (
-        <div
-            className="w-full min-h-full overflow-y-auto overflow-x-hidden no-scrollbar flex flex-col items-center relative"
-            style={{
-                backgroundColor: bgColor,
-                color: textColor,
-                fontFamily: fontFamily,
-                backgroundImage: backgroundImage ? `url(${backgroundImage})` : undefined,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundAttachment: 'local'
-            }}
-        >
-            {/* Header Section */}
-            {headerImage ? (
-                <div className="w-full h-48 shrink-0 relative overflow-hidden">
-                    <img src={headerImage} alt="header" className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-black/10"></div>
-                </div>
-            ) : headerColor ? (
-                <div className="w-full h-32 shrink-0" style={{ backgroundColor: headerColor }}></div>
-            ) : (
-                <div className="w-full h-12"></div>
-            )}
+    const getShadowStyle = (level: number = 1) => {
+        if (shadowType === 'solid') {
+            return `${level * 4}px ${level * 4}px 0px rgba(0,0,0,0.2)`;
+        }
+        return `0px ${level * 4}px ${level * 10}px rgba(0,0,0,${level * 0.1})`;
+    };
 
-            {/* Content Container */}
-            <div className={`w-full flex flex-col items-center px-6 pb-12 relative flex-grow max-w-md mx-auto ${(headerImage || headerColor) ? '-mt-16' : ''}`}>
+    const handleCopyLink = () => {
+        if (typeof navigator !== 'undefined') {
+            navigator.clipboard.writeText(`https://liinks.co/${bioPage.slug}`);
+            setIsCopied(true);
+            setTimeout(() => setIsCopied(false), 2000);
+        }
+    };
 
-                {/* Background Card / Glassmorphism */}
-                {(cardMode || (!cardMode && (headerImage || headerColor || backgroundImage))) && (
-                    <div className={`absolute inset-x-0 top-0 bottom-0 -z-10 ${cardMode
-                            ? 'bg-white dark:bg-gray-900 rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-gray-800 mx-2'
-                            : 'bg-white/94 dark:bg-gray-950/80 backdrop-blur-2xl rounded-t-[3rem] shadow-[0_-20px_50px_-20px_rgba(0,0,0,0.15)]'
-                        }`}></div>
-                )}
+    const handleCloseShare = () => {
+        setShowShare(false);
+        setViewMode('share'); // Reset on close
+    };
 
-                {/* Avatar with Overlap */}
-                <div className={`${cardMode ? 'pt-8' : 'pt-6'}`}>
-                    {bioPage.avatar_url ? (
-                        <div className="relative group mb-4">
-                            <img
-                                src={bioPage.avatar_url}
-                                alt="Profile"
-                                className="w-24 h-24 rounded-full object-cover border-4 border-white dark:border-gray-800 shadow-2xl transition-all duration-500 group-hover:scale-105"
-                            />
-                            {theme.isVerified && (
-                                <div className="absolute bottom-1 right-1 bg-white dark:bg-gray-900 rounded-full p-1 shadow-lg ring-1 ring-black/5">
-                                    <CheckCircle2 className="w-5 h-5 text-blue-500 fill-blue-500/10" />
+    const shareUrl = typeof window !== 'undefined' ? window.location.href : `https://liinks.co/${bioPage.slug}`;
+
+    // The inner content (The "Phone" screen)
+    const content = (
+        <div className="relative w-full h-full overflow-hidden bg-white">
+            {/* SHARE MODAL OVERLAY */}
+            {showShare && (
+                <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm px-6 animate-in fade-in duration-200">
+                    <button
+                        onClick={handleCloseShare}
+                        className="absolute top-24 left-1/2 -translate-x-1/2 text-white/90 hover:text-white mb-4 z-50 focus:outline-none transition-transform active:scale-95"
+                    >
+                        <div className="bg-white/10 p-2 rounded-full backdrop-blur-md">
+                            <X className="w-6 h-6" />
+                        </div>
+                    </button>
+
+                    <div className="bg-white rounded-[1.5rem] p-6 w-full max-w-[320px] shadow-2xl flex flex-col items-center gap-4 mt-8 animate-in zoom-in-95 duration-200 relative max-h-[75vh] overflow-y-auto no-scrollbar">
+
+                        {viewMode === 'share' ? (
+                            <>
+                                <div className="text-center w-full relative">
+                                    <h3 className="font-bold text-xl mb-4 text-gray-900 border-b border-gray-100 pb-4">{bioPage.title || 'Profile'}</h3>
+
+                                    <div className="flex justify-center mb-2">
+                                        {bioPage.avatar_url ? (
+                                            <img
+                                                src={bioPage.avatar_url}
+                                                className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-xl"
+                                            />
+                                        ) : (
+                                            <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center text-3xl font-black text-gray-300">
+                                                {bioPage.title?.charAt(0)}
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
-                            )}
-                        </div>
-                    ) : (
-                        <div className="w-24 h-24 rounded-full bg-gray-100 dark:bg-gray-800 mb-4 flex items-center justify-center text-3xl font-black text-gray-300 border-4 border-white dark:border-gray-800 shadow-lg">
-                            {bioPage.title?.charAt(0) || '?'}
-                        </div>
-                    )}
-                </div>
 
-                {/* Title & Description */}
-                <div className="text-center px-4 w-full">
-                    <h1 className="text-2xl font-black mb-1 flex items-center justify-center gap-1.5" style={{ color: cardMode || (headerImage || headerColor || backgroundImage) ? undefined : textColor }}>
-                        {bioPage.title || 'Your Name'}
-                        {!bioPage.avatar_url && theme.isVerified && (
-                            <CheckCircle2 className="w-5 h-5 text-blue-500 fill-blue-500/10" />
-                        )}
-                    </h1>
-                    <p className="text-sm opacity-70 mb-8 max-w-xs leading-relaxed font-medium mx-auto" style={{ color: cardMode || (headerImage || headerColor || backgroundImage) ? undefined : textColor }}>
-                        {bioPage.description}
-                    </p>
-                </div>
+                                <div className="w-full space-y-3 pt-2">
+                                    <button
+                                        onClick={() => setViewMode('qr')}
+                                        className="w-full bg-[#1a1b1f] text-white h-12 px-4 rounded-xl font-bold text-sm flex items-center justify-between hover:bg-black transition-colors"
+                                    >
+                                        View QR Code <QrCode className="w-5 h-5 text-gray-400" />
+                                    </button>
+                                    <button
+                                        onClick={handleCopyLink}
+                                        className={`w-full h-12 px-4 rounded-xl font-bold text-sm flex items-center justify-between transition-all duration-200 ${isCopied ? 'bg-green-600 text-white' : 'bg-[#1a1b1f] text-white hover:bg-black'}`}
+                                    >
+                                        {isCopied ? 'Copied to Clipboard!' : 'Copy Page URL'}
+                                        {isCopied ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5 text-gray-400" />}
+                                    </button>
+                                </div>
 
-                {/* Social Icons */}
-                {Object.keys(socials).some(key => socials[key]) && (
-                    <div className="flex flex-wrap justify-center gap-5 mb-8 px-4">
-                        {socials.instagram && (
-                            <a href={socials.instagram} target="_blank" className="p-2 transition-all hover:scale-125 hover:rotate-6 active:scale-95 opacity-80 hover:opacity-100">
-                                <Instagram className="w-6 h-6" />
-                            </a>
-                        )}
-                        {socials.twitter && (
-                            <a href={socials.twitter} target="_blank" className="p-2 transition-all hover:scale-125 hover:-rotate-6 active:scale-95 opacity-80 hover:opacity-100">
-                                <Twitter className="w-6 h-6" />
-                            </a>
-                        )}
-                        {socials.github && (
-                            <a href={socials.github} target="_blank" className="p-2 transition-all hover:scale-125 hover:rotate-6 active:scale-95 opacity-80 hover:opacity-100">
-                                <Github className="w-6 h-6" />
-                            </a>
-                        )}
-                        {socials.youtube && (
-                            <a href={socials.youtube} target="_blank" className="p-2 transition-all hover:scale-125 hover:-rotate-6 active:scale-95 opacity-80 hover:opacity-100">
-                                <Youtube className="w-6 h-6" />
-                            </a>
+                                <div className="flex justify-center gap-2 pt-2 w-full">
+                                    <button className="w-12 h-12 bg-[#1877F2] rounded-xl flex items-center justify-center text-white hover:scale-110 active:scale-95 transition-all shadow-sm">
+                                        <Facebook className="w-6 h-6 fill-current" />
+                                    </button>
+                                    <button className="w-12 h-12 bg-[#1DA1F2] rounded-xl flex items-center justify-center text-white hover:scale-110 active:scale-95 transition-all shadow-sm">
+                                        <Twitter className="w-6 h-6 fill-current" />
+                                    </button>
+                                    <button className="w-12 h-12 bg-[#E60023] rounded-xl flex items-center justify-center text-white hover:scale-110 active:scale-95 transition-all shadow-sm">
+                                        <svg viewBox="0 0 24 24" className="w-6 h-6 fill-current"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.399.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.951-7.252 4.173 0 7.41 2.967 7.41 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.367 18.62 0 12.017 0z" /></svg>
+                                    </button>
+                                    <button className="w-12 h-12 bg-[#FF4500] rounded-xl flex items-center justify-center text-white hover:scale-110 active:scale-95 transition-all shadow-sm">
+                                        <span className="font-extrabold text-[10px] w-6 h-6 flex items-center justify-center border-2 border-white rounded-full">RD</span>
+                                    </button>
+                                    <button className="w-12 h-12 bg-[#0077b5] rounded-xl flex items-center justify-center text-white hover:scale-110 active:scale-95 transition-all shadow-sm">
+                                        <Linkedin className="w-6 h-6 fill-current" />
+                                    </button>
+                                </div>
+                            </>
+                        ) : (
+                            // QR Code View
+                            <div className="flex flex-col items-center w-full">
+                                <div className="w-full flex items-center justify-start mb-4 border-b border-gray-100 pb-4">
+                                    <button onClick={() => setViewMode('share')} className="text-gray-500 hover:text-black flex items-center text-sm font-bold gap-1 transition-colors">
+                                        <ChevronLeft className="w-5 h-5" /> Back
+                                    </button>
+                                </div>
+                                <h3 className="font-bold text-lg mb-6 text-gray-900">Scan QR Code</h3>
+
+                                <QrCodeDisplay
+                                    url={`https://liinks.co/${bioPage.slug}`}
+                                    variant="mobile-sheet"
+                                    options={{ width: 400, margin: 1 }}
+                                />
+                            </div>
                         )}
                     </div>
+                </div>
+            )}
+
+            <div
+                className="w-full h-full overflow-y-auto overflow-x-hidden no-scrollbar flex flex-col items-center relative"
+                style={{
+                    backgroundColor: bgColor,
+                    color: textColor,
+                    fontFamily: fontFamily,
+                    backgroundImage: backgroundImage ? `url(${backgroundImage})` : undefined,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundAttachment: 'local'
+                }}
+            >
+                {/* IN-APP HEADER (New) */}
+                <div className={`w-full px-6 py-6 flex items-center justify-between shrink-0 z-20 ${headerImage || headerColor ? 'text-white mix-blend-difference' : ''}`} style={{ color: headerImage || headerColor ? undefined : textColor }}>
+                    <div className="flex gap-4">
+                        <UserPlus className="w-5 h-5 opacity-80 cursor-pointer hover:scale-110 transition-transform" />
+                        <Share2 onClick={() => setShowShare(true)} className="w-5 h-5 opacity-100 cursor-pointer hover:scale-110 transition-transform" />
+                    </div>
+                    <div className="flex gap-4">
+                        <Search className="w-5 h-5 opacity-80" />
+                        <Menu className="w-5 h-5 opacity-80" />
+                    </div>
+                </div>
+
+                {/* Header Image (Optional Banner) */}
+                {headerImage && (
+                    <div className="absolute top-0 w-full h-48 shrink-0 overflow-hidden z-0">
+                        <img src={headerImage} alt="header" className="w-full h-full object-cover opacity-90" />
+                        <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-transparent"></div>
+                    </div>
+                )}
+                {headerColor && (
+                    <div className="absolute top-0 w-full h-32 shrink-0 z-0" style={{ backgroundColor: headerColor }}></div>
                 )}
 
-                {/* Links */}
-                <div className="w-full space-y-4 px-2">
-                    {links.filter(l => l.is_active !== false).map((link) => {
-                        if (link.type === 'youtube') {
-                            const videoId = link.url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/)?.[2];
-                            if (!videoId) return null;
-                            return (
-                                <div key={link.id} className="w-full rounded-3xl overflow-hidden shadow-2xl mb-4 transform hover:scale-[1.02] transition-all border-4 border-white dark:border-gray-800">
-                                    <iframe
-                                        width="100%"
-                                        height="180"
-                                        src={`https://www.youtube.com/embed/${videoId}`}
-                                        title={link.title}
-                                        frameBorder="0"
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                        allowFullScreen
-                                    />
-                                </div>
-                            );
-                        }
 
-                        if (link.type === 'spotify') {
-                            const match = link.url.match(/(track|album|playlist|episode)\/([a-zA-Z0-9]+)/);
-                            if (!match) return null;
-                            const type = match[1];
-                            const id = match[2];
-                            return (
-                                <div key={link.id} className="w-full mb-4 transform hover:scale-[1.02] transition-all shadow-xl rounded-3xl overflow-hidden bg-black/5">
-                                    <iframe
-                                        style={{ borderRadius: '1.5rem' }}
-                                        src={`https://open.spotify.com/embed/${type}/${id}?utm_source=generator&theme=0`}
-                                        width="100%"
-                                        height="152"
-                                        frameBorder="0"
-                                        allowFullScreen
-                                        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                                        loading="lazy"
-                                    />
-                                </div>
-                            );
-                        }
+                {/* Content Container */}
+                <div className={`w-full flex flex-col items-center px-6 pb-12 relative flex-grow max-w-md mx-auto z-10 ${(headerImage || headerColor) ? 'pt-12' : ''}`}>
 
-                        return (
-                            <a
-                                key={link.id}
-                                href={link.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className={`block w-full py-4 px-6 text-center text-base font-black transition-all hover:scale-[1.03] active:scale-[0.97] shadow-lg hover:shadow-xl ${buttonClass} mb-3`}
+                    {/* Avatar with Custom Styles */}
+                    <div className="relative group mb-4">
+                        {bioPage.avatar_url ? (
+                            <div className="relative">
+                                <img
+                                    src={bioPage.avatar_url}
+                                    alt="Profile"
+                                    className="object-cover transition-all duration-500 group-hover:scale-105"
+                                    style={{
+                                        width: '96px',
+                                        height: '96px',
+                                        borderRadius: '9999px',
+                                        border: `${profileBorder}px solid ${cardMode ? bgColor : '#fff'}`,
+                                        boxShadow: profileShadow > 0 ? (shadowType === 'solid' ? `${profileShadow}px ${profileShadow}px 0px rgba(0,0,0,0.2)` : `0px 10px ${profileShadow * 2}px rgba(0,0,0,0.2)`) : 'none'
+                                    }}
+                                />
+                                {theme.isVerified && (
+                                    <div className="absolute bottom-1 right-1 bg-white dark:bg-gray-900 rounded-full p-1 shadow-lg ring-1 ring-black/5">
+                                        <CheckCircle2 className="w-5 h-5 text-blue-500 fill-blue-500/10" />
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <div
+                                className="w-24 h-24 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-3xl font-black text-gray-300 shadow-lg"
                                 style={{
-                                    backgroundColor: buttonStyle === 'border-2' ? 'transparent' : buttonBgColor,
-                                    color: buttonStyle === 'border-2' ? textColor : buttonTextColor,
-                                    borderColor: textColor + '44'
+                                    border: `${profileBorder}px solid #fff`,
                                 }}
                             >
-                                {link.title}
-                            </a>
-                        );
-                    })}
-                </div>
+                                {bioPage.title?.charAt(0) || '?'}
+                            </div>
+                        )}
+                    </div>
 
-                <div className="flex-grow"></div>
+                    {/* Title & Description */}
+                    <div className="text-center px-4 w-full mb-6">
+                        <h1 className="text-xl font-bold mb-3 flex items-center justify-center gap-1.5" style={{ color: textColor }}>
+                            {bioPage.title || 'Your Name'}
+                        </h1>
+                        <p className="text-xs opacity-70 mb-2 max-w-[240px] leading-relaxed font-medium mx-auto" style={{ color: textColor }}>
+                            {bioPage.description || 'Welcome to my page.'}
+                        </p>
+                    </div>
 
-                {/* Branding */}
-                <div className="mt-16 mb-4 flex items-center gap-2 opacity-20 text-[10px] uppercase font-black tracking-widest pointer-events-none">
-                    <Globe className="w-3 h-3" /> Built with ShortLink
+                    {/* Social Icons with Dynamic Size */}
+                    {Object.keys(socials).some(key => socials[key]) && (
+                        <div className="flex flex-wrap justify-center gap-6 mb-8 px-4">
+                            {socials.instagram && (
+                                <a href={socials.instagram} target="_blank" className="transition-transform hover:scale-110 opacity-70 hover:opacity-100" style={{ color: textColor }}>
+                                    <Instagram style={{ width: socialSize, height: socialSize }} strokeWidth={1.5} />
+                                </a>
+                            )}
+                            {socials.twitter && (
+                                <a href={socials.twitter} target="_blank" className="transition-transform hover:scale-110 opacity-70 hover:opacity-100" style={{ color: textColor }}>
+                                    {/* X Logo */}
+                                    <svg viewBox="0 0 24 24" style={{ width: socialSize, height: socialSize }} fill="currentColor">
+                                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
+                                    </svg>
+                                </a>
+                            )}
+                            {socials.github && (
+                                <a href={socials.github} target="_blank" className="transition-transform hover:scale-110 opacity-70 hover:opacity-100" style={{ color: textColor }}>
+                                    <Github style={{ width: socialSize, height: socialSize }} strokeWidth={1.5} />
+                                </a>
+                            )}
+                            {socials.youtube && (
+                                <a href={socials.youtube} target="_blank" className="transition-transform hover:scale-110 opacity-70 hover:opacity-100" style={{ color: textColor }}>
+                                    <Youtube style={{ width: socialSize, height: socialSize }} strokeWidth={1.5} />
+                                </a>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Links */}
+                    <div className="w-full space-y-3 px-2">
+                        {links.filter(l => l.is_active !== false).map((link) => {
+                            if (link.type === 'youtube') {
+                                const videoId = link.url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/)?.[2];
+                                if (!videoId) return null;
+                                return (
+                                    <div key={link.id} className="w-full rounded-2xl overflow-hidden shadow-lg mb-4 transform hover:scale-[1.02] transition-all">
+                                        <iframe width="100%" height="180" src={`https://www.youtube.com/embed/${videoId}`} title={link.title} frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+                                    </div>
+                                );
+                            }
+
+                            if (link.type === 'spotify') {
+                                const match = link.url.match(/(track|album|playlist|episode)\/([a-zA-Z0-9]+)/);
+                                if (!match) return null;
+                                return (
+                                    <div key={link.id} className="w-full mb-4 shadow-lg rounded-2xl overflow-hidden">
+                                        <iframe src={`https://open.spotify.com/embed/${match[1]}/${match[2]}?utm_source=generator&theme=0`} width="100%" height="152" frameBorder="0" allowFullScreen allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" />
+                                    </div>
+                                );
+                            }
+
+                            return (
+                                <a
+                                    key={link.id}
+                                    href={link.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={() => {
+                                        fetch('/api/bio/click', {
+                                            method: 'POST',
+                                            keepalive: true,
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ linkId: link.id })
+                                        }).catch(err => console.error("Track click failed", err));
+                                    }}
+                                    className={`block w-full py-4 px-6 text-center text-sm font-bold transition-all hover:scale-[1.02] active:scale-[0.98] ${buttonClass}`}
+                                    style={{
+                                        backgroundColor: buttonStyle === 'border-2' ? 'transparent' : buttonBgColor,
+                                        color: buttonStyle === 'border-2' ? textColor : buttonTextColor,
+                                        borderColor: buttonStyle === 'border-2' ? textColor : 'transparent',
+                                        boxShadow: getShadowStyle(1)
+                                    }}
+                                >
+                                    {link.title}
+                                </a>
+                            );
+                        })}
+                    </div>
+
+                    <div className="flex-grow min-h-[40px]"></div>
+
+                    {/* Footer Branding */}
+                    <div className="mt-8 mb-4 flex flex-col items-center gap-1 opacity-40 hover:opacity-100 transition-opacity">
+                        <span className="text-[9px] font-bold tracking-widest uppercase">Made With</span>
+                        <div className="flex items-center gap-1 font-black text-sm tracking-tight">
+                            <Globe className="w-3 h-3" /> liinks.co
+                        </div>
+                    </div>
                 </div>
+            </div>
+        </div>
+    );
+
+    // LAYOUT LOGIC
+    if (variant === 'preview') {
+        return content;
+    }
+
+    return (
+        <div className="min-h-screen w-full flex items-center justify-center p-0 md:bg-gray-100 md:dark:bg-gray-900 md:py-8">
+            <div className="w-full h-full md:w-[400px] md:h-auto md:aspect-[9/19] md:max-h-[90vh] md:rounded-[2.5rem] md:shadow-2xl md:ring-8 md:ring-black/5 overflow-hidden bg-white">
+                {content}
             </div>
         </div>
     );

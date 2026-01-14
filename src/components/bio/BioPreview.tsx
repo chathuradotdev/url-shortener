@@ -8,14 +8,14 @@ interface BioPreviewProps {
 
 export default function BioPreview({ bioPage, links }: BioPreviewProps) {
     return (
-        <div className="mx-auto w-[320px] h-[640px] bg-gray-900 rounded-[3rem] p-4 shadow-2xl relative border-8 border-gray-800 box-content">
-            {/* Phone Notch/Header */}
-            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 h-6 w-32 bg-gray-800 rounded-b-2xl z-10"></div>
-
+        <div className="mx-auto w-[300px] h-[600px] bg-white rounded-[2.5rem] relative border-[12px] border-slate-800 shadow-2xl box-border overflow-hidden ring-1 ring-black/5">
             {/* Screen Content */}
-            <div className="w-full h-full bg-white overflow-hidden rounded-[2.2rem]">
-                <BioRenderer bioPage={bioPage} links={links} />
+            <div className="w-full h-full bg-white overflow-hidden rounded-[1.8rem]">
+                <BioRenderer bioPage={bioPage} links={links} variant="preview" />
             </div>
+
+            {/* Subtle inner reflection/glare */}
+            <div className="absolute top-0 left-0 w-full h-full rounded-[1.8rem] pointer-events-none shadow-[inset_0_0_20px_rgba(0,0,0,0.05)]"></div>
         </div>
     );
 }
