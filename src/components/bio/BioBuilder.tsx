@@ -353,7 +353,7 @@ export default function BioBuilder() {
                                         >
                                             <div className="h-20 w-full relative" style={{ backgroundColor: t.theme.backgroundColor }}>
                                                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 opacity-80 group-hover:scale-105 transition-transform">
-                                                    <div className="w-8 h-8 rounded-full border-2 border-white/50 shadow-sm" style={{ backgroundColor: t.theme.avatarBorderColor || '#ddd' }}></div>
+                                                    <div className="w-8 h-8 rounded-full border-2 border-white/50 shadow-sm" style={{ backgroundColor: '#ddd' }}></div>
                                                     <div className="w-16 h-2 rounded-full" style={{ backgroundColor: t.theme.buttonBgColor }}></div>
                                                 </div>
                                             </div>

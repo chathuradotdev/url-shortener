@@ -264,8 +264,6 @@ class SupabaseDB {
 
         if (error) throw error;
         return data as BioPage;
-        if (error) throw error;
-        return data as BioPage;
     }
 
     async incrementBioPageViews(id: string): Promise<void> {
