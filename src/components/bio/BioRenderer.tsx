@@ -46,6 +46,7 @@ export default function BioRenderer({ bioPage, links, variant = 'public' }: BioR
     const socialSize = theme.socialSize || 24; // px
     const buttonPadding = theme.buttonPadding || 16; // px
     const buttonSpacing = theme.buttonSpacing || 12; // px
+    const glassEffect = theme.glassEffect || false;
 
     const socials = theme.socials || {};
 
@@ -62,7 +63,7 @@ export default function BioRenderer({ bioPage, links, variant = 'public' }: BioR
         return `0px ${level * 4}px ${level * 10}px rgba(0,0,0,${level * 0.1})`;
     };
 
-    const getAnimationProps = (animation?: string) => {
+    const getAnimationProps = (animation?: string): any => {
         switch (animation) {
             case 'pulse':
                 return {
@@ -215,159 +216,168 @@ export default function BioRenderer({ bioPage, links, variant = 'public' }: BioR
                     backgroundImage: backgroundImage ? `url(${backgroundImage})` : undefined,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
-                    backgroundAttachment: 'local'
+                    backgroundAttachment: 'local',
+                    position: 'relative'
                 }}
             >
-                {/* IN-APP HEADER (New) */}
-                <div className={`w-full px-6 py-6 flex items-center justify-between shrink-0 z-20 ${headerImage || headerColor ? 'text-white mix-blend-difference' : ''}`} style={{ color: headerImage || headerColor ? undefined : textColor }}>
-                    <div className="flex gap-4">
-                        <UserPlus className="w-5 h-5 opacity-80 cursor-pointer hover:scale-110 transition-transform" />
-                        <Share2 onClick={() => setShowShare(true)} className="w-5 h-5 opacity-100 cursor-pointer hover:scale-110 transition-transform" />
-                    </div>
-                    <div className="flex gap-4">
-                        <Search className="w-5 h-5 opacity-80" />
-                        <Menu className="w-5 h-5 opacity-80" />
-                    </div>
-                </div>
-
-                {/* Header Image (Optional Banner) */}
-                {headerImage && (
-                    <div className="absolute top-0 w-full h-48 shrink-0 overflow-hidden z-0">
-                        <img src={headerImage} alt="header" className="w-full h-full object-cover opacity-90" />
-                        <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-transparent"></div>
-                    </div>
+                {backgroundImage && (
+                    <div
+                        className="absolute inset-0 pointer-events-none"
+                        style={{ backgroundColor: `${bgColor}50` }}
+                    />
                 )}
-                {headerColor && (
-                    <div className="absolute top-0 w-full h-32 shrink-0 z-0" style={{ backgroundColor: headerColor }}></div>
-                )}
+                <div className="relative z-10 flex flex-col items-center">
+                    <div className={`w-full px-6 py-6 flex items-center justify-between shrink-0 z-20 ${headerImage || headerColor ? 'text-white mix-blend-difference' : ''}`} style={{ color: headerImage || headerColor ? undefined : textColor }}>
+                        <div className="flex gap-4">
+                            <UserPlus className="w-5 h-5 opacity-80 cursor-pointer hover:scale-110 transition-transform" />
+                            <Share2 onClick={() => setShowShare(true)} className="w-5 h-5 opacity-100 cursor-pointer hover:scale-110 transition-transform" />
+                        </div>
+                        <div className="flex gap-4">
+                            <Search className="w-5 h-5 opacity-80" />
+                            <Menu className="w-5 h-5 opacity-80" />
+                        </div>
+                    </div>
+
+                    {/* Header Image (Optional Banner) */}
+                    {headerImage && (
+                        <div className="absolute top-0 w-full h-48 shrink-0 overflow-hidden z-0">
+                            <img src={headerImage} alt="header" className="w-full h-full object-cover opacity-90" />
+                            <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-transparent"></div>
+                        </div>
+                    )}
+                    {headerColor && (
+                        <div className="absolute top-0 w-full h-32 shrink-0 z-0" style={{ backgroundColor: headerColor }}></div>
+                    )}
 
 
-                {/* Content Container */}
-                <div className={`w-full flex flex-col items-center px-6 pb-12 relative flex-grow max-w-md mx-auto z-10 ${(headerImage || headerColor) ? 'pt-12' : ''}`}>
+                    {/* Content Container */}
+                    <div className={`w-full flex flex-col items-center px-6 pb-12 relative flex-grow max-w-md mx-auto z-10 ${(headerImage || headerColor) ? 'pt-12' : ''}`}>
 
-                    {/* Avatar with Custom Styles */}
-                    <div className="relative group mb-4">
-                        {bioPage.avatar_url ? (
-                            <div className="relative">
-                                <img
-                                    src={bioPage.avatar_url}
-                                    alt="Profile"
-                                    className="object-cover transition-all duration-500 group-hover:scale-105"
+                        {/* Avatar with Custom Styles */}
+                        <div className="relative group mb-4">
+                            {bioPage.avatar_url ? (
+                                <div className="relative">
+                                    <img
+                                        src={bioPage.avatar_url}
+                                        alt="Profile"
+                                        className="object-cover transition-all duration-500 group-hover:scale-105"
+                                        style={{
+                                            width: '96px',
+                                            height: '96px',
+                                            borderRadius: '9999px',
+                                            border: `${profileBorder}px solid ${cardMode ? bgColor : '#fff'}`,
+                                            boxShadow: profileShadow > 0 ? (shadowType === 'solid' ? `${profileShadow}px ${profileShadow}px 0px rgba(0,0,0,0.2)` : `0px 10px ${profileShadow * 2}px rgba(0,0,0,0.2)`) : 'none'
+                                        }}
+                                    />
+                                    {theme.isVerified && (
+                                        <div className="absolute bottom-1 right-1 bg-white dark:bg-gray-900 rounded-full p-1 shadow-lg ring-1 ring-black/5">
+                                            <CheckCircle2 className="w-5 h-5 text-blue-500 fill-blue-500/10" />
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <div
+                                    className="w-24 h-24 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-3xl font-black text-gray-300 shadow-lg"
                                     style={{
-                                        width: '96px',
-                                        height: '96px',
-                                        borderRadius: '9999px',
-                                        border: `${profileBorder}px solid ${cardMode ? bgColor : '#fff'}`,
-                                        boxShadow: profileShadow > 0 ? (shadowType === 'solid' ? `${profileShadow}px ${profileShadow}px 0px rgba(0,0,0,0.2)` : `0px 10px ${profileShadow * 2}px rgba(0,0,0,0.2)`) : 'none'
+                                        border: `${profileBorder}px solid #fff`,
                                     }}
-                                />
-                                {theme.isVerified && (
-                                    <div className="absolute bottom-1 right-1 bg-white dark:bg-gray-900 rounded-full p-1 shadow-lg ring-1 ring-black/5">
-                                        <CheckCircle2 className="w-5 h-5 text-blue-500 fill-blue-500/10" />
-                                    </div>
-                                )}
-                            </div>
-                        ) : (
-                            <div
-                                className="w-24 h-24 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-3xl font-black text-gray-300 shadow-lg"
-                                style={{
-                                    border: `${profileBorder}px solid #fff`,
-                                }}
-                            >
-                                {bioPage.title?.charAt(0) || '?'}
+                                >
+                                    {bioPage.title?.charAt(0) || '?'}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Title & Description */}
+                        <div className="text-center px-4 w-full mb-6">
+                            <h1 className="text-xl font-bold mb-3 flex items-center justify-center gap-1.5" style={{ color: textColor }}>
+                                {bioPage.title || 'Your Name'}
+                            </h1>
+                            <p className="text-xs opacity-70 mb-2 max-w-[240px] leading-relaxed font-medium mx-auto" style={{ color: textColor }}>
+                                {bioPage.description || 'Welcome to my page.'}
+                            </p>
+                        </div>
+
+                        {/* Social Icons with Dynamic Size */}
+                        {Object.keys(socials).some(key => socials[key]) && (
+                            <div className="flex flex-wrap justify-center gap-6 mb-8 px-4">
+                                {Object.entries(socials).map(([key, value]) => {
+                                    if (!value) return null;
+                                    return (
+                                        <a
+                                            key={key}
+                                            href={key === 'email' ? `mailto:${value}` : (key === 'phone' ? `tel:${value}` : value as string)}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className={`transition-transform hover:scale-110 opacity-70 hover:opacity-100 p-2 ${glassEffect ? 'backdrop-blur-md bg-white/10 rounded-xl' : ''}`}
+                                            style={{ color: textColor }}
+                                        >
+                                            <SocialIcon name={key} size={socialSize} />
+                                        </a>
+                                    );
+                                })}
                             </div>
                         )}
-                    </div>
 
-                    {/* Title & Description */}
-                    <div className="text-center px-4 w-full mb-6">
-                        <h1 className="text-xl font-bold mb-3 flex items-center justify-center gap-1.5" style={{ color: textColor }}>
-                            {bioPage.title || 'Your Name'}
-                        </h1>
-                        <p className="text-xs opacity-70 mb-2 max-w-[240px] leading-relaxed font-medium mx-auto" style={{ color: textColor }}>
-                            {bioPage.description || 'Welcome to my page.'}
-                        </p>
-                    </div>
+                        {/* Links */}
+                        <div className="w-full flex flex-col px-2" style={{ gap: buttonSpacing }}>
+                            {links.filter(l => l.is_active !== false).map((link) => {
+                                if (link.type === 'youtube') {
+                                    const videoId = link.url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/)?.[2];
+                                    if (!videoId) return null;
+                                    return (
+                                        <div key={link.id} className="w-full rounded-2xl overflow-hidden shadow-lg transform hover:scale-[1.02] transition-all">
+                                            <iframe width="100%" height="180" src={`https://www.youtube.com/embed/${videoId}`} title={link.title} frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+                                        </div>
+                                    );
+                                }
 
-                    {/* Social Icons with Dynamic Size */}
-                    {Object.keys(socials).some(key => socials[key]) && (
-                        <div className="flex flex-wrap justify-center gap-6 mb-8 px-4">
-                            {Object.entries(socials).map(([key, value]) => {
-                                if (!value) return null;
+                                if (link.type === 'spotify') {
+                                    const match = link.url.match(/(track|album|playlist|episode)\/([a-zA-Z0-9]+)/);
+                                    if (!match) return null;
+                                    return (
+                                        <div key={link.id} className="w-full shadow-lg rounded-2xl overflow-hidden">
+                                            <iframe src={`https://open.spotify.com/embed/${match[1]}/${match[2]}?utm_source=generator&theme=0`} width="100%" height="152" frameBorder="0" allowFullScreen allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" />
+                                        </div>
+                                    );
+                                }
+
                                 return (
-                                    <a
-                                        key={key}
-                                        href={key === 'email' ? `mailto:${value}` : (key === 'phone' ? `tel:${value}` : value as string)}
+                                    <motion.a
+                                        key={link.id}
+                                        href={link.url}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="transition-transform hover:scale-110 opacity-70 hover:opacity-100"
-                                        style={{ color: textColor }}
+                                        onClick={() => {
+                                            fetch('/api/bio/click', {
+                                                method: 'POST',
+                                                keepalive: true,
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({ linkId: link.id })
+                                            }).catch(err => console.error("Track click failed", err));
+                                        }}
+                                        className={`block w-full px-6 text-center text-sm font-bold transition-all hover:scale-[1.02] active:scale-[0.98] ${buttonClass} ${glassEffect ? 'backdrop-blur-xl border border-white/20' : ''}`}
+                                        style={{
+                                            backgroundColor: buttonStyle === 'border-2' ? 'transparent' : (glassEffect ? 'rgba(255, 255, 255, 0.15)' : buttonBgColor),
+                                            color: buttonStyle === 'border-2' ? textColor : (glassEffect ? '#ffffff' : buttonTextColor),
+                                            borderColor: buttonStyle === 'border-2' ? textColor : (glassEffect ? 'rgba(255, 255, 255, 0.3)' : 'transparent'),
+                                            boxShadow: glassEffect ? 'none' : getShadowStyle(1),
+                                            paddingTop: buttonPadding,
+                                            paddingBottom: buttonPadding,
+                                            textShadow: glassEffect ? '0 2px 4px rgba(0,0,0,0.1)' : 'none'
+                                        }}
+                                        {...getAnimationProps(link.animation)}
                                     >
-                                        <SocialIcon name={key} size={socialSize} />
-                                    </a>
+                                        {link.title}
+                                    </motion.a>
                                 );
                             })}
                         </div>
-                    )}
 
-                    {/* Links */}
-                    <div className="w-full flex flex-col px-2" style={{ gap: buttonSpacing }}>
-                        {links.filter(l => l.is_active !== false).map((link) => {
-                            if (link.type === 'youtube') {
-                                const videoId = link.url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/)?.[2];
-                                if (!videoId) return null;
-                                return (
-                                    <div key={link.id} className="w-full rounded-2xl overflow-hidden shadow-lg transform hover:scale-[1.02] transition-all">
-                                        <iframe width="100%" height="180" src={`https://www.youtube.com/embed/${videoId}`} title={link.title} frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
-                                    </div>
-                                );
-                            }
-
-                            if (link.type === 'spotify') {
-                                const match = link.url.match(/(track|album|playlist|episode)\/([a-zA-Z0-9]+)/);
-                                if (!match) return null;
-                                return (
-                                    <div key={link.id} className="w-full shadow-lg rounded-2xl overflow-hidden">
-                                        <iframe src={`https://open.spotify.com/embed/${match[1]}/${match[2]}?utm_source=generator&theme=0`} width="100%" height="152" frameBorder="0" allowFullScreen allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" />
-                                    </div>
-                                );
-                            }
-
-                            return (
-                                <motion.a
-                                    key={link.id}
-                                    href={link.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    onClick={() => {
-                                        fetch('/api/bio/click', {
-                                            method: 'POST',
-                                            keepalive: true,
-                                            headers: { 'Content-Type': 'application/json' },
-                                            body: JSON.stringify({ linkId: link.id })
-                                        }).catch(err => console.error("Track click failed", err));
-                                    }}
-                                    className={`block w-full px-6 text-center text-sm font-bold transition-all hover:scale-[1.02] active:scale-[0.98] ${buttonClass}`}
-                                    style={{
-                                        backgroundColor: buttonStyle === 'border-2' ? 'transparent' : buttonBgColor,
-                                        color: buttonStyle === 'border-2' ? textColor : buttonTextColor,
-                                        borderColor: buttonStyle === 'border-2' ? textColor : 'transparent',
-                                        boxShadow: getShadowStyle(1),
-                                        paddingTop: buttonPadding,
-                                        paddingBottom: buttonPadding
-                                    }}
-                                    {...getAnimationProps(link.animation)}
-                                >
-                                    {link.title}
-                                </motion.a>
-                            );
-                        })}
+                        <div className="flex-grow min-h-[40px]"></div>
                     </div>
 
-                    <div className="flex-grow min-h-[40px]"></div>
-
                     {/* Footer Branding */}
-                    <div className="mt-8 mb-4 flex flex-col items-center gap-1 opacity-40 hover:opacity-100 transition-opacity">
+                    <div className="mt-8 mb-4 flex flex-col items-center gap-1 opacity-40 hover:opacity-100 transition-opacity relative z-10">
                         <span className="text-[9px] font-bold tracking-widest uppercase">Made With</span>
                         <div className="flex items-center gap-1 font-black text-sm tracking-tight">
                             <Globe className="w-3 h-3" /> liinks.co

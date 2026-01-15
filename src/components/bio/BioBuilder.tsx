@@ -196,6 +196,24 @@ export default function BioBuilder() {
                 profileBorder: 2,
                 socialSize: 24
             }
+        },
+        {
+            id: 'glass',
+            name: 'Glass',
+            color: '#6366f1',
+            theme: {
+                backgroundColor: "#6366f1",
+                textColor: "#ffffff",
+                buttonBgColor: "rgba(255, 255, 255, 0.2)",
+                buttonTextColor: "#ffffff",
+                buttonStyle: "rounded-2xl",
+                shadowType: 'soft',
+                profileShadow: 0,
+                profileBorder: 0,
+                socialSize: 24,
+                glassEffect: true,
+                backgroundImage: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200'
+            }
         }
     ];
 
@@ -866,6 +884,16 @@ export default function BioBuilder() {
                                 max={40}
                                 onChange={(v) => updateTheme('buttonSpacing', v)}
                             />
+
+                            <div className="flex items-center justify-between pt-1">
+                                <label className="text-[11px] font-bold text-gray-500">Glassmorphism Effect</label>
+                                <button
+                                    onClick={() => updateTheme('glassEffect', !bioPage.theme?.glassEffect)}
+                                    className={`w-8 h-4 rounded-full transition-all relative ${bioPage.theme?.glassEffect ? 'bg-blue-500' : 'bg-gray-200'}`}
+                                >
+                                    <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${bioPage.theme?.glassEffect ? 'right-0.5' : 'left-0.5'}`}></div>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
