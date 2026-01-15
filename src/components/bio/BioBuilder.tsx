@@ -9,8 +9,19 @@ import {
     LayoutTemplate, Palette, Share2, PlusCircle, Instagram, Twitter,
     Globe, Github, Youtube, Music, Link as LinkIcon, Type, X,
     ChevronRight, CheckCircle2, ChevronDown, ChevronUp, GripVertical,
-    Smartphone, Monitor, Save, RotateCcw, Copy, BarChart3, TrendingUp, MousePointerClick
+    Smartphone, Monitor, Save, RotateCcw, Copy, BarChart3, TrendingUp, MousePointerClick,
+    Linkedin, Facebook, Mail, Upload
 } from "lucide-react";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Reorder } from "framer-motion";
 
 export default function BioBuilder() {
@@ -18,13 +29,14 @@ export default function BioBuilder() {
     const [loading, setLoading] = useState(true);
 
     // Core Data
+    const [baseUrl, setBaseUrl] = useState("");
     const [bioPage, setBioPage] = useState<Partial<BioPage>>({
         title: "",
         description: "",
         theme: {
-            backgroundColor: "#ffffff", // Warm white
+            backgroundColor: "#ffffff",
             textColor: "#4a4a4a",
-            buttonBgColor: "#5b5050", // Muted brown/gray
+            buttonBgColor: "#5b5050",
             buttonTextColor: "#ffffff",
             buttonStyle: "rounded-none",
             fontFamily: "Inter",
@@ -42,6 +54,9 @@ export default function BioBuilder() {
     const [previewMode, setPreviewMode] = useState<'mobile' | 'desktop'>('mobile');
     const [mode, setMode] = useState<'editor' | 'analytics'>('editor');
     const [saving, setSaving] = useState(false);
+    const [showShareMenu, setShowShareMenu] = useState(false);
+    const [showReplaceDialog, setShowReplaceDialog] = useState(false);
+    const [pendingFile, setPendingFile] = useState<File | null>(null);
 
     const TEMPLATES = [
         {
@@ -147,6 +162,9 @@ export default function BioBuilder() {
     // --- Data Fetching ---
 
     useEffect(() => {
+        if (typeof window !== 'undefined') {
+            setBaseUrl(window.location.origin);
+        }
         fetchData();
     }, []);
 
@@ -161,7 +179,6 @@ export default function BioBuilder() {
 
             const bioData = await bioRes.json();
             if (bioData.id) {
-                // Ensure new theme defaults exist
                 const safeTheme = {
                     backgroundColor: "#ffffff",
                     textColor: "#000000",
@@ -215,23 +232,75 @@ export default function BioBuilder() {
 
     const applyTemplate = (template: any) => {
         if (confirm("Apply this template? Current style changes will be overwritten.")) {
-            // Keep content, replace visual theme
             setBioPage(prev => ({
                 ...prev,
                 theme: {
-                    ...prev.theme, // keep socials if nested? no, template has full visual theme
+                    ...prev.theme,
                     ...template.theme,
-                    socials: prev.theme?.socials || {} // preserve social links
+                    socials: prev.theme?.socials || {}
                 }
             }));
             toast.success(`Applied ${template.name} template`);
         }
     };
 
-    // --- Link Management ---
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files?.[0]) return;
+
+        const file = e.target.files[0];
+        const previousUrl = bioPage.avatar_url;
+
+        if (previousUrl && previousUrl.includes('public.blob.vercel-storage.com')) {
+            setPendingFile(file);
+            setShowReplaceDialog(true);
+            if (e.target) e.target.value = '';
+            return;
+        }
+
+        await performUpload(file);
+        if (e.target) e.target.value = '';
+    };
+
+    const confirmReplacement = async () => {
+        if (pendingFile) {
+            await performUpload(pendingFile, bioPage.avatar_url);
+            setPendingFile(null);
+            setShowReplaceDialog(false);
+        }
+    };
+
+    const performUpload = async (file: File, previousUrl?: string) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        if (previousUrl) {
+            formData.append('previousUrl', previousUrl);
+        }
+
+        const loadingToast = toast.loading("Uploading image...");
+
+        try {
+            const res = await fetch("/api/upload", {
+                method: "POST",
+                body: formData
+            });
+
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.error || "Upload failed");
+            }
+
+            const data = await res.json();
+            setBioPage(prev => ({ ...prev, avatar_url: data.url }));
+            toast.success(previousUrl ? "Image replaced successfully!" : "Image uploaded!");
+        } catch (error: any) {
+            toast.error(error.message);
+        } finally {
+            toast.dismiss(loadingToast);
+        }
+    };
 
     const handleAddLink = async () => {
-        if (!bioPage.id) await handleSave(true); // Ensure page exists first
+        if (!bioPage.id) await handleSave(true);
 
         const newLink = {
             title: "New Link",
@@ -257,7 +326,6 @@ export default function BioBuilder() {
 
     const updateLink = async (id: string, updates: Partial<BioLink>) => {
         setLinks(links.map(l => l.id === id ? { ...l, ...updates } : l));
-        // Debounce actual save in real app, simplified here
         await fetch(`/api/bio/links/${id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
@@ -290,6 +358,109 @@ export default function BioBuilder() {
                         >
                             Analytics
                         </button>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        {bioPage.slug && (
+                            <>
+                                <a
+                                    href={`/${bioPage.slug}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-[10px] font-bold text-gray-500 hover:text-blue-500 bg-gray-50 dark:bg-gray-800 px-3 py-1.5 rounded-lg flex items-center gap-2 transition-colors border border-transparent hover:border-blue-100 dark:hover:border-blue-900"
+                                >
+                                    <Globe className="w-3 h-3" />
+                                    <span className="max-w-[120px] truncate">
+                                        {baseUrl ? `${baseUrl.replace(/^https?:\/\//, '')}/${bioPage.slug}` : `/${bioPage.slug}`}
+                                    </span>
+                                </a>
+                                <div className="relative">
+                                    <button
+                                        onClick={() => setShowShareMenu(!showShareMenu)}
+                                        className={`p-1.5 rounded-md transition-all border border-transparent ${showShareMenu ? 'bg-blue-50 text-blue-500 border-blue-100 dark:bg-blue-900/40 dark:border-blue-800' : 'bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-100 dark:hover:border-blue-900'}`}
+                                        title="Share"
+                                    >
+                                        <Share2 className="w-4 h-4" />
+                                    </button>
+
+                                    {showShareMenu && (
+                                        <>
+                                            <div className="fixed inset-0 z-40" onClick={() => setShowShareMenu(false)}></div>
+                                            <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-200 dark:border-gray-800 p-2 z-50 animate-in fade-in slide-in-from-top-2">
+                                                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-2 py-1 mb-1">Share via</div>
+
+                                                <button
+                                                    onClick={() => {
+                                                        const url = `${baseUrl}/${bioPage.slug}`;
+                                                        navigator.clipboard.writeText(url);
+                                                        toast.success("Link copied!");
+                                                        setShowShareMenu(false);
+                                                    }}
+                                                    className="w-full flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-left group"
+                                                >
+                                                    <div className="p-1.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 group-hover:bg-blue-50 group-hover:text-blue-500 transition-colors">
+                                                        <LinkIcon className="w-3.5 h-3.5" />
+                                                    </div>
+                                                    <span className="text-xs font-bold text-gray-700 dark:text-gray-300">Copy Link</span>
+                                                </button>
+
+                                                <div className="h-px bg-gray-100 dark:bg-gray-800 my-1"></div>
+
+                                                <a
+                                                    href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(`${baseUrl}/${bioPage.slug}`)}&text=${encodeURIComponent(`Check out my page: ${bioPage.title}`)}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="w-full flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-left group"
+                                                    onClick={() => setShowShareMenu(false)}
+                                                >
+                                                    <div className="p-1.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 group-hover:bg-black group-hover:text-white transition-colors">
+                                                        <Twitter className="w-3.5 h-3.5" />
+                                                    </div>
+                                                    <span className="text-xs font-bold text-gray-700 dark:text-gray-300">Twitter</span>
+                                                </a>
+
+                                                <a
+                                                    href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`${baseUrl}/${bioPage.slug}`)}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="w-full flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-left group"
+                                                    onClick={() => setShowShareMenu(false)}
+                                                >
+                                                    <div className="p-1.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 group-hover:bg-[#0077b5] group-hover:text-white transition-colors">
+                                                        <Linkedin className="w-3.5 h-3.5" />
+                                                    </div>
+                                                    <span className="text-xs font-bold text-gray-700 dark:text-gray-300">LinkedIn</span>
+                                                </a>
+
+                                                <a
+                                                    href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`${baseUrl}/${bioPage.slug}`)}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="w-full flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-left group"
+                                                    onClick={() => setShowShareMenu(false)}
+                                                >
+                                                    <div className="p-1.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 group-hover:bg-[#1877F2] group-hover:text-white transition-colors">
+                                                        <Facebook className="w-3.5 h-3.5" />
+                                                    </div>
+                                                    <span className="text-xs font-bold text-gray-700 dark:text-gray-300">Facebook</span>
+                                                </a>
+
+                                                <a
+                                                    href={`mailto:?subject=${encodeURIComponent(`Check out ${bioPage.title}`)}&body=${encodeURIComponent(`Check out my page here: ${baseUrl}/${bioPage.slug}`)}`}
+                                                    className="w-full flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-left group"
+                                                    onClick={() => setShowShareMenu(false)}
+                                                >
+                                                    <div className="p-1.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 group-hover:bg-orange-500 group-hover:text-white transition-colors">
+                                                        <Mail className="w-3.5 h-3.5" />
+                                                    </div>
+                                                    <span className="text-xs font-bold text-gray-700 dark:text-gray-300">Email</span>
+                                                </a>
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
 
@@ -337,7 +508,6 @@ export default function BioBuilder() {
                         </div>
                     ) : (
                         <>
-                            {/* Collapsible Section: Templates */}
                             <Section
                                 title="Templates"
                                 isOpen={activeSection === 'templates'}
@@ -365,7 +535,6 @@ export default function BioBuilder() {
                                 </div>
                             </Section>
 
-                            {/* Collapsible Section: Page Info */}
                             <Section
                                 title="Page: Home"
                                 isOpen={activeSection === 'page'}
@@ -385,7 +554,6 @@ export default function BioBuilder() {
                                 </div>
                             </Section>
 
-                            {/* Collapsible Section: Header */}
                             <Section
                                 title="Header"
                                 isOpen={activeSection === 'header'}
@@ -395,12 +563,18 @@ export default function BioBuilder() {
                                 <div className="space-y-3 p-3">
                                     <div className="space-y-1">
                                         <label className="text-[10px] font-bold uppercase text-gray-400">Profile Image</label>
-                                        <input
-                                            value={bioPage.avatar_url || ''}
-                                            onChange={e => setBioPage({ ...bioPage, avatar_url: e.target.value })}
-                                            className="w-full text-xs p-2 bg-gray-50 dark:bg-gray-800 rounded-lg border-none text-blue-500"
-                                            placeholder="https://"
-                                        />
+                                        <div className="flex gap-2">
+                                            <input
+                                                value={bioPage.avatar_url || ''}
+                                                onChange={e => setBioPage({ ...bioPage, avatar_url: e.target.value })}
+                                                className="flex-1 text-xs p-2 bg-gray-50 dark:bg-gray-800 rounded-lg border-none text-blue-500"
+                                                placeholder="https://"
+                                            />
+                                            <label className="cursor-pointer bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 p-2 rounded-lg transition-colors flex items-center justify-center min-w-[32px]">
+                                                <Upload className="w-4 h-4 text-gray-500" />
+                                                <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
+                                            </label>
+                                        </div>
                                     </div>
                                     <div className="space-y-1">
                                         <label className="text-[10px] font-bold uppercase text-gray-400">Headline</label>
@@ -422,7 +596,6 @@ export default function BioBuilder() {
                                 </div>
                             </Section>
 
-                            {/* Collapsible Section: Socials */}
                             <Section
                                 title="Socials"
                                 isOpen={activeSection === 'socials'}
@@ -444,7 +617,6 @@ export default function BioBuilder() {
                                 </div>
                             </Section>
 
-                            {/* Collapsible Section: Blocks (Main) */}
                             <Section
                                 title="Blocks"
                                 isOpen={activeSection === 'blocks'}
@@ -455,9 +627,7 @@ export default function BioBuilder() {
                                 <Reorder.Group axis="y" values={links} onReorder={setLinks} className="space-y-2 p-2 list-none">
                                     {links.map((link) => (
                                         <Reorder.Item key={link.id} value={link}>
-                                            <div
-                                                className="group bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-3 shadow-sm hover:shadow-md transition-all flex items-center gap-3 cursor-grab active:cursor-grabbing"
-                                            >
+                                            <div className="group bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-3 shadow-sm hover:shadow-md transition-all flex items-center gap-3 cursor-grab active:cursor-grabbing">
                                                 <div className="text-gray-300 hover:text-gray-500">
                                                     <GripVertical className="w-4 h-4" />
                                                 </div>
@@ -480,13 +650,11 @@ export default function BioBuilder() {
                                         </Reorder.Item>
                                     ))}
                                 </Reorder.Group>
-
                             </Section>
                         </>
                     )}
                 </div>
 
-                {/* Save bar */}
                 <div className="p-4 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 flex justify-between items-center z-10">
                     <div className="text-[10px] text-gray-400">All changes saved</div>
                     <button onClick={() => handleSave()} className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-4 py-2 rounded-lg text-xs font-bold shadow-lg hover:scale-105 transition-transform flex items-center gap-2">
@@ -516,8 +684,6 @@ export default function BioBuilder() {
                 </div>
 
                 <div className="overflow-y-auto flex-1 p-6 space-y-8 no-scrollbar">
-
-                    {/* General Styles */}
                     <div>
                         <h4 className="font-bold text-xs mb-4 flex items-center justify-between">
                             General Styles
@@ -546,7 +712,6 @@ export default function BioBuilder() {
                                 value={bioPage.theme?.buttonTextColor || '#1f2937'}
                                 onChange={(c) => updateTheme('buttonTextColor', c)}
                             />
-
                             <div className="pt-2">
                                 <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-xl">
                                     <button
@@ -564,7 +729,6 @@ export default function BioBuilder() {
 
                     <div className="h-px bg-gray-100 dark:bg-gray-800"></div>
 
-                    {/* Header Styles */}
                     <div>
                         <h4 className="font-bold text-xs mb-4">Header Styles</h4>
                         <div className="space-y-5">
@@ -592,7 +756,6 @@ export default function BioBuilder() {
 
                     <div className="h-px bg-gray-100 dark:bg-gray-800"></div>
 
-                    {/* Button Styles */}
                     <div>
                         <h4 className="font-bold text-xs mb-4">Button Shape</h4>
                         <div className="flex gap-2">
@@ -605,11 +768,27 @@ export default function BioBuilder() {
                             ))}
                         </div>
                     </div>
-
                 </div>
             </div>
 
-        </div >
+            {/* Image Replacement Confirmation Dialog */}
+            <AlertDialog open={showReplaceDialog} onOpenChange={setShowReplaceDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Replace profile image?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            You already have a profile image. Replacing it will permanently delete the old one from storage.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => { setPendingFile(null); setShowReplaceDialog(false); }}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={confirmReplacement} className="bg-blue-600 hover:bg-blue-700">
+                            Replace Image
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+        </div>
     );
 }
 

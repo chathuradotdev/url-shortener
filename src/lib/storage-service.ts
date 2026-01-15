@@ -8,6 +8,7 @@ import { Readable } from "stream";
 export interface IStorageProvider {
     upload(fileBuffer: Buffer, fileName: string): Promise<string>;
     download(location: string): Promise<Buffer>;
+    delete(location: string): Promise<void>;
 }
 
 export class LocalStorageProvider implements IStorageProvider {
@@ -30,6 +31,14 @@ export class LocalStorageProvider implements IStorageProvider {
 
     async download(location: string): Promise<Buffer> {
         return fs.readFile(location);
+    }
+
+    async delete(location: string): Promise<void> {
+        try {
+            await fs.unlink(location);
+        } catch (e) {
+            console.warn(`Failed to delete local file ${location}:`, e);
+        }
     }
 }
 
@@ -80,6 +89,11 @@ export class S3StorageProvider implements IStorageProvider {
         }
         return Buffer.concat(chunks);
     }
+
+    async delete(key: string): Promise<void> {
+        // Implementation for S3 delete (stub for now as requested feature focus is Vercel)
+        // await this.client.send(new DeleteObjectCommand({ Bucket: this.bucket, Key: key }));
+    }
 }
 
 export class AzureStorageProvider implements IStorageProvider {
@@ -121,13 +135,55 @@ export class AzureStorageProvider implements IStorageProvider {
         }
         return Buffer.concat(chunks);
     }
+
+    async delete(blobName: string): Promise<void> {
+        const containerClient = this.client.getContainerClient(this.container);
+        const blobClient = containerClient.getBlobClient(blobName);
+        await blobClient.deleteIfExists();
+    }
+}
+
+import { put, del } from "@vercel/blob";
+
+export class VercelBlobStorageProvider implements IStorageProvider {
+    async upload(fileBuffer: Buffer, fileName: string): Promise<string> {
+        // Vercel Blob handles filename internally but we can suggest path
+        // It returns a unique URL
+        const token = process.env.BLOB_READ_WRITE_TOKEN;
+        const { url } = await put(fileName, fileBuffer, { access: 'public', token });
+        return url;
+    }
+
+    async download(url: string): Promise<Buffer> {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`Failed to download from Vercel Blob: ${response.statusText}`);
+        return Buffer.from(await response.arrayBuffer());
+    }
+
+    async delete(url: string): Promise<void> {
+        if (!url || !url.includes('public.blob.vercel-storage.com')) {
+            console.log("Skipping delete: Not a Vercel Blob URL", url);
+            return;
+        }
+        const token = process.env.BLOB_READ_WRITE_TOKEN;
+        await del(url, { token });
+    }
 }
 
 export class StorageService {
     static async getProvider(): Promise<IStorageProvider> {
         const config = await db.getStorageConfig();
 
+        // Allow overriding via Env for Vercel Blob (common pattern)
+        if (process.env.BLOB_READ_WRITE_TOKEN) {
+            console.log("Forcing Vercel Blob Provider due to Env Token");
+            return new VercelBlobStorageProvider();
+        }
+
         switch (config.provider) {
+            case 'vercel-blob':
+                return new VercelBlobStorageProvider();
+
             case 's3':
                 if (!config.region || !config.accessKey || !config.secretKey || !config.bucket) {
                     throw new Error("Incomplete S3 configuration");
@@ -148,6 +204,10 @@ export class StorageService {
 
             case 'local':
             default:
+                if (config.provider === 'vercel-blob' || (!config.provider && process.env.BLOB_READ_WRITE_TOKEN)) {
+                    return new VercelBlobStorageProvider();
+                }
+
                 // Default to local if configured, otherwise might throw or return dummy?
                 // If local path is empty, we technically can't store.
                 // But let's assume if it is selected, the user wants it.
@@ -159,7 +219,7 @@ export class StorageService {
                     // So we can return a "NullProvider" or handle check upstream.
                     // Let's return LocalStorageProvider which throws if path missing.
                 }
-                return new LocalStorageProvider(config.localPath);
+                return new LocalStorageProvider(config.localPath || './uploads');
         }
     }
 }
