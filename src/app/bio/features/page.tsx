@@ -9,19 +9,19 @@ import { useState, useEffect } from "react";
 const features = [
     {
         title: "Fully Customizable",
-        description: "Match your brand with deep customization—colors, fonts, buttons, and high-quality textures.",
+        description: "Match your brand with deep customization—Google Fonts, adjustable padding, and premium spacing.",
         icon: Palette,
         color: "blue"
     },
     {
-        title: "Advanced Analytics",
-        description: "Understand your audience with real-time data on clicks, devices, and geographic locations.",
-        icon: BarChart3,
+        title: "Link Animations",
+        description: "Make your content pop with Pulse, Glow, and Bounce animations for your most important links.",
+        icon: Sparkles,
         color: "purple"
     },
     {
         title: "Social Integration",
-        description: "Connect all your social profiles in one place with beautiful, high-click icons and links.",
+        description: "Connect to 20+ platforms with high-fidelity icons including X (Twitter), TikTok, and YouTube.",
         icon: Share2,
         color: "pink"
     },
@@ -273,34 +273,39 @@ export default function BioFeaturesPage() {
                         <div className="absolute -bottom-10 -right-10 opacity-30 group-hover:scale-125 transition-transform duration-700">
                             <Share2 className="w-40 h-40" />
                         </div>
-                        <h3 className="text-2xl font-black mb-4">Global Reach</h3>
-                        <p className="text-purple-100/80 text-sm font-medium pr-10">Integration with 20+ social platforms and custom icon sets.</p>
+                        <h3 className="text-2xl font-black mb-4">20+ Platforms</h3>
+                        <p className="text-purple-100/80 text-sm font-medium pr-10">Instant integration with Instagram, TikTok, Threads, Discord, and more with custom sizing.</p>
                     </div>
 
                     <div className="p-10 bg-slate-900 border border-slate-800 rounded-[3rem] text-white relative group">
                         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-blue-500/20 blur-[100px] pointer-events-none group-hover:bg-blue-500/40 transition-all"></div>
                         <h3 className="text-2xl font-black mb-4 flex items-center gap-3">
-                            <Wand2 className="w-6 h-6 text-blue-400" /> Smart Flow
+                            <Zap className="w-6 h-6 text-yellow-400" /> Link Animations
                         </h3>
-                        <p className="text-slate-400 text-sm leading-relaxed mb-6">Redirect users based on their country, time of day, or device automatically.</p>
-                        <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
-                            <div className="text-[10px] text-slate-500 uppercase font-black mb-3">Targeting Active</div>
-                            <div className="flex justify-between items-center text-xs">
-                                <span>US Visitors</span>
-                                <span className="text-blue-400 font-bold">Store A</span>
+                        <p className="text-slate-400 text-sm leading-relaxed mb-6">Drive clicks with premium animations like Pulse, Glow, Shake, and Bounce for high-priority links.</p>
+                        <div className="p-4 bg-white/5 rounded-2xl border border-white/10 flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center">
+                                <motion.div
+                                    animate={{ scale: [1, 1.2, 1] }}
+                                    transition={{ duration: 2, repeat: Infinity }}
+                                    className="w-4 h-4 bg-blue-400 rounded-full"
+                                />
                             </div>
+                            <div className="text-[10px] text-slate-500 uppercase font-black">Active Pulse Effect</div>
                         </div>
                     </div>
 
                     <div className="lg:col-span-2 p-10 bg-pink-500 rounded-[3rem] text-white relative overflow-hidden group">
                         <div className="grid md:grid-cols-2 gap-8 items-center">
                             <div>
-                                <h3 className="text-3xl font-black mb-4 leading-tight">The Aesthetic Standard</h3>
-                                <p className="text-pink-100/90 font-medium">Glassmorphism, high-res backgrounds, and smooth transitions built-in.</p>
+                                <h3 className="text-3xl font-black mb-4 leading-tight">Elite Typography & Spacing</h3>
+                                <p className="text-pink-100/90 font-medium">Choose from premium Google Fonts (Outfit, Playfair, Inter) and control every pixel of spacing and padding.</p>
                             </div>
                             <div className="relative">
-                                <div className="w-full h-32 bg-white/10 backdrop-blur-xl rounded-[2rem] border border-white/20"></div>
-                                <div className="absolute top-4 left-4 h-4 w-24 bg-white rounded-full"></div>
+                                <div className="w-full h-32 bg-white/10 backdrop-blur-xl rounded-[2rem] border border-white/20 flex items-center justify-center">
+                                    <span className="text-2xl font-black tracking-tighter" style={{ fontFamily: 'Outfit' }}>Premium Design</span>
+                                </div>
+                                <div className="absolute top-4 left-4 h-4 w-24 bg-white/20 rounded-full"></div>
                                 <div className="absolute bottom-4 left-4 h-2 w-12 bg-white/40 rounded-full"></div>
                             </div>
                         </div>
