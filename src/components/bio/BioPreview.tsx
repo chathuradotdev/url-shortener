@@ -4,14 +4,15 @@ import BioRenderer from "./BioRenderer";
 interface BioPreviewProps {
     bioPage: Partial<BioPage>;
     links: BioLink[];
+    allPages?: BioPage[];
 }
 
-export default function BioPreview({ bioPage, links }: BioPreviewProps) {
+export default function BioPreview({ bioPage, links, allPages = [] }: BioPreviewProps) {
     return (
         <div className="mx-auto w-[300px] h-[600px] bg-white rounded-[2.5rem] relative border-[12px] border-slate-800 shadow-2xl box-border overflow-hidden ring-1 ring-black/5">
             {/* Screen Content */}
             <div className="w-full h-full bg-white overflow-hidden rounded-[1.8rem]">
-                <BioRenderer bioPage={bioPage} links={links} variant="preview" />
+                <BioRenderer bioPage={bioPage} links={links} variant="preview" allPages={allPages} />
             </div>
 
             {/* Subtle inner reflection/glare */}

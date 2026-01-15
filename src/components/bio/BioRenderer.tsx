@@ -9,15 +9,18 @@ import {
     Facebook, Linkedin, Check, ChevronLeft, Mail, Phone, Music, Send, PlusCircle
 } from "lucide-react";
 import QrCodeDisplay from "../QrCodeDisplay";
+import { toast } from "sonner";
 
 interface BioRendererProps {
     bioPage: Partial<BioPage>;
     links: BioLink[];
     variant?: 'public' | 'preview';
+    allPages?: BioPage[];
 }
 
-export default function BioRenderer({ bioPage, links, variant = 'public' }: BioRendererProps) {
+export default function BioRenderer({ bioPage, links, variant = 'public', allPages = [] }: BioRendererProps) {
     const [showShare, setShowShare] = useState(false);
+    const [showMenu, setShowMenu] = useState(false);
     const [viewMode, setViewMode] = useState<'share' | 'qr'>('share');
     const [isCopied, setIsCopied] = useState(false);
     const [isSearchVisible, setIsSearchVisible] = useState(false);
@@ -209,6 +212,82 @@ export default function BioRenderer({ bioPage, links, variant = 'public' }: BioR
                 </div>
             )}
 
+            {/* NAVIGATION MENU OVERLAY */}
+            {showMenu && (
+                <div
+                    className="absolute inset-0 z-[60] flex justify-end bg-black/60 backdrop-blur-[2px] animate-in fade-in duration-300"
+                    onClick={() => setShowMenu(false)}
+                >
+                    <motion.div
+                        initial={{ x: '100%' }}
+                        animate={{ x: 0 }}
+                        exit={{ x: '100%' }}
+                        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                        className="w-[80%] h-full bg-white dark:bg-gray-900 shadow-2xl flex flex-col p-6 relative overflow-y-auto no-scrollbar"
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <div className="flex items-center justify-between mb-8">
+                            <h3 className="font-black text-lg uppercase tracking-wider opacity-90">My Pages</h3>
+                            <button
+                                onClick={() => setShowMenu(false)}
+                                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <div className="space-y-3">
+                            {allPages.length > 0 ? (
+                                allPages.map((page) => (
+                                    <a
+                                        key={page.id}
+                                        href={variant === 'public' ? `/bio/${page.slug}` : '#'}
+                                        onClick={(e) => {
+                                            if (variant === 'preview') {
+                                                e.preventDefault();
+                                                toast.success(`Switching to: ${page.title}`);
+                                            }
+                                        }}
+                                        className={`flex items-center gap-4 p-4 rounded-2xl transition-all hover:scale-[1.02] active:scale-[0.98] ${page.slug === bioPage.slug
+                                                ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/25 ring-2 ring-blue-400/20'
+                                                : 'bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 border border-transparent hover:border-blue-500/20'
+                                            }`}
+                                    >
+                                        <div className="w-10 h-10 rounded-full overflow-hidden bg-white/20 border border-white/10 shrink-0">
+                                            <img
+                                                src={page.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${page.slug}`}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="font-black text-sm truncate uppercase tracking-tight">{page.title || page.slug}</div>
+                                            <div className="text-[10px] opacity-60 font-medium truncate">/{page.slug}</div>
+                                        </div>
+                                        {page.slug === bioPage.slug && (
+                                            <Check className="w-4 h-4" />
+                                        )}
+                                    </a>
+                                ))
+                            ) : (
+                                <div className="text-center py-12 opacity-40">
+                                    <Globe className="w-12 h-12 mx-auto mb-4 opacity-10" />
+                                    <p className="text-xs font-bold uppercase tracking-widest">No other pages</p>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="mt-auto pt-8">
+                            <div className="p-6 rounded-[2rem] bg-gradient-to-br from-blue-600 to-indigo-700 text-white relative overflow-hidden shadow-xl shadow-blue-500/20 group">
+                                <div className="absolute top-0 right-0 -mr-4 -mt-4 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
+                                <h4 className="font-black text-sm mb-2 relative z-10">Upgrade to Pro</h4>
+                                <p className="text-[10px] opacity-80 leading-relaxed mb-4 relative z-10">Create unlimited pages and unlock advanced analytics.</p>
+                                <button className="w-full py-2 bg-white text-blue-600 rounded-xl text-[10px] font-black uppercase tracking-wider hover:bg-blue-50 transition-colors relative z-10">Learn More</button>
+                            </div>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
+
             <div
                 className="w-full h-full overflow-y-auto overflow-x-hidden no-scrollbar flex flex-col items-center relative"
                 style={{
@@ -238,7 +317,7 @@ export default function BioRenderer({ bioPage, links, variant = 'public' }: BioR
                             {theme.showSearch && (
                                 <Search onClick={() => setIsSearchVisible(!isSearchVisible)} className="w-5 h-5 opacity-80 cursor-pointer hover:scale-110 transition-transform" />
                             )}
-                            <Menu className="w-5 h-5 opacity-80" />
+                            <Menu onClick={() => setShowMenu(true)} className="w-5 h-5 opacity-80 cursor-pointer hover:scale-110 transition-transform" />
                         </div>
                     </div>
 
@@ -297,7 +376,7 @@ export default function BioRenderer({ bioPage, links, variant = 'public' }: BioR
                                         }}
                                     />
                                     {theme.isVerified && (
-                                        <div className="absolute bottom-1 right-1 bg-white dark:bg-gray-900 rounded-full p-1 shadow-lg ring-1 ring-black/5">
+                                        <div className="absolute bottom-0 right-0 bg-white dark:bg-gray-900 rounded-full p-1 shadow-lg ring-1 ring-black/5 z-20">
                                             <CheckCircle2 className="w-5 h-5 text-blue-500 fill-blue-500/10" />
                                         </div>
                                     )}
@@ -316,11 +395,8 @@ export default function BioRenderer({ bioPage, links, variant = 'public' }: BioR
 
                         {/* Title & Description */}
                         <div className="text-center px-4 w-full mb-6">
-                            <h1 className="text-xl font-bold mb-3 flex items-center justify-center gap-1.5" style={{ color: textColor }}>
+                            <h1 className="text-xl font-bold mb-3 text-center" style={{ color: textColor }}>
                                 {bioPage.title || 'Your Name'}
-                                {theme.isVerified && (
-                                    <CheckCircle2 className="w-4 h-4 text-blue-500 fill-blue-500/10" />
-                                )}
                             </h1>
                             <p className="text-xs opacity-70 mb-2 max-w-[240px] leading-relaxed font-medium mx-auto" style={{ color: textColor }}>
                                 {bioPage.description || 'Welcome to my page.'}
@@ -531,6 +607,7 @@ export default function BioRenderer({ bioPage, links, variant = 'public' }: BioR
         </div>
     );
 }
+
 function SocialIcon({ name, size = 20 }: { name: string, size?: number }) {
     const props = { style: { width: size, height: size }, strokeWidth: 1.5 };
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, ReactNode } from "react";
+import React, { useState, useEffect, ReactNode, MouseEvent } from "react";
 import { BioPage, BioLink } from "@/lib/db";
 import BioPreview from "./BioPreview";
 import { useRouter } from "next/navigation";
@@ -106,6 +106,8 @@ export default function BioBuilder() {
     const [pendingFile, setPendingFile] = useState<File | null>(null);
     const [showPlatformSelector, setShowPlatformSelector] = useState(false);
     const [showBlockSelector, setShowBlockSelector] = useState(false);
+    const [allPages, setAllPages] = useState<BioPage[]>([]);
+    const [showPageSelector, setShowPageSelector] = useState(false);
 
     const TEMPLATES = [
         {
@@ -235,9 +237,18 @@ export default function BioBuilder() {
         fetchData();
     }, []);
 
-    const fetchData = async () => {
+    const fetchData = async (pageId?: string) => {
         try {
-            const bioRes = await fetch("/api/bio");
+            // Fetch list of all pages
+            const listRes = await fetch("/api/bio?all=true");
+            if (listRes.ok) {
+                const pages = await listRes.json();
+                setAllPages(pages);
+            }
+
+            const fetchUrl = pageId ? `/api/bio/${pageId}` : "/api/bio";
+            const bioRes = await fetch(fetchUrl);
+
             if (bioRes.status === 403) {
                 toast.error("Premium required");
                 router.push("/dashboard");
@@ -255,17 +266,77 @@ export default function BioBuilder() {
                     profileShadow: 0,
                     profileBorder: 0,
                     socialSize: 24,
+                    isVerified: false,
+                    showSearch: false,
                     ...(bioData.theme || {})
                 };
                 setBioPage({ ...bioData, theme: safeTheme });
 
-                const linksRes = await fetch("/api/bio/links");
+                // Fetch links for this specific page
+                const linksRes = await fetch(`/api/bio/links?pageId=${bioData.id}`);
                 if (linksRes.ok) setLinks(await linksRes.json());
             }
         } catch (e) {
             console.error(e);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleCreateNewPage = async () => {
+        const loadingToast = toast.loading("Creating your new bio page...");
+        try {
+            const res = await fetch("/api/bio", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    title: "New Page",
+                    description: "Welcome to my new bio page!",
+                    theme: {
+                        backgroundColor: "#ffffff",
+                        textColor: "#000000",
+                        buttonBgColor: "#f3f4f6",
+                        buttonTextColor: "#1f2937",
+                        shadowType: 'soft'
+                    }
+                })
+            });
+
+            if (res.ok) {
+                const newPage = await res.json();
+                toast.success("New bio page created!");
+                // Refresh full list and switch
+                await fetchData(newPage.id);
+                setShowPageSelector(false);
+            } else {
+                const err = await res.json();
+                toast.error(err.error || "Failed to create page");
+            }
+        } catch (e) {
+            toast.error("An error occurred");
+        } finally {
+            toast.dismiss(loadingToast);
+        }
+    };
+
+    const handleDeletePage = async (id: string, e: MouseEvent) => {
+        e.stopPropagation();
+        if (allPages.length <= 1) {
+            toast.error("You must have at least one bio page.");
+            return;
+        }
+        if (!confirm("Are you sure you want to delete this page? This cannot be undone.")) return;
+
+        try {
+            const res = await fetch(`/api/bio/${id}`, { method: "DELETE" });
+            if (res.ok) {
+                toast.success("Page deleted");
+                // Fetch first available page
+                const remaining = allPages.filter(p => p.id !== id);
+                fetchData(remaining[0]?.id);
+            }
+        } catch (e) {
+            toast.error("Failed to delete page");
         }
     };
 
@@ -446,106 +517,142 @@ export default function BioBuilder() {
                     </div>
 
                     <div className="flex items-center gap-2">
-                        {bioPage.slug && (
-                            <>
-                                <a
-                                    href={`/${bioPage.slug}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-[10px] font-bold text-gray-500 hover:text-blue-500 bg-gray-50 dark:bg-gray-800 px-3 py-1.5 rounded-lg flex items-center gap-2 transition-colors border border-transparent hover:border-blue-100 dark:hover:border-blue-900"
-                                >
-                                    <Globe className="w-3 h-3" />
-                                    <span className="max-w-[120px] truncate">
-                                        {baseUrl ? `${baseUrl.replace(/^https?:\/\//, '')}/${bioPage.slug}` : `/${bioPage.slug}`}
-                                    </span>
-                                </a>
-                                <div className="relative">
+                        <div className="relative">
+                            <button
+                                onClick={() => setShowPageSelector(!showPageSelector)}
+                                className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-gray-800 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-all border border-gray-100 dark:border-gray-700"
+                            >
+                                <Smartphone className="w-3.5 h-3.5 text-blue-500" />
+                                <span className="text-[11px] font-black">{bioPage.slug || 'Select Page'}</span>
+                                <ChevronDown className={`w-3 h-3 transition-transform ${showPageSelector ? 'rotate-180' : ''}`} />
+                            </button>
+
+                            {showPageSelector && (
+                                <div className="absolute top-full right-0 mt-2 w-64 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-800 p-2 z-50 animate-in fade-in zoom-in-95 duration-200">
+                                    <div className="text-[10px] font-bold text-gray-400 px-3 py-2 uppercase tracking-wider">Your Pages</div>
+                                    <div className="space-y-1 max-h-60 overflow-y-auto no-scrollbar">
+                                        {allPages.map(p => (
+                                            <button
+                                                key={p.id}
+                                                onClick={() => {
+                                                    fetchData(p.id);
+                                                    setShowPageSelector(false);
+                                                }}
+                                                className={`w-full flex items-center justify-between p-3 rounded-xl transition-all ${bioPage.id === p.id ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600' : 'hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600'}`}
+                                            >
+                                                <div className="flex flex-col items-start overflow-hidden text-left">
+                                                    <span className="text-xs font-black truncate w-40">{p.title || p.slug}</span>
+                                                    <span className="text-[10px] opacity-60">/{p.slug}</span>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    {allPages.length > 1 && (
+                                                        <X
+                                                            onClick={(e) => handleDeletePage(p.id, e)}
+                                                            className="w-3.5 h-3.5 text-gray-300 hover:text-red-500 transition-colors cursor-pointer"
+                                                        />
+                                                    )}
+                                                    {bioPage.id === p.id && <div className="w-1.5 h-1.5 bg-blue-500 rounded-full" />}
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <div className="h-px bg-gray-100 dark:bg-gray-800 my-2" />
                                     <button
-                                        onClick={() => setShowShareMenu(!showShareMenu)}
-                                        className={`p-1.5 rounded-md transition-all border border-transparent ${showShareMenu ? 'bg-blue-50 text-blue-500 border-blue-100 dark:bg-blue-900/40 dark:border-blue-800' : 'bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-100 dark:hover:border-blue-900'}`}
-                                        title="Share"
+                                        onClick={handleCreateNewPage}
+                                        className="w-full flex items-center gap-2 p-3 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition-all text-xs font-black"
                                     >
-                                        <Share2 className="w-4 h-4" />
+                                        <PlusCircle className="w-4 h-4" />
+                                        Create New Page
                                     </button>
-
-                                    {showShareMenu && (
-                                        <>
-                                            <div className="fixed inset-0 z-40" onClick={() => setShowShareMenu(false)}></div>
-                                            <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-200 dark:border-gray-800 p-2 z-50 animate-in fade-in slide-in-from-top-2">
-                                                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-2 py-1 mb-1">Share via</div>
-
-                                                <button
-                                                    onClick={() => {
-                                                        const url = `${baseUrl}/${bioPage.slug}`;
-                                                        navigator.clipboard.writeText(url);
-                                                        toast.success("Link copied!");
-                                                        setShowShareMenu(false);
-                                                    }}
-                                                    className="w-full flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-left group"
-                                                >
-                                                    <div className="p-1.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 group-hover:bg-blue-50 group-hover:text-blue-500 transition-colors">
-                                                        <LinkIcon className="w-3.5 h-3.5" />
-                                                    </div>
-                                                    <span className="text-xs font-bold text-gray-700 dark:text-gray-300">Copy Link</span>
-                                                </button>
-
-                                                <div className="h-px bg-gray-100 dark:bg-gray-800 my-1"></div>
-
-                                                <a
-                                                    href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(`${baseUrl}/${bioPage.slug}`)}&text=${encodeURIComponent(`Check out my page: ${bioPage.title}`)}`}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="w-full flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-left group"
-                                                    onClick={() => setShowShareMenu(false)}
-                                                >
-                                                    <div className="p-1.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 group-hover:bg-black group-hover:text-white transition-colors">
-                                                        <Twitter className="w-3.5 h-3.5" />
-                                                    </div>
-                                                    <span className="text-xs font-bold text-gray-700 dark:text-gray-300">Twitter</span>
-                                                </a>
-
-                                                <a
-                                                    href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`${baseUrl}/${bioPage.slug}`)}`}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="w-full flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-left group"
-                                                    onClick={() => setShowShareMenu(false)}
-                                                >
-                                                    <div className="p-1.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 group-hover:bg-[#0077b5] group-hover:text-white transition-colors">
-                                                        <Linkedin className="w-3.5 h-3.5" />
-                                                    </div>
-                                                    <span className="text-xs font-bold text-gray-700 dark:text-gray-300">LinkedIn</span>
-                                                </a>
-
-                                                <a
-                                                    href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`${baseUrl}/${bioPage.slug}`)}`}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="w-full flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-left group"
-                                                    onClick={() => setShowShareMenu(false)}
-                                                >
-                                                    <div className="p-1.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 group-hover:bg-[#1877F2] group-hover:text-white transition-colors">
-                                                        <Facebook className="w-3.5 h-3.5" />
-                                                    </div>
-                                                    <span className="text-xs font-bold text-gray-700 dark:text-gray-300">Facebook</span>
-                                                </a>
-
-                                                <a
-                                                    href={`mailto:?subject=${encodeURIComponent(`Check out ${bioPage.title}`)}&body=${encodeURIComponent(`Check out my page here: ${baseUrl}/${bioPage.slug}`)}`}
-                                                    className="w-full flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-left group"
-                                                    onClick={() => setShowShareMenu(false)}
-                                                >
-                                                    <div className="p-1.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 group-hover:bg-orange-500 group-hover:text-white transition-colors">
-                                                        <Mail className="w-3.5 h-3.5" />
-                                                    </div>
-                                                    <span className="text-xs font-bold text-gray-700 dark:text-gray-300">Email</span>
-                                                </a>
-                                            </div>
-                                        </>
-                                    )}
                                 </div>
-                            </>
-                        )}
+                            )}
+                        </div>
+
+                        <div className="relative">
+                            <button
+                                onClick={() => setShowShareMenu(!showShareMenu)}
+                                className={`p-1.5 rounded-md transition-all border border-transparent ${showShareMenu ? 'bg-blue-50 text-blue-500 border-blue-100 dark:bg-blue-900/40 dark:border-blue-800' : 'bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-100 dark:hover:border-blue-900'}`}
+                                title="Share"
+                            >
+                                <Share2 className="w-4 h-4" />
+                            </button>
+
+                            {showShareMenu && (
+                                <>
+                                    <div className="fixed inset-0 z-40" onClick={() => setShowShareMenu(false)}></div>
+                                    <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-200 dark:border-gray-800 p-2 z-50 animate-in fade-in slide-in-from-top-2">
+                                        <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-2 py-1 mb-1">Share via</div>
+
+                                        <button
+                                            onClick={() => {
+                                                const url = `${baseUrl}/${bioPage.slug}`;
+                                                navigator.clipboard.writeText(url);
+                                                toast.success("Link copied!");
+                                                setShowShareMenu(false);
+                                            }}
+                                            className="w-full flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-left group"
+                                        >
+                                            <div className="p-1.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 group-hover:bg-blue-50 group-hover:text-blue-500 transition-colors">
+                                                <LinkIcon className="w-3.5 h-3.5" />
+                                            </div>
+                                            <span className="text-xs font-bold text-gray-700 dark:text-gray-300">Copy Link</span>
+                                        </button>
+
+                                        <div className="h-px bg-gray-100 dark:bg-gray-800 my-1"></div>
+
+                                        <a
+                                            href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(`${baseUrl}/${bioPage.slug}`)}&text=${encodeURIComponent(`Check out my page: ${bioPage.title}`)}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="w-full flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-left group"
+                                            onClick={() => setShowShareMenu(false)}
+                                        >
+                                            <div className="p-1.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 group-hover:bg-black group-hover:text-white transition-colors">
+                                                <Twitter className="w-3.5 h-3.5" />
+                                            </div>
+                                            <span className="text-xs font-bold text-gray-700 dark:text-gray-300">Twitter</span>
+                                        </a>
+
+                                        <a
+                                            href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`${baseUrl}/${bioPage.slug}`)}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="w-full flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-left group"
+                                            onClick={() => setShowShareMenu(false)}
+                                        >
+                                            <div className="p-1.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 group-hover:bg-[#0077b5] group-hover:text-white transition-colors">
+                                                <Linkedin className="w-3.5 h-3.5" />
+                                            </div>
+                                            <span className="text-xs font-bold text-gray-700 dark:text-gray-300">LinkedIn</span>
+                                        </a>
+
+                                        <a
+                                            href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`${baseUrl}/${bioPage.slug}`)}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="w-full flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-left group"
+                                            onClick={() => setShowShareMenu(false)}
+                                        >
+                                            <div className="p-1.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 group-hover:bg-[#1877F2] group-hover:text-white transition-colors">
+                                                <Facebook className="w-3.5 h-3.5" />
+                                            </div>
+                                            <span className="text-xs font-bold text-gray-700 dark:text-gray-300">Facebook</span>
+                                        </a>
+
+                                        <a
+                                            href={`mailto:?subject=${encodeURIComponent(`Check out ${bioPage.title}`)}&body=${encodeURIComponent(`Check out my page here: ${baseUrl}/${bioPage.slug}`)}`}
+                                            className="w-full flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-left group"
+                                            onClick={() => setShowShareMenu(false)}
+                                        >
+                                            <div className="p-1.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 group-hover:bg-orange-500 group-hover:text-white transition-colors">
+                                                <Mail className="w-3.5 h-3.5" />
+                                            </div>
+                                            <span className="text-xs font-bold text-gray-700 dark:text-gray-300">Email</span>
+                                        </a>
+                                    </div>
+                                </>
+                            )}
+                        </div>
                     </div>
                 </div>
 
@@ -621,20 +728,44 @@ export default function BioBuilder() {
                             </Section>
 
                             <Section
-                                title="Page: Home"
+                                title={bioPage.slug ? `Page: /${bioPage.slug}` : "Page Settings"}
                                 isOpen={activeSection === 'page'}
                                 onToggle={() => setActiveSection(activeSection === 'page' ? 'blocks' : 'page')}
                                 icon={<LayoutTemplate className="w-4 h-4" />}
                             >
-                                <div className="space-y-3 p-3">
+                                <div className="space-y-4 p-3">
                                     <div className="space-y-1">
-                                        <label className="text-[10px] font-bold uppercase text-gray-400">Page Title</label>
+                                        <label className="text-[10px] font-bold uppercase text-gray-400 tracking-wider">Page Title</label>
                                         <input
                                             value={bioPage.title || ''}
                                             onChange={e => setBioPage({ ...bioPage, title: e.target.value })}
-                                            className="w-full text-sm p-2 bg-gray-50 dark:bg-gray-800 rounded-lg border-none focus:ring-1 focus:ring-blue-500 transition-all font-bold"
-                                            placeholder="My Page"
+                                            className="w-full text-sm p-3 bg-gray-50 dark:bg-gray-800 rounded-xl border border-transparent focus:border-blue-500 transition-all font-bold placeholder:text-gray-300"
+                                            placeholder="My Professional Bio"
                                         />
+                                    </div>
+
+                                    <div className="h-px bg-gray-100 dark:bg-gray-800 my-2"></div>
+
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); handleCreateNewPage(); }}
+                                            className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-all border border-blue-100 dark:border-blue-800 group"
+                                        >
+                                            <div className="p-2 bg-white dark:bg-blue-900/40 rounded-lg shadow-sm group-hover:scale-110 transition-transform">
+                                                <PlusCircle className="w-4 h-4" />
+                                            </div>
+                                            <span className="text-[10px] font-black uppercase tracking-tight">Create New</span>
+                                        </button>
+
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); setShowPageSelector(true); }}
+                                            className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all border border-gray-100 dark:border-gray-700 group"
+                                        >
+                                            <div className="p-2 bg-white dark:bg-gray-700 rounded-lg shadow-sm group-hover:scale-110 transition-transform">
+                                                <RotateCcw className="w-4 h-4" />
+                                            </div>
+                                            <span className="text-[10px] font-black uppercase tracking-tight">Switch Page</span>
+                                        </button>
                                     </div>
                                 </div>
                             </Section>
@@ -809,7 +940,7 @@ export default function BioBuilder() {
 
                 <div className={`transition-all duration-500 ${previewMode === 'mobile' ? 'w-[280px] h-[580px]' : 'w-[800px] h-[600px]'} relative`}>
                     <div className={`w-full h-full transition-all duration-500 transform ${previewMode === 'desktop' ? 'scale-75' : 'scale-100'}`}>
-                        <BioPreview bioPage={bioPage} links={links} />
+                        <BioPreview bioPage={bioPage} links={links} allPages={allPages} />
                     </div>
                 </div>
             </div>

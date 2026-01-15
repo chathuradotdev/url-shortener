@@ -10,10 +10,13 @@ export async function GET(req: NextRequest) {
     }
 
     const teamId = req.nextUrl.searchParams.get("teamId");
+    const pageId = req.nextUrl.searchParams.get("pageId");
 
     try {
         let bioPage = null;
-        if (teamId) {
+        if (pageId) {
+            bioPage = await db.getBioPageById(pageId);
+        } else if (teamId) {
             // Check if user is in team
             const role = await db.getUserTeamRole(teamId, session.user.id);
             if (!role) return NextResponse.json({ error: "Access denied" }, { status: 403 });
@@ -23,6 +26,16 @@ export async function GET(req: NextRequest) {
         }
 
         if (!bioPage) return NextResponse.json({ error: "Bio page not found" }, { status: 404 });
+
+        // Security check
+        if (bioPage.user_id !== session.user.id) {
+            if (bioPage.team_id) {
+                const role = await db.getUserTeamRole(bioPage.team_id, session.user.id);
+                if (!role) return NextResponse.json({ error: "Access denied" }, { status: 403 });
+            } else {
+                return NextResponse.json({ error: "Access denied" }, { status: 403 });
+            }
+        }
 
         const links = await db.getBioLinks(bioPage.id);
         return NextResponse.json(links);
@@ -39,10 +52,12 @@ export async function POST(req: NextRequest) {
 
     try {
         const body = await req.json();
-        const { title, url, icon, position, teamId, type, animation } = body;
+        const { title, url, icon, position, teamId, pageId, type, animation } = body;
 
         let bioPage = null;
-        if (teamId) {
+        if (pageId) {
+            bioPage = await db.getBioPageById(pageId);
+        } else if (teamId) {
             // Check if user has permission (admin/owner to add links?)
             const role = await db.getUserTeamRole(teamId, session.user.id);
             if (role !== 'owner' && role !== 'admin' && role !== 'member') {
@@ -54,6 +69,18 @@ export async function POST(req: NextRequest) {
         }
 
         if (!bioPage) return NextResponse.json({ error: "Bio page not found" }, { status: 404 });
+
+        // Security check
+        if (bioPage.user_id !== session.user.id) {
+            if (bioPage.team_id) {
+                const role = await db.getUserTeamRole(bioPage.team_id, session.user.id);
+                if (role !== 'owner' && role !== 'admin' && role !== 'member') {
+                    return NextResponse.json({ error: "Access denied" }, { status: 403 });
+                }
+            } else {
+                return NextResponse.json({ error: "Access denied" }, { status: 403 });
+            }
+        }
 
         // Check premium
         if (session.user.plan !== 'premium' && session.user.role !== 'admin') {
@@ -89,14 +116,16 @@ export async function PUT(req: NextRequest) {
 
     try {
         const body = await req.json();
-        const { items, teamId } = body; // Array of { id, position }
+        const { items, teamId, pageId } = body; // Array of { id, position }
 
         if (!Array.isArray(items)) {
             return NextResponse.json({ error: "Invalid items" }, { status: 400 });
         }
 
         let bioPage = null;
-        if (teamId) {
+        if (pageId) {
+            bioPage = await db.getBioPageById(pageId);
+        } else if (teamId) {
             const role = await db.getUserTeamRole(teamId, session.user.id);
             if (role !== 'owner' && role !== 'admin' && role !== 'member') {
                 return NextResponse.json({ error: "Permission denied" }, { status: 403 });

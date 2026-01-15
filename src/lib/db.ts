@@ -216,7 +216,32 @@ class SupabaseDB {
             query = query.is('team_id', null);
         }
 
-        const { data } = await query.maybeSingle();
+        const { data } = await query.order('created_at', { ascending: false }).limit(1).maybeSingle();
+        return data as BioPage | null;
+    }
+
+    async getBioPages(userId: string, teamId?: string | null): Promise<BioPage[]> {
+        let query = supabase
+            .from('bio_pages')
+            .select('*')
+            .eq('user_id', userId);
+
+        if (teamId) {
+            query = query.eq('team_id', teamId);
+        } else {
+            query = query.is('team_id', null);
+        }
+
+        const { data } = await query.order('created_at', { ascending: false });
+        return (data || []) as BioPage[];
+    }
+
+    async getBioPageById(id: string): Promise<BioPage | null> {
+        const { data } = await supabase
+            .from('bio_pages')
+            .select('*')
+            .eq('id', id)
+            .maybeSingle();
         return data as BioPage | null;
     }
 
@@ -261,10 +286,30 @@ class SupabaseDB {
             query = query.is('team_id', null);
         }
 
-        const { data, error } = await query.select().single();
+        const { data, error } = await query.select().limit(1).single();
 
         if (error) throw error;
         return data as BioPage;
+    }
+
+    async updateBioPageById(id: string, updates: Partial<BioPage>): Promise<BioPage> {
+        const { data, error } = await supabase
+            .from('bio_pages')
+            .update(updates)
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data as BioPage;
+    }
+
+    async deleteBioPage(id: string): Promise<void> {
+        const { error } = await supabase
+            .from('bio_pages')
+            .delete()
+            .eq('id', id);
+        if (error) throw error;
     }
 
     async incrementBioPageViews(id: string): Promise<void> {
