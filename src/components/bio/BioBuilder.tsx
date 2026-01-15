@@ -10,7 +10,7 @@ import {
     Globe, Github, Youtube, Music, Link as LinkIcon, Type, X,
     ChevronRight, CheckCircle2, ChevronDown, ChevronUp, GripVertical,
     Smartphone, Monitor, Save, RotateCcw, Copy, BarChart3, TrendingUp, MousePointerClick,
-    Linkedin, Facebook, Mail, Upload
+    Linkedin, Facebook, Mail, Upload, Music2, Mic, FormInput, AlignLeft, Headphones
 } from "lucide-react";
 import {
     AlertDialog,
@@ -63,6 +63,14 @@ const LINK_ANIMATIONS = [
     { id: 'blink', name: 'Blink (Urgent)' },
 ];
 
+const BLOCK_TYPES = [
+    { id: 'link', name: 'URL Button', icon: <LinkIcon className="w-4 h-4" />, desc: 'Standard link to any URL' },
+    { id: 'text', name: 'Text Block', icon: <AlignLeft className="w-4 h-4" />, desc: 'Heading or paragraph text' },
+    { id: 'audio', name: 'Audio Embed', icon: <Headphones className="w-4 h-4" />, desc: 'Spotify or Apple Music' },
+    // { id: 'instagram', name: 'Insta Sync', icon: <Instagram className="w-4 h-4" />, desc: 'Embed Instagram posts' }, // Temporarily disabled
+    { id: 'form', name: 'Custom Form', icon: <FormInput className="w-4 h-4" />, desc: 'Collect emails or data' },
+];
+
 export default function BioBuilder() {
     const router = useRouter();
     const [loading, setLoading] = useState(true);
@@ -97,6 +105,7 @@ export default function BioBuilder() {
     const [showReplaceDialog, setShowReplaceDialog] = useState(false);
     const [pendingFile, setPendingFile] = useState<File | null>(null);
     const [showPlatformSelector, setShowPlatformSelector] = useState(false);
+    const [showBlockSelector, setShowBlockSelector] = useState(false);
 
     const TEMPLATES = [
         {
@@ -357,15 +366,25 @@ export default function BioBuilder() {
         }
     };
 
-    const handleAddLink = async () => {
-        if (!bioPage.id) await handleSave(true);
+    const handleAddLink = async (type: BioLink['type'] = 'link') => {
+        if (!bioPage.id) {
+            await handleSave(true);
+        }
+
+        // Re-check if we have an ID now (save might have failed)
+        if (!bioPage.id) {
+            toast.error("Please save your page details first.");
+            return;
+        }
 
         const newLink = {
-            title: "New Link",
-            url: "https://",
-            type: 'link' as const,
+            title: type === 'text' ? "Heading" : (type === 'form' ? "Sign up for updates" : "New Block"),
+            url: type === 'text' ? "" : "https://",
+            type: type,
             position: links.length
         };
+
+        const loadingToast = toast.loading("Adding block...");
 
         try {
             const res = await fetch("/api/bio/links", {
@@ -373,12 +392,20 @@ export default function BioBuilder() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(newLink)
             });
+
             if (res.ok) {
                 const saved = await res.json();
                 setLinks([...links, saved]);
+                setShowBlockSelector(false);
+                toast.success("Block added!");
+            } else {
+                const errorData = await res.json().catch(() => ({}));
+                toast.error(errorData.error || "Failed to add block");
             }
         } catch (e) {
-            toast.error("Failed to add link");
+            toast.error("Failed to add block");
+        } finally {
+            toast.dismiss(loadingToast);
         }
     };
 
@@ -705,7 +732,7 @@ export default function BioBuilder() {
                                 isOpen={activeSection === 'blocks'}
                                 onToggle={() => setActiveSection(activeSection === 'blocks' ? 'blocks' : 'blocks')}
                                 icon={<div className="font-bold text-[10px] border border-current w-4 h-4 flex items-center justify-center rounded text-inherit">::</div>}
-                                action={<button onClick={handleAddLink} className="text-xs font-bold bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded transition-colors flex items-center gap-1">New Block <PlusCircle className="w-3 h-3" /></button>}
+                                action={<button onClick={() => setShowBlockSelector(true)} className="text-xs font-bold bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 px-2 py-1 rounded transition-colors flex items-center gap-1">New Block <PlusCircle className="w-3 h-3" /></button>}
                             >
                                 <Reorder.Group axis="y" values={links} onReorder={setLinks} className="space-y-2 p-2 list-none">
                                     {links.map((link) => (
@@ -715,16 +742,23 @@ export default function BioBuilder() {
                                                     <GripVertical className="w-4 h-4" />
                                                 </div>
                                                 <div className="p-2 bg-blue-50 dark:bg-blue-900/20 text-blue-500 rounded-lg">
-                                                    <LinkIcon className="w-4 h-4" />
+                                                    {link.type === 'text' ? <AlignLeft className="w-4 h-4" /> :
+                                                        link.type === 'audio' ? <Headphones className="w-4 h-4" /> :
+                                                            link.type === 'instagram' ? <Instagram className="w-4 h-4" /> :
+                                                                link.type === 'form' ? <FormInput className="w-4 h-4" /> :
+                                                                    <LinkIcon className="w-4 h-4" />}
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <input
                                                         value={link.title}
+                                                        placeholder={link.type === 'text' ? 'Heading text...' : 'Title...'}
                                                         onChange={(e) => updateLink(link.id, { title: e.target.value })}
                                                         className="block w-full text-xs font-bold bg-transparent border-none p-0 focus:ring-0 text-gray-900 dark:text-white mb-0.5"
                                                     />
                                                     <div className="flex items-center gap-2">
-                                                        <span className="text-[10px] text-gray-400 font-medium">URL Button</span>
+                                                        <span className="text-[10px] text-gray-400 font-medium lowercase">
+                                                            {link.type === 'link' ? 'URL Button' : link.type}
+                                                        </span>
                                                         <span className="text-[10px] text-gray-300">•</span>
                                                         <select
                                                             value={link.animation || 'none'}
@@ -732,10 +766,18 @@ export default function BioBuilder() {
                                                             className="text-[10px] bg-transparent border-none p-0 focus:ring-0 text-blue-500 font-bold cursor-pointer hover:underline"
                                                         >
                                                             {LINK_ANIMATIONS.map(an => (
-                                                                <option key={an.id} value={an.id} className="text-gray-900">{an.name}</option>
+                                                                <option key={an.id} value={an.id} className="text-gray-900 font-sans">{an.name}</option>
                                                             ))}
                                                         </select>
                                                     </div>
+                                                    {link.type !== 'text' && link.type !== 'form' && (
+                                                        <input
+                                                            value={link.url}
+                                                            placeholder={link.type === 'audio' ? 'Spotify or Apple Music link' : 'https://...'}
+                                                            onChange={(e) => updateLink(link.id, { url: e.target.value })}
+                                                            className="block w-full text-[10px] bg-transparent border-none p-0 focus:ring-0 text-gray-400 mt-1"
+                                                        />
+                                                    )}
                                                 </div>
                                                 <div className="opacity-0 group-hover:opacity-100 flex items-center gap-1 transition-opacity">
                                                     <button onClick={() => updateLink(link.id, { is_active: !link.is_active })} className={`p-1.5 rounded-md ${link.is_active ? 'text-green-500 bg-green-50' : 'text-gray-300'}`}><CheckCircle2 className="w-3.5 h-3.5" /></button>
@@ -966,6 +1008,40 @@ export default function BioBuilder() {
 
                     <AlertDialogFooter className="p-4 bg-gray-50 dark:bg-gray-800/50">
                         <AlertDialogCancel className="w-full rounded-xl font-bold text-xs">Close</AlertDialogCancel>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            {/* Block Type Selector Dialog */}
+            <AlertDialog open={showBlockSelector} onOpenChange={setShowBlockSelector}>
+                <AlertDialogContent className="sm:max-w-[420px] rounded-[2rem] p-0 overflow-hidden">
+                    <AlertDialogHeader className="p-6 pb-2">
+                        <AlertDialogTitle className="text-xl font-black">Add Block</AlertDialogTitle>
+                        <AlertDialogDescription className="text-xs font-bold text-gray-400">
+                            Select the type of content you want to add
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+
+                    <div className="grid grid-cols-2 gap-3 p-6 max-h-[60vh] overflow-y-auto no-scrollbar">
+                        {BLOCK_TYPES.map(type => (
+                            <button
+                                key={type.id}
+                                onClick={() => handleAddLink(type.id as any)}
+                                className="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 border-gray-50 dark:border-gray-800 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all text-center group"
+                            >
+                                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl group-hover:bg-blue-100 dark:group-hover:bg-blue-900/40 text-gray-500 group-hover:text-blue-600 transition-colors">
+                                    {type.icon}
+                                </div>
+                                <div className="space-y-0.5">
+                                    <div className="text-[11px] font-black">{type.name}</div>
+                                    <div className="text-[9px] text-gray-400 font-bold">{type.desc}</div>
+                                </div>
+                            </button>
+                        ))}
+                    </div>
+
+                    <AlertDialogFooter className="p-4 bg-gray-50 dark:bg-gray-800/50">
+                        <AlertDialogCancel className="w-full rounded-xl font-bold text-xs">Cancel</AlertDialogCancel>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>

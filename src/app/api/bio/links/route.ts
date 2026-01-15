@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
 
     try {
         const body = await req.json();
-        const { title, url, icon, position, teamId } = body;
+        const { title, url, icon, position, teamId, type, animation } = body;
 
         let bioPage = null;
         if (teamId) {
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
 
         if (!bioPage) return NextResponse.json({ error: "Bio page not found" }, { status: 404 });
 
-        // Check premium (skipped for simplicity/Teams for now, or use session.user.plan)
+        // Check premium
         if (session.user.plan !== 'premium' && session.user.role !== 'admin') {
             return NextResponse.json({ error: "Premium required" }, { status: 403 });
         }
@@ -69,7 +69,9 @@ export async function POST(req: NextRequest) {
             url,
             icon,
             position: nextPosition,
-            is_active: true
+            is_active: true,
+            type,
+            animation
         });
 
         return NextResponse.json(newLink);

@@ -6,7 +6,7 @@ import { BioPage, BioLink } from "@/lib/db";
 import {
     Instagram, Twitter, Github, Youtube, Globe, CheckCircle2,
     UserPlus, Share2, Search, Menu, X, QrCode, Copy,
-    Facebook, Linkedin, Check, ChevronLeft, Mail, Phone, Music
+    Facebook, Linkedin, Check, ChevronLeft, Mail, Phone, Music, Send, PlusCircle
 } from "lucide-react";
 import QrCodeDisplay from "../QrCodeDisplay";
 
@@ -318,9 +318,70 @@ export default function BioRenderer({ bioPage, links, variant = 'public' }: BioR
                             </div>
                         )}
 
-                        {/* Links */}
+                        {/* Instagram Feed Section (Priority) - Temporarily Disabled */}
+                        {false && links.filter(l => l.type === 'instagram' && l.is_active !== false).length > 0 && (
+                            <div className="w-full flex flex-col gap-4 mb-8 px-2">
+                                <div className="flex items-center gap-2 px-4 mb-1">
+                                    <div className="p-1.5 bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] rounded-lg text-white">
+                                        <Instagram className="w-3.5 h-3.5" />
+                                    </div>
+                                    <span className="text-[11px] font-black uppercase tracking-wider opacity-60">Instagram Feed</span>
+                                </div>
+                                <div className="grid grid-cols-1 gap-4">
+                                    {links.filter(l => l.type === 'instagram' && l.is_active !== false).map((link) => {
+                                        const instaMatch = link.url.match(/(?:p|reels)\/([a-zA-Z0-9_-]+)/);
+                                        if (!instaMatch) {
+                                            // Fallback for profile URLs - show a nice follow card
+                                            return (
+                                                <a
+                                                    key={link.id}
+                                                    href={link.url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className={`p-6 rounded-2xl flex items-center justify-between group transition-all hover:scale-[1.02] shadow-lg ${glassEffect ? 'backdrop-blur-xl border border-white/20' : ''}`}
+                                                    style={{
+                                                        backgroundColor: glassEffect ? 'rgba(255, 255, 255, 0.1)' : buttonBgColor,
+                                                        color: glassEffect ? '#ffffff' : buttonTextColor
+                                                    }}
+                                                >
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] p-0.5">
+                                                            <div className="w-full h-full rounded-full bg-white dark:bg-gray-900 flex items-center justify-center">
+                                                                <Instagram className="w-6 h-6 text-[#ee2a7b]" />
+                                                            </div>
+                                                        </div>
+                                                        <div>
+                                                            <div className="font-black text-sm">Follow on Instagram</div>
+                                                            <div className="text-[10px] opacity-60 font-bold">@{(link.url.split('instagram.com/')[1] || '').split('/')[0]}</div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="bg-white/20 p-2 rounded-full group-hover:bg-white group-hover:text-gray-900 transition-colors">
+                                                        <PlusCircle className="w-4 h-4" />
+                                                    </div>
+                                                </a>
+                                            );
+                                        }
+                                        return (
+                                            <div key={link.id} className="w-full shadow-xl rounded-[2rem] overflow-hidden bg-white dark:bg-gray-800 border-4 border-white/10">
+                                                <iframe src={`https://www.instagram.com/p/${instaMatch[1]}/embed`} width="100%" height="480" frameBorder="0" scrolling="no" allowTransparency={true} />
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Other Links */}
                         <div className="w-full flex flex-col px-2" style={{ gap: buttonSpacing }}>
-                            {links.filter(l => l.is_active !== false).map((link) => {
+                            {links.filter(l => l.is_active !== false && l.type !== 'instagram').map((link) => {
+                                if (link.type === 'text') {
+                                    return (
+                                        <div key={link.id} className="w-full py-4 text-center">
+                                            <h2 className="text-lg font-black tracking-tight" style={{ color: textColor }}>{link.title}</h2>
+                                        </div>
+                                    );
+                                }
+
                                 if (link.type === 'youtube') {
                                     const videoId = link.url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/)?.[2];
                                     if (!videoId) return null;
@@ -331,12 +392,46 @@ export default function BioRenderer({ bioPage, links, variant = 'public' }: BioR
                                     );
                                 }
 
-                                if (link.type === 'spotify') {
+                                if (link.type === 'spotify' || (link.type === 'audio' && link.url.includes('spotify'))) {
                                     const match = link.url.match(/(track|album|playlist|episode)\/([a-zA-Z0-9]+)/);
                                     if (!match) return null;
                                     return (
                                         <div key={link.id} className="w-full shadow-lg rounded-2xl overflow-hidden">
                                             <iframe src={`https://open.spotify.com/embed/${match[1]}/${match[2]}?utm_source=generator&theme=0`} width="100%" height="152" frameBorder="0" allowFullScreen allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" />
+                                        </div>
+                                    );
+                                }
+
+                                if (link.type === 'audio' && link.url.includes('music.apple.com')) {
+                                    const embedUrl = link.url.replace('music.apple.com', 'embed.music.apple.com');
+                                    return (
+                                        <div key={link.id} className="w-full shadow-lg rounded-2xl overflow-hidden">
+                                            <iframe allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" frameBorder="0" height="175" style={{ width: '100%', maxWidth: '660px', overflow: 'hidden', borderRadius: '10px' }} sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation" src={embedUrl} />
+                                        </div>
+                                    );
+                                }
+
+
+                                if (link.type === 'form') {
+                                    return (
+                                        <div key={link.id}
+                                            className={`w-full p-6 rounded-2xl flex flex-col gap-4 shadow-lg ${glassEffect ? 'backdrop-blur-xl border border-white/20' : ''}`}
+                                            style={{
+                                                backgroundColor: glassEffect ? 'rgba(255, 255, 255, 0.1)' : buttonBgColor,
+                                                color: glassEffect ? '#ffffff' : buttonTextColor
+                                            }}
+                                        >
+                                            <h4 className="font-black text-sm">{link.title || 'Stay Updated'}</h4>
+                                            <div className="flex gap-2">
+                                                <input
+                                                    type="email"
+                                                    placeholder="Enter your email"
+                                                    className="flex-1 bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-xs focus:ring-2 focus:ring-white/30 outline-none placeholder:text-inherit/50"
+                                                />
+                                                <button className="bg-white text-gray-900 rounded-xl px-4 py-2 font-black text-xs hover:scale-105 active:scale-95 transition-transform">
+                                                    <Send className="w-3.5 h-3.5" />
+                                                </button>
+                                            </div>
                                         </div>
                                     );
                                 }
