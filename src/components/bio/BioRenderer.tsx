@@ -489,8 +489,8 @@ export default function BioRenderer({ bioPage, links, variant = 'public' }: BioR
     }
 
     return (
-        <div className="min-h-screen w-full flex items-center justify-center p-0 md:bg-gray-100 md:dark:bg-gray-900 md:py-8">
-            <div className="w-full h-full md:w-[400px] md:h-auto md:aspect-[9/19] md:max-h-[90vh] md:rounded-[2.5rem] md:shadow-2xl md:ring-8 md:ring-black/5 overflow-hidden bg-white">
+        <div className="min-h-screen w-full flex flex-col md:items-center md:justify-center p-0 md:bg-gray-100 md:dark:bg-gray-900 md:py-8">
+            <div className="w-full flex-grow md:flex-grow-0 md:w-[400px] md:h-auto md:aspect-[9/19] md:max-h-[90vh] md:rounded-[2.5rem] md:shadow-2xl md:ring-8 md:ring-black/5 overflow-hidden" style={{ backgroundColor: bgColor }}>
                 {content}
             </div>
         </div>
