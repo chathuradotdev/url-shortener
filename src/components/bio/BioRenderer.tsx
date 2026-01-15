@@ -1,11 +1,12 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { useState } from "react";
 import { BioPage, BioLink } from "@/lib/db";
 import {
     Instagram, Twitter, Github, Youtube, Globe, CheckCircle2,
     UserPlus, Share2, Search, Menu, X, QrCode, Copy,
-    Facebook, Linkedin, Check, ChevronLeft
+    Facebook, Linkedin, Check, ChevronLeft, Mail, Phone, Music
 } from "lucide-react";
 import QrCodeDisplay from "../QrCodeDisplay";
 
@@ -43,6 +44,8 @@ export default function BioRenderer({ bioPage, links, variant = 'public' }: BioR
     const profileShadow = theme.profileShadow || 0; // 0-20
     const profileBorder = theme.profileBorder || 0; // 0-10
     const socialSize = theme.socialSize || 24; // px
+    const buttonPadding = theme.buttonPadding || 16; // px
+    const buttonSpacing = theme.buttonSpacing || 12; // px
 
     const socials = theme.socials || {};
 
@@ -57,6 +60,44 @@ export default function BioRenderer({ bioPage, links, variant = 'public' }: BioR
             return `${level * 4}px ${level * 4}px 0px rgba(0,0,0,0.2)`;
         }
         return `0px ${level * 4}px ${level * 10}px rgba(0,0,0,${level * 0.1})`;
+    };
+
+    const getAnimationProps = (animation?: string) => {
+        switch (animation) {
+            case 'pulse':
+                return {
+                    animate: { scale: [1, 1.03, 1] },
+                    transition: { duration: 2, repeat: Infinity, ease: "easeInOut" }
+                };
+            case 'shake':
+                return {
+                    animate: { x: [0, -2, 2, -2, 2, 0] },
+                    transition: { duration: 0.5, repeat: Infinity, repeatDelay: 3 }
+                };
+            case 'bounce':
+                return {
+                    animate: { y: [0, -5, 0] },
+                    transition: { duration: 2, repeat: Infinity, ease: "easeInOut" }
+                };
+            case 'glow':
+                return {
+                    animate: {
+                        boxShadow: [
+                            getShadowStyle(1),
+                            `0px 0px 20px ${buttonBgColor}80`,
+                            getShadowStyle(1)
+                        ]
+                    },
+                    transition: { duration: 2, repeat: Infinity }
+                };
+            case 'blink':
+                return {
+                    animate: { opacity: [1, 0.5, 1] },
+                    transition: { duration: 1, repeat: Infinity }
+                };
+            default:
+                return {};
+        }
     };
 
     const handleCopyLink = () => {
@@ -251,40 +292,32 @@ export default function BioRenderer({ bioPage, links, variant = 'public' }: BioR
                     {/* Social Icons with Dynamic Size */}
                     {Object.keys(socials).some(key => socials[key]) && (
                         <div className="flex flex-wrap justify-center gap-6 mb-8 px-4">
-                            {socials.instagram && (
-                                <a href={socials.instagram} target="_blank" className="transition-transform hover:scale-110 opacity-70 hover:opacity-100" style={{ color: textColor }}>
-                                    <Instagram style={{ width: socialSize, height: socialSize }} strokeWidth={1.5} />
-                                </a>
-                            )}
-                            {socials.twitter && (
-                                <a href={socials.twitter} target="_blank" className="transition-transform hover:scale-110 opacity-70 hover:opacity-100" style={{ color: textColor }}>
-                                    {/* X Logo */}
-                                    <svg viewBox="0 0 24 24" style={{ width: socialSize, height: socialSize }} fill="currentColor">
-                                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
-                                    </svg>
-                                </a>
-                            )}
-                            {socials.github && (
-                                <a href={socials.github} target="_blank" className="transition-transform hover:scale-110 opacity-70 hover:opacity-100" style={{ color: textColor }}>
-                                    <Github style={{ width: socialSize, height: socialSize }} strokeWidth={1.5} />
-                                </a>
-                            )}
-                            {socials.youtube && (
-                                <a href={socials.youtube} target="_blank" className="transition-transform hover:scale-110 opacity-70 hover:opacity-100" style={{ color: textColor }}>
-                                    <Youtube style={{ width: socialSize, height: socialSize }} strokeWidth={1.5} />
-                                </a>
-                            )}
+                            {Object.entries(socials).map(([key, value]) => {
+                                if (!value) return null;
+                                return (
+                                    <a
+                                        key={key}
+                                        href={key === 'email' ? `mailto:${value}` : (key === 'phone' ? `tel:${value}` : value as string)}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="transition-transform hover:scale-110 opacity-70 hover:opacity-100"
+                                        style={{ color: textColor }}
+                                    >
+                                        <SocialIcon name={key} size={socialSize} />
+                                    </a>
+                                );
+                            })}
                         </div>
                     )}
 
                     {/* Links */}
-                    <div className="w-full space-y-3 px-2">
+                    <div className="w-full flex flex-col px-2" style={{ gap: buttonSpacing }}>
                         {links.filter(l => l.is_active !== false).map((link) => {
                             if (link.type === 'youtube') {
                                 const videoId = link.url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/)?.[2];
                                 if (!videoId) return null;
                                 return (
-                                    <div key={link.id} className="w-full rounded-2xl overflow-hidden shadow-lg mb-4 transform hover:scale-[1.02] transition-all">
+                                    <div key={link.id} className="w-full rounded-2xl overflow-hidden shadow-lg transform hover:scale-[1.02] transition-all">
                                         <iframe width="100%" height="180" src={`https://www.youtube.com/embed/${videoId}`} title={link.title} frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
                                     </div>
                                 );
@@ -294,14 +327,14 @@ export default function BioRenderer({ bioPage, links, variant = 'public' }: BioR
                                 const match = link.url.match(/(track|album|playlist|episode)\/([a-zA-Z0-9]+)/);
                                 if (!match) return null;
                                 return (
-                                    <div key={link.id} className="w-full mb-4 shadow-lg rounded-2xl overflow-hidden">
+                                    <div key={link.id} className="w-full shadow-lg rounded-2xl overflow-hidden">
                                         <iframe src={`https://open.spotify.com/embed/${match[1]}/${match[2]}?utm_source=generator&theme=0`} width="100%" height="152" frameBorder="0" allowFullScreen allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" />
                                     </div>
                                 );
                             }
 
                             return (
-                                <a
+                                <motion.a
                                     key={link.id}
                                     href={link.url}
                                     target="_blank"
@@ -314,16 +347,19 @@ export default function BioRenderer({ bioPage, links, variant = 'public' }: BioR
                                             body: JSON.stringify({ linkId: link.id })
                                         }).catch(err => console.error("Track click failed", err));
                                     }}
-                                    className={`block w-full py-4 px-6 text-center text-sm font-bold transition-all hover:scale-[1.02] active:scale-[0.98] ${buttonClass}`}
+                                    className={`block w-full px-6 text-center text-sm font-bold transition-all hover:scale-[1.02] active:scale-[0.98] ${buttonClass}`}
                                     style={{
                                         backgroundColor: buttonStyle === 'border-2' ? 'transparent' : buttonBgColor,
                                         color: buttonStyle === 'border-2' ? textColor : buttonTextColor,
                                         borderColor: buttonStyle === 'border-2' ? textColor : 'transparent',
-                                        boxShadow: getShadowStyle(1)
+                                        boxShadow: getShadowStyle(1),
+                                        paddingTop: buttonPadding,
+                                        paddingBottom: buttonPadding
                                     }}
+                                    {...getAnimationProps(link.animation)}
                                 >
                                     {link.title}
-                                </a>
+                                </motion.a>
                             );
                         })}
                     </div>
@@ -354,4 +390,25 @@ export default function BioRenderer({ bioPage, links, variant = 'public' }: BioR
             </div>
         </div>
     );
+}
+function SocialIcon({ name, size = 20 }: { name: string, size?: number }) {
+    const props = { style: { width: size, height: size }, strokeWidth: 1.5 };
+
+    switch (name) {
+        case 'email': return <Mail {...props} />;
+        case 'phone': return <Phone {...props} />;
+        case 'instagram': return <Instagram {...props} />;
+        case 'twitter': return (
+            <svg viewBox="0 0 24 24" style={{ width: size, height: size }} fill="currentColor">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
+            </svg>
+        );
+        case 'linkedin': return <Linkedin {...props} />;
+        case 'facebook': return <Facebook {...props} />;
+        case 'github': return <Github {...props} />;
+        case 'youtube': return <Youtube {...props} />;
+        case 'website': return <Globe {...props} />;
+        case 'tiktok': return <Music {...props} />;
+        default: return <Globe {...props} />;
+    }
 }

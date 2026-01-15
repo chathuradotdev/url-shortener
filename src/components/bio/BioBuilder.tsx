@@ -24,6 +24,45 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Reorder } from "framer-motion";
 
+function TwitterIcon() {
+    return (
+        <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor">
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
+        </svg>
+    );
+}
+
+const PLATFORMS = [
+    { id: 'instagram', name: 'Instagram', icon: <Instagram className="w-4 h-4" />, placeholder: '@username' },
+    { id: 'twitter', name: 'Twitter (X)', icon: <TwitterIcon />, placeholder: '@username' },
+    { id: 'github', name: 'GitHub', icon: <Github className="w-4 h-4" />, placeholder: 'username' },
+    { id: 'youtube', name: 'YouTube', icon: <Youtube className="w-4 h-4" />, placeholder: 'Channel URL' },
+    { id: 'linkedin', name: 'LinkedIn', icon: <Linkedin className="w-4 h-4" />, placeholder: 'Profile URL' },
+    { id: 'facebook', name: 'Facebook', icon: <Facebook className="w-4 h-4" />, placeholder: 'Profile URL' },
+    { id: 'email', name: 'Email', icon: <Mail className="w-4 h-4" />, placeholder: 'your@email.com' },
+    { id: 'website', name: 'Website', icon: <Globe className="w-4 h-4" />, placeholder: 'https://...' },
+    { id: 'tiktok', name: 'TikTok', icon: <Music className="w-4 h-4" />, placeholder: '@username' },
+];
+
+const FONTS = [
+    { id: 'Inter', name: 'Inter (Modern)' },
+    { id: 'Outfit', name: 'Outfit (Premium)' },
+    { id: 'Roboto', name: 'Roboto (Classic)' },
+    { id: 'Playfair Display', name: 'Playfair (Serif)' },
+    { id: 'Montserrat', name: 'Montserrat (Bold)' },
+    { id: 'Space Grotesk', name: 'Space (Tech)' },
+    { id: 'Courier Prime', name: 'Courier (Mono)' },
+];
+
+const LINK_ANIMATIONS = [
+    { id: 'none', name: 'No Animation' },
+    { id: 'pulse', name: 'Pulse (Subtle)' },
+    { id: 'shake', name: 'Shake (Alert)' },
+    { id: 'bounce', name: 'Bounce (Playful)' },
+    { id: 'glow', name: 'Glow (Highlight)' },
+    { id: 'blink', name: 'Blink (Urgent)' },
+];
+
 export default function BioBuilder() {
     const router = useRouter();
     const [loading, setLoading] = useState(true);
@@ -57,6 +96,7 @@ export default function BioBuilder() {
     const [showShareMenu, setShowShareMenu] = useState(false);
     const [showReplaceDialog, setShowReplaceDialog] = useState(false);
     const [pendingFile, setPendingFile] = useState<File | null>(null);
+    const [showPlatformSelector, setShowPlatformSelector] = useState(false);
 
     const TEMPLATES = [
         {
@@ -603,17 +643,42 @@ export default function BioBuilder() {
                                 icon={<Share2 className="w-4 h-4" />}
                             >
                                 <div className="space-y-2 p-3">
-                                    {['instagram', 'twitter', 'github', 'youtube'].map(key => (
-                                        <div key={key} className="flex items-center gap-2">
-                                            <div className="w-6 flex justify-center text-gray-400"><SocialIcon name={key} /></div>
-                                            <input
-                                                value={bioPage.theme?.socials?.[key] || ''}
-                                                onChange={e => setBioPage({ ...bioPage, theme: { ...(bioPage.theme || {}), socials: { ...(bioPage.theme?.socials || {}), [key]: e.target.value } } })}
-                                                className="flex-1 text-xs p-2 bg-gray-50 dark:bg-gray-800 rounded-lg border-none"
-                                                placeholder={`/${key}`}
-                                            />
-                                        </div>
-                                    ))}
+                                    {Object.keys(bioPage.theme?.socials || {}).map(key => {
+                                        const platform = PLATFORMS.find(p => p.id === key);
+                                        if (!platform && !['instagram', 'twitter', 'github', 'youtube', 'email', 'linkedin', 'facebook', 'website', 'tiktok'].includes(key)) return null;
+
+                                        return (
+                                            <div key={key} className="flex items-center gap-2">
+                                                <div className="w-6 flex justify-center text-gray-400">
+                                                    <SocialIcon name={key} />
+                                                </div>
+                                                <input
+                                                    value={bioPage.theme?.socials?.[key] || ''}
+                                                    onChange={e => setBioPage({ ...bioPage, theme: { ...(bioPage.theme || {}), socials: { ...(bioPage.theme?.socials || {}), [key]: e.target.value } } })}
+                                                    className="flex-1 text-xs p-2 bg-gray-50 dark:bg-gray-800 rounded-lg border-none"
+                                                    placeholder={platform?.placeholder || `/${key}`}
+                                                />
+                                                <button
+                                                    onClick={() => {
+                                                        const newSocials = { ...bioPage.theme?.socials };
+                                                        delete newSocials[key];
+                                                        updateTheme('socials', newSocials);
+                                                    }}
+                                                    className="text-gray-300 hover:text-red-500 p-1"
+                                                >
+                                                    <X className="w-3 h-3" />
+                                                </button>
+                                            </div>
+                                        );
+                                    })}
+
+                                    <button
+                                        onClick={() => setShowPlatformSelector(true)}
+                                        className="w-full py-2 mt-2 border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-xl text-[10px] font-bold text-gray-400 hover:border-blue-500 hover:text-blue-500 transition-all flex items-center justify-center gap-2"
+                                    >
+                                        <PlusCircle className="w-3.5 h-3.5" />
+                                        Add more social media
+                                    </button>
                                 </div>
                             </Section>
 
@@ -640,7 +705,19 @@ export default function BioBuilder() {
                                                         onChange={(e) => updateLink(link.id, { title: e.target.value })}
                                                         className="block w-full text-xs font-bold bg-transparent border-none p-0 focus:ring-0 text-gray-900 dark:text-white mb-0.5"
                                                     />
-                                                    <div className="text-[10px] text-gray-400 font-medium">URL Button</div>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-[10px] text-gray-400 font-medium">URL Button</span>
+                                                        <span className="text-[10px] text-gray-300">•</span>
+                                                        <select
+                                                            value={link.animation || 'none'}
+                                                            onChange={(e) => updateLink(link.id, { animation: e.target.value })}
+                                                            className="text-[10px] bg-transparent border-none p-0 focus:ring-0 text-blue-500 font-bold cursor-pointer hover:underline"
+                                                        >
+                                                            {LINK_ANIMATIONS.map(an => (
+                                                                <option key={an.id} value={an.id} className="text-gray-900">{an.name}</option>
+                                                            ))}
+                                                        </select>
+                                                    </div>
                                                 </div>
                                                 <div className="opacity-0 group-hover:opacity-100 flex items-center gap-1 transition-opacity">
                                                     <button onClick={() => updateLink(link.id, { is_active: !link.is_active })} className={`p-1.5 rounded-md ${link.is_active ? 'text-green-500 bg-green-50' : 'text-gray-300'}`}><CheckCircle2 className="w-3.5 h-3.5" /></button>
@@ -744,12 +821,50 @@ export default function BioBuilder() {
                                 max={10}
                                 onChange={(v) => updateTheme('profileBorder', v)}
                             />
+
+                            <div className="pt-2">
+                                <label className="text-[11px] font-bold text-gray-500 block mb-2">Font Family</label>
+                                <div className="relative group">
+                                    <select
+                                        value={bioPage.theme?.fontFamily || 'Inter'}
+                                        onChange={(e) => updateTheme('fontFamily', e.target.value)}
+                                        className="w-full text-xs p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl border-2 border-gray-100 dark:border-gray-800 font-bold focus:ring-2 focus:ring-blue-500 outline-none transition-all appearance-none cursor-pointer pr-10"
+                                        style={{ fontFamily: bioPage.theme?.fontFamily || 'Inter' }}
+                                    >
+                                        {FONTS.map(f => (
+                                            <option key={f.id} value={f.id} style={{ fontFamily: f.id }}>
+                                                {f.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 group-hover:text-blue-500 transition-colors">
+                                        <ChevronDown className="w-4 h-4" />
+                                    </div>
+                                </div>
+                            </div>
+
                             <Slider
                                 label="Social Icon Size"
                                 value={bioPage.theme?.socialSize || 24}
                                 min={16}
                                 max={48}
                                 onChange={(v) => updateTheme('socialSize', v)}
+                            />
+
+                            <Slider
+                                label="Button Vertical Size"
+                                value={bioPage.theme?.buttonPadding || 16}
+                                min={8}
+                                max={32}
+                                onChange={(v) => updateTheme('buttonPadding', v)}
+                            />
+
+                            <Slider
+                                label="Button Spacing"
+                                value={bioPage.theme?.buttonSpacing || 12}
+                                min={0}
+                                max={40}
+                                onChange={(v) => updateTheme('buttonSpacing', v)}
                             />
                         </div>
                     </div>
@@ -785,6 +900,44 @@ export default function BioBuilder() {
                         <AlertDialogAction onClick={confirmReplacement} className="bg-blue-600 hover:bg-blue-700">
                             Replace Image
                         </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            {/* Platform Selector Dialog */}
+            <AlertDialog open={showPlatformSelector} onOpenChange={setShowPlatformSelector}>
+                <AlertDialogContent className="sm:max-w-[420px] rounded-[2rem] p-0 overflow-hidden">
+                    <AlertDialogHeader className="p-6 pb-2">
+                        <AlertDialogTitle className="text-xl font-black">Add Social</AlertDialogTitle>
+                        <AlertDialogDescription className="text-xs font-bold text-gray-400">
+                            Select a platform to add to your page
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+
+                    <div className="grid grid-cols-3 gap-3 p-6 max-h-[60vh] overflow-y-auto no-scrollbar">
+                        {PLATFORMS.map(p => {
+                            const isAdded = !!bioPage.theme?.socials?.[p.id];
+                            return (
+                                <button
+                                    key={p.id}
+                                    disabled={isAdded}
+                                    onClick={() => {
+                                        updateTheme('socials', { ...(bioPage.theme?.socials || {}), [p.id]: '' });
+                                        setShowPlatformSelector(false);
+                                    }}
+                                    className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all ${isAdded ? 'opacity-30' : 'hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20'}`}
+                                >
+                                    <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                                        {p.icon}
+                                    </div>
+                                    <span className="text-[10px] font-bold">{p.name}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    <AlertDialogFooter className="p-4 bg-gray-50 dark:bg-gray-800/50">
+                        <AlertDialogCancel className="w-full rounded-xl font-bold text-xs">Close</AlertDialogCancel>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
@@ -877,13 +1030,12 @@ function Slider({ label, value, onChange, min = 0, max = 100 }: SliderProps) {
 
 function SocialIcon({ name }: { name: string }) {
     if (name === 'instagram') return <Instagram className="w-4 h-4" />;
-    if (name === 'twitter') return (
-        // X Logo
-        <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor">
-            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
-        </svg>
-    );
+    if (name === 'twitter') return <TwitterIcon />;
     if (name === 'github') return <Github className="w-4 h-4" />;
     if (name === 'youtube') return <Youtube className="w-4 h-4" />;
+    if (name === 'linkedin') return <Linkedin className="w-4 h-4" />;
+    if (name === 'facebook') return <Facebook className="w-4 h-4" />;
+    if (name === 'email') return <Mail className="w-4 h-4" />;
+    if (name === 'tiktok') return <Music className="w-4 h-4" />;
     return <Globe className="w-4 h-4" />;
 }

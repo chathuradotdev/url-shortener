@@ -149,6 +149,7 @@ export interface BioLink {
     is_active: boolean;
     clicks?: number;
     type?: 'link' | 'youtube' | 'spotify' | 'header';
+    animation?: string;
     created_at: string;
 }
 
