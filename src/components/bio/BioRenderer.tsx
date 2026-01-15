@@ -20,6 +20,8 @@ export default function BioRenderer({ bioPage, links, variant = 'public' }: BioR
     const [showShare, setShowShare] = useState(false);
     const [viewMode, setViewMode] = useState<'share' | 'qr'>('share');
     const [isCopied, setIsCopied] = useState(false);
+    const [isSearchVisible, setIsSearchVisible] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
 
     const theme = bioPage.theme || {};
 
@@ -233,10 +235,35 @@ export default function BioRenderer({ bioPage, links, variant = 'public' }: BioR
                             <Share2 onClick={() => setShowShare(true)} className="w-5 h-5 opacity-100 cursor-pointer hover:scale-110 transition-transform" />
                         </div>
                         <div className="flex gap-4">
-                            <Search className="w-5 h-5 opacity-80" />
+                            {theme.showSearch && (
+                                <Search onClick={() => setIsSearchVisible(!isSearchVisible)} className="w-5 h-5 opacity-80 cursor-pointer hover:scale-110 transition-transform" />
+                            )}
                             <Menu className="w-5 h-5 opacity-80" />
                         </div>
                     </div>
+
+                    {isSearchVisible && theme.showSearch && (
+                        <div className="w-full px-6 mb-4 animate-in fade-in slide-in-from-top-1 z-20">
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                <input
+                                    type="text"
+                                    placeholder="Search links..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="w-full pl-9 pr-4 py-2 bg-white/10 backdrop-blur-md rounded-xl text-sm border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-gray-400/70"
+                                    style={{ color: textColor }}
+                                    autoFocus
+                                />
+                                {searchQuery && (
+                                    <X
+                                        onClick={() => setSearchQuery("")}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-600"
+                                    />
+                                )}
+                            </div>
+                        </div>
+                    )}
 
                     {/* Header Image (Optional Banner) */}
                     {headerImage && (
@@ -291,6 +318,9 @@ export default function BioRenderer({ bioPage, links, variant = 'public' }: BioR
                         <div className="text-center px-4 w-full mb-6">
                             <h1 className="text-xl font-bold mb-3 flex items-center justify-center gap-1.5" style={{ color: textColor }}>
                                 {bioPage.title || 'Your Name'}
+                                {theme.isVerified && (
+                                    <CheckCircle2 className="w-4 h-4 text-blue-500 fill-blue-500/10" />
+                                )}
                             </h1>
                             <p className="text-xs opacity-70 mb-2 max-w-[240px] leading-relaxed font-medium mx-auto" style={{ color: textColor }}>
                                 {bioPage.description || 'Welcome to my page.'}
@@ -373,7 +403,12 @@ export default function BioRenderer({ bioPage, links, variant = 'public' }: BioR
 
                         {/* Other Links */}
                         <div className="w-full flex flex-col px-2" style={{ gap: buttonSpacing }}>
-                            {links.filter(l => l.is_active !== false && l.type !== 'instagram').map((link) => {
+                            {links.filter(l => {
+                                if (l.is_active === false || l.type === 'instagram') return false;
+                                if (!searchQuery) return true;
+                                const q = searchQuery.toLowerCase();
+                                return l.title.toLowerCase().includes(q) || (l.url && l.url.toLowerCase().includes(q));
+                            }).map((link) => {
                                 if (link.type === 'text') {
                                     return (
                                         <div key={link.id} className="w-full py-4 text-center">

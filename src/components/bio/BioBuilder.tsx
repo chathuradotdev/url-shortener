@@ -10,7 +10,7 @@ import {
     Globe, Github, Youtube, Music, Link as LinkIcon, Type, X,
     ChevronRight, CheckCircle2, ChevronDown, ChevronUp, GripVertical,
     Smartphone, Monitor, Save, RotateCcw, Copy, BarChart3, TrendingUp, MousePointerClick,
-    Linkedin, Facebook, Mail, Upload, Music2, Mic, FormInput, AlignLeft, Headphones
+    Linkedin, Facebook, Mail, Upload, Music2, Mic, FormInput, AlignLeft, Headphones, Search
 } from "lucide-react";
 import {
     AlertDialog,
@@ -953,6 +953,38 @@ export default function BioBuilder() {
                             ))}
                         </div>
                     </div>
+
+                    <div className="h-px bg-gray-100 dark:bg-gray-800"></div>
+
+                    <div>
+                        <h4 className="font-bold text-xs mb-4">Page Features</h4>
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <CheckCircle2 className="w-4 h-4 text-blue-500" />
+                                    <label className="text-[11px] font-bold text-gray-500">Verified Badge</label>
+                                </div>
+                                <button
+                                    onClick={() => updateTheme('isVerified', !bioPage.theme?.isVerified)}
+                                    className={`w-8 h-4 rounded-full transition-all relative ${bioPage.theme?.isVerified ? 'bg-blue-500' : 'bg-gray-200'}`}
+                                >
+                                    <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${bioPage.theme?.isVerified ? 'right-0.5' : 'left-0.5'}`}></div>
+                                </button>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <Search className="w-4 h-4 text-gray-500" />
+                                    <label className="text-[11px] font-bold text-gray-500">Enable Search</label>
+                                </div>
+                                <button
+                                    onClick={() => updateTheme('showSearch', !bioPage.theme?.showSearch)}
+                                    className={`w-8 h-4 rounded-full transition-all relative ${bioPage.theme?.showSearch ? 'bg-blue-500' : 'bg-gray-200'}`}
+                                >
+                                    <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${bioPage.theme?.showSearch ? 'right-0.5' : 'left-0.5'}`}></div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -1045,7 +1077,7 @@ export default function BioBuilder() {
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
-        </div>
+        </div >
     );
 }
 
