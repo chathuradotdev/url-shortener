@@ -9,6 +9,8 @@ import {
     Facebook, Linkedin, Check, ChevronLeft, Mail, Phone, Music, Send, PlusCircle
 } from "lucide-react";
 import QrCodeDisplay from "../QrCodeDisplay";
+import CountdownWidget from "./CountdownWidget";
+import ContactFormWidget from "./ContactFormWidget";
 import { toast } from "sonner";
 
 interface BioRendererProps {
@@ -524,28 +526,26 @@ export default function BioRenderer({ bioPage, links, variant = 'public', allPag
                                     );
                                 }
 
+                                if (link.type === 'countdown') {
+                                    return (
+                                        <CountdownWidget
+                                            key={link.id}
+                                            targetDate={link.url}
+                                            title={link.title}
+                                            theme={theme}
+                                        />
+                                    );
+                                }
 
                                 if (link.type === 'form') {
                                     return (
-                                        <div key={link.id}
-                                            className={`w-full p-6 rounded-2xl flex flex-col gap-4 shadow-lg ${glassEffect ? 'backdrop-blur-xl border border-white/20' : ''}`}
-                                            style={{
-                                                backgroundColor: glassEffect ? 'rgba(255, 255, 255, 0.1)' : buttonBgColor,
-                                                color: glassEffect ? '#ffffff' : buttonTextColor
-                                            }}
-                                        >
-                                            <h4 className="font-black text-sm">{link.title || 'Stay Updated'}</h4>
-                                            <div className="flex gap-2">
-                                                <input
-                                                    type="email"
-                                                    placeholder="Enter your email"
-                                                    className="flex-1 bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-xs focus:ring-2 focus:ring-white/30 outline-none placeholder:text-inherit/50"
-                                                />
-                                                <button className="bg-white text-gray-900 rounded-xl px-4 py-2 font-black text-xs hover:scale-105 active:scale-95 transition-transform">
-                                                    <Send className="w-3.5 h-3.5" />
-                                                </button>
-                                            </div>
-                                        </div>
+                                        <ContactFormWidget
+                                            key={link.id}
+                                            link={link}
+                                            theme={theme}
+                                            bioPageId={bioPage.id}
+                                            glassEffect={glassEffect}
+                                        />
                                     );
                                 }
 
@@ -563,7 +563,7 @@ export default function BioRenderer({ bioPage, links, variant = 'public', allPag
                                                 body: JSON.stringify({ linkId: link.id })
                                             }).catch(err => console.error("Track click failed", err));
                                         }}
-                                        className={`block w-full px-6 text-center text-sm font-bold transition-all hover:scale-[1.02] active:scale-[0.98] ${buttonClass} ${glassEffect ? 'backdrop-blur-xl border border-white/20' : ''}`}
+                                        className={`block w-full px-6 flex items-center justify-center text-sm font-bold transition-all hover:scale-[1.02] active:scale-[0.98] ${buttonClass} ${glassEffect ? 'backdrop-blur-xl border border-white/20' : ''}`}
                                         style={{
                                             backgroundColor: buttonStyle === 'border-2' ? 'transparent' : (glassEffect ? 'rgba(255, 255, 255, 0.15)' : buttonBgColor),
                                             color: buttonStyle === 'border-2' ? textColor : (glassEffect ? '#ffffff' : buttonTextColor),
@@ -575,7 +575,14 @@ export default function BioRenderer({ bioPage, links, variant = 'public', allPag
                                         }}
                                         {...getAnimationProps(link.animation)}
                                     >
-                                        {link.title}
+                                        <div className="relative w-full flex items-center justify-center">
+                                            {link.type === 'audio' && (
+                                                <div className="absolute left-0">
+                                                    <Music className="w-4 h-4 opacity-70" />
+                                                </div>
+                                            )}
+                                            <span>{link.title}</span>
+                                        </div>
                                     </motion.a>
                                 );
                             })}
@@ -586,34 +593,43 @@ export default function BioRenderer({ bioPage, links, variant = 'public', allPag
 
                     {/* Footer Branding */}
                     <div className="mt-8 mb-4 flex flex-col items-center gap-1 opacity-40 hover:opacity-100 transition-opacity relative z-10">
-                        {!userBranding || userBranding.type === 'default' ? (
-                            <>
-                                <span className="text-[9px] font-bold tracking-widest uppercase">Made With</span>
-                                <div className="flex items-center gap-1 font-black text-sm tracking-tight">
-                                    <Globe className="w-3 h-3" /> liinks.co
-                                </div>
-                            </>
-                        ) : userBranding.type === 'text' && userBranding.text ? (
-                            <span className="text-[10px] font-bold tracking-wide text-center px-4">
-                                {userBranding.text}
-                            </span>
-                        ) : userBranding.type === 'image' && userBranding.image ? (
-                            <div className="flex items-center justify-center">
-                                <img
-                                    src={userBranding.image}
-                                    alt="Company branding"
-                                    className="max-h-10 object-contain"
-                                    style={{ maxWidth: '200px' }}
-                                />
-                            </div>
-                        ) : (
-                            <>
-                                <span className="text-[9px] font-bold tracking-widest uppercase">Made With</span>
-                                <div className="flex items-center gap-1 font-black text-sm tracking-tight">
-                                    <Globe className="w-3 h-3" /> liinks.co
-                                </div>
-                            </>
-                        )}
+                        {(() => {
+                            const branding = userBranding || theme.userBranding;
+
+                            if (branding?.type === 'image' && branding.image) {
+                                return (
+                                    <div className="flex items-center justify-center">
+                                        <img
+                                            src={branding.image}
+                                            alt="Company branding"
+                                            className="object-contain transition-all"
+                                            style={{
+                                                height: `${branding.height || 24}px`,
+                                                maxWidth: '200px'
+                                            }}
+                                        />
+                                    </div>
+                                );
+                            }
+
+                            if (branding?.type === 'text' && branding.text) {
+                                return (
+                                    <span className="text-[10px] font-bold tracking-wide text-center px-4">
+                                        {branding.text}
+                                    </span>
+                                );
+                            }
+
+                            // Default Branding
+                            return (
+                                <>
+                                    <span className="text-[9px] font-bold tracking-widest uppercase">Made With</span>
+                                    <div className="flex items-center gap-1 font-black text-sm tracking-tight">
+                                        <Globe className="w-3 h-3" /> liinks.co
+                                    </div>
+                                </>
+                            );
+                        })()}
                     </div>
                 </div>
             </div>

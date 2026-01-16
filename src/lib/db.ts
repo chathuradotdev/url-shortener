@@ -151,7 +151,7 @@ export interface BioLink {
     position: number;
     is_active: boolean;
     clicks?: number;
-    type?: 'link' | 'youtube' | 'spotify' | 'header' | 'text' | 'audio' | 'instagram' | 'form';
+    type?: 'link' | 'youtube' | 'spotify' | 'header' | 'text' | 'audio' | 'instagram' | 'form' | 'countdown';
     animation?: string;
     created_at: string;
 }
@@ -188,6 +188,17 @@ export interface TeamMember {
     role: 'owner' | 'admin' | 'member' | 'viewer';
     joined_at: string;
     user?: User; // Joined user data
+}
+
+export interface BioLead {
+    id: string;
+    bio_page_id: string;
+    user_id: string;
+    name?: string;
+    email: string;
+    message?: string;
+    status: 'unread' | 'read' | 'archived';
+    created_at: string;
 }
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -378,6 +389,30 @@ class SupabaseDB {
             await supabase.from('bio_links').update({ clicks: (data.clicks || 0) + 1 }).eq('id', id);
         }
     }
+    async createBioLead(lead: Omit<BioLead, 'id' | 'created_at'>): Promise<BioLead> {
+        const { data, error } = await supabase
+            .from('bio_leads')
+            .insert([{
+                ...lead,
+                status: 'unread'
+            }])
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data as BioLead;
+    }
+
+    async getBioLeads(bioPageId: string): Promise<BioLead[]> {
+        const { data, error } = await supabase
+            .from('bio_leads')
+            .select('*')
+            .eq('bio_page_id', bioPageId)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        return data as BioLead[];
+    }
 
     // --- User Methods ---
 
@@ -389,13 +424,6 @@ class SupabaseDB {
                 role: 'user',
                 status: 'active',
                 plan: 'freemium',
-                // Default logic can be overridden by passed user object properties if I used spread ...user AFTER defaults, 
-                // but here ...user comes first. 
-                // Since user argument Omit excludes 'plan', we are good.
-                // However, I need to make sure trial_ends_at is PASSED in the user argument or I default it here?
-                // The interface Omit doesn't exclude trial_ends_at, so it can be passed in 'user'.
-                // So I don't strictly need to change the body if I pass it in.
-                // But I'll leave the function body as is, just reliant on the interface change above.
             }])
             .select()
             .single();
@@ -409,7 +437,7 @@ class SupabaseDB {
             .from('users')
             .select('*')
             .eq('email', email)
-            .maybeSingle(); // maybeSingle returns null if not found instead of error
+            .maybeSingle();
         return data as User | null;
     }
 
@@ -1160,6 +1188,11 @@ class SupabaseDB {
             .eq('user_id', userId)
             .maybeSingle();
         return (data?.role as TeamMember['role']) || null;
+    }
+
+    async checkTeamAccess(teamId: string, userId: string): Promise<boolean> {
+        const role = await this.getUserTeamRole(teamId, userId);
+        return !!role;
     }
 
     async isUserInTeam(teamId: string, userId: string): Promise<boolean> {

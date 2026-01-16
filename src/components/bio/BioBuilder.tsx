@@ -3,6 +3,8 @@
 import React, { useState, useEffect, ReactNode, MouseEvent } from "react";
 import { BioPage, BioLink } from "@/lib/db";
 import BioPreview from "./BioPreview";
+import BioLeadsList from "./BioLeadsList";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
@@ -10,7 +12,7 @@ import {
     Globe, Github, Youtube, Music, Link as LinkIcon, Type, X,
     ChevronRight, CheckCircle2, ChevronDown, ChevronUp, GripVertical,
     Smartphone, Monitor, Save, RotateCcw, Copy, BarChart3, TrendingUp, MousePointerClick,
-    Linkedin, Facebook, Mail, Upload, Music2, Mic, FormInput, AlignLeft, Headphones, Search, Image as ImageIcon
+    Linkedin, Facebook, Mail, Upload, Music2, Mic, FormInput, AlignLeft, Headphones, Search, Image as ImageIcon, Timer, Inbox, Settings2, Trash2, Stamp, Lock, Crown
 } from "lucide-react";
 import {
     AlertDialog,
@@ -66,12 +68,14 @@ const LINK_ANIMATIONS = [
 const BLOCK_TYPES = [
     { id: 'link', name: 'URL Button', icon: <LinkIcon className="w-4 h-4" />, desc: 'Standard link to any URL' },
     { id: 'text', name: 'Text Block', icon: <AlignLeft className="w-4 h-4" />, desc: 'Heading or paragraph text' },
-    { id: 'audio', name: 'Audio Embed', icon: <Headphones className="w-4 h-4" />, desc: 'Spotify or Apple Music' },
+    { id: 'audio', name: 'Audio Embed', icon: <Music2 className="w-4 h-4" />, desc: 'Spotify or Apple Music' },
     // { id: 'instagram', name: 'Insta Sync', icon: <Instagram className="w-4 h-4" />, desc: 'Embed Instagram posts' }, // Temporarily disabled
     { id: 'form', name: 'Custom Form', icon: <FormInput className="w-4 h-4" />, desc: 'Collect emails or data' },
+    { id: 'countdown', name: 'Countdown', icon: <Timer className="w-4 h-4" />, desc: 'Event timer' },
 ];
-
 export default function BioBuilder() {
+    const { data: session } = useSession();
+    const isPremium = session?.user?.plan === 'premium' || session?.user?.role === 'admin';
     const router = useRouter();
     const [loading, setLoading] = useState(true);
 
@@ -99,7 +103,7 @@ export default function BioBuilder() {
     // UI State
     const [activeSection, setActiveSection] = useState<'templates' | 'page' | 'header' | 'socials' | 'blocks'>('templates');
     const [previewMode, setPreviewMode] = useState<'mobile' | 'desktop'>('mobile');
-    const [mode, setMode] = useState<'editor' | 'analytics'>('editor');
+    const [mode, setMode] = useState<'editor' | 'analytics' | 'leads'>('editor');
     const [saving, setSaving] = useState(false);
     const [showShareMenu, setShowShareMenu] = useState(false);
     const [showReplaceDialog, setShowReplaceDialog] = useState(false);
@@ -108,6 +112,8 @@ export default function BioBuilder() {
     const [showBlockSelector, setShowBlockSelector] = useState(false);
     const [allPages, setAllPages] = useState<BioPage[]>([]);
     const [showPageSelector, setShowPageSelector] = useState(false);
+    const [activeRightTab, setActiveRightTab] = useState<'design' | 'settings'>('design');
+    const [activeRightSection, setActiveRightSection] = useState<'templates' | 'general' | 'header' | 'buttons' | 'branding' | null>('general');
 
     const TEMPLATES = [
         {
@@ -437,6 +443,40 @@ export default function BioBuilder() {
         }
     };
 
+    const handleBrandingUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files?.[0]) return;
+        const file = e.target.files[0];
+        const previousUrl = bioPage.theme?.userBranding?.image;
+
+        const formData = new FormData();
+        formData.append('file', file);
+        if (previousUrl && previousUrl.includes('public.blob.vercel-storage.com')) {
+            formData.append('previousUrl', previousUrl);
+        }
+
+        const loadingToast = toast.loading("Uploading logo...");
+        try {
+            const res = await fetch("/api/upload", {
+                method: "POST",
+                body: formData
+            });
+            if (!res.ok) throw new Error("Upload failed");
+            const data = await res.json();
+
+            updateTheme('userBranding', {
+                type: 'image',
+                image: data.url,
+                height: bioPage.theme?.userBranding?.height || 24
+            });
+            toast.success("Logo uploaded!");
+        } catch (error) {
+            toast.error("Failed to upload logo");
+        } finally {
+            toast.dismiss(loadingToast);
+            if (e.target) e.target.value = '';
+        }
+    };
+
     const handleAddLink = async (type: BioLink['type'] = 'link') => {
         if (!bioPage.id) {
             await handleSave(true);
@@ -449,8 +489,8 @@ export default function BioBuilder() {
         }
 
         const newLink = {
-            title: type === 'text' ? "Heading" : (type === 'form' ? "Sign up for updates" : "New Block"),
-            url: type === 'text' ? "" : "https://",
+            title: type === 'text' ? "Heading" : (type === 'form' ? "Get in Touch" : (type === 'countdown' ? "Event Launch" : "New Block")),
+            url: type === 'text' ? "" : (type === 'countdown' ? new Date(Date.now() + 86400000).toISOString() : "https://"),
             type: type,
             position: links.length
         };
@@ -514,6 +554,13 @@ export default function BioBuilder() {
                         >
                             Analytics
                         </button>
+                        <button
+                            onClick={() => setMode('leads')}
+                            className={`px-3 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-1 ${mode === 'leads' ? 'bg-white text-black shadow-sm' : 'text-gray-500'}`}
+                        >
+                            Messages
+                            <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+                        </button>
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -567,6 +614,7 @@ export default function BioBuilder() {
                                 </div>
                             )}
                         </div>
+
 
                         <div className="relative">
                             <button
@@ -698,6 +746,8 @@ export default function BioBuilder() {
                                 </div>
                             </div>
                         </div>
+                    ) : mode === 'leads' ? (
+                        <BioLeadsList bioPageId={bioPage.id || ''} />
                     ) : (
                         <>
                             <Section
@@ -744,15 +794,59 @@ export default function BioBuilder() {
                                         />
                                     </div>
 
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-bold uppercase text-gray-400 tracking-wider">Description</label>
+                                        <textarea
+                                            value={bioPage.description || ''}
+                                            onChange={e => setBioPage({ ...bioPage, description: e.target.value })}
+                                            className="w-full text-xs p-3 bg-gray-50 dark:bg-gray-800 rounded-xl border border-transparent focus:border-blue-500 transition-all font-medium placeholder:text-gray-300 min-h-[60px] resize-none"
+                                            placeholder="A short bio about yourself..."
+                                        />
+                                    </div>
+
+                                    <div className="h-px bg-gray-100 dark:bg-gray-800 my-1"></div>
+
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <CheckCircle2 className="w-3.5 h-3.5 text-blue-500" />
+                                            <label className="text-[10px] font-bold text-gray-500">Verified Badge</label>
+                                        </div>
+                                        <button
+                                            onClick={() => updateTheme('isVerified', !bioPage.theme?.isVerified)}
+                                            className={`w-7 h-3.5 rounded-full transition-all relative ${bioPage.theme?.isVerified ? 'bg-blue-500' : 'bg-gray-200'}`}
+                                        >
+                                            <div className={`absolute top-0.5 w-2.5 h-2.5 bg-white rounded-full transition-all ${bioPage.theme?.isVerified ? 'right-0.5' : 'left-0.5'}`}></div>
+                                        </button>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <Search className="w-3.5 h-3.5 text-gray-500" />
+                                            <label className="text-[10px] font-bold text-gray-500">Enable Search</label>
+                                        </div>
+                                        <button
+                                            onClick={() => updateTheme('showSearch', !bioPage.theme?.showSearch)}
+                                            className={`w-7 h-3.5 rounded-full transition-all relative ${bioPage.theme?.showSearch ? 'bg-blue-500' : 'bg-gray-200'}`}
+                                        >
+                                            <div className={`absolute top-0.5 w-2.5 h-2.5 bg-white rounded-full transition-all ${bioPage.theme?.showSearch ? 'right-0.5' : 'left-0.5'}`}></div>
+                                        </button>
+                                    </div>
+
                                     <div className="h-px bg-gray-100 dark:bg-gray-800 my-2"></div>
 
                                     <div className="grid grid-cols-2 gap-2">
                                         <button
-                                            onClick={(e) => { e.stopPropagation(); handleCreateNewPage(); }}
-                                            className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-all border border-blue-100 dark:border-blue-800 group"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                if (!isPremium && allPages.length >= 1) {
+                                                    toast.error("Free plan is limited to 1 bio page. Upgrade to create more.");
+                                                    return;
+                                                }
+                                                handleCreateNewPage();
+                                            }}
+                                            className={`flex flex-col items-center justify-center gap-2 p-4 rounded-2xl transition-all border group ${!isPremium && allPages.length >= 1 ? 'bg-gray-50 border-gray-100 text-gray-400 opacity-60' : 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/40 border-blue-100 dark:border-blue-800'}`}
                                         >
-                                            <div className="p-2 bg-white dark:bg-blue-900/40 rounded-lg shadow-sm group-hover:scale-110 transition-transform">
-                                                <PlusCircle className="w-4 h-4" />
+                                            <div className={`p-2 rounded-lg shadow-sm group-hover:scale-110 transition-transform ${!isPremium && allPages.length >= 1 ? 'bg-gray-100' : 'bg-white dark:bg-blue-900/40'}`}>
+                                                {!isPremium && allPages.length >= 1 ? <Lock className="w-4 h-4" /> : <PlusCircle className="w-4 h-4" />}
                                             </div>
                                             <span className="text-[10px] font-black uppercase tracking-tight">Create New</span>
                                         </button>
@@ -880,7 +974,8 @@ export default function BioBuilder() {
                                                         link.type === 'audio' ? <Headphones className="w-4 h-4" /> :
                                                             link.type === 'instagram' ? <Instagram className="w-4 h-4" /> :
                                                                 link.type === 'form' ? <FormInput className="w-4 h-4" /> :
-                                                                    <LinkIcon className="w-4 h-4" />}
+                                                                    link.type === 'countdown' ? <Timer className="w-4 h-4" /> :
+                                                                        <LinkIcon className="w-4 h-4" />}
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <input
@@ -904,14 +999,21 @@ export default function BioBuilder() {
                                                             ))}
                                                         </select>
                                                     </div>
-                                                    {link.type !== 'text' && link.type !== 'form' && (
+                                                    {link.type === 'countdown' ? (
+                                                        <input
+                                                            type="datetime-local"
+                                                            value={link.url && !isNaN(Date.parse(link.url)) ? new Date(link.url).toISOString().slice(0, 16) : ''}
+                                                            onChange={(e) => updateLink(link.id, { url: new Date(e.target.value).toISOString() })}
+                                                            className="block w-full text-[10px] bg-transparent border-none p-0 focus:ring-0 text-gray-400 mt-1"
+                                                        />
+                                                    ) : (link.type !== 'text' && link.type !== 'form' && (
                                                         <input
                                                             value={link.url}
                                                             placeholder={link.type === 'audio' ? 'Spotify or Apple Music link' : 'https://...'}
                                                             onChange={(e) => updateLink(link.id, { url: e.target.value })}
                                                             className="block w-full text-[10px] bg-transparent border-none p-0 focus:ring-0 text-gray-400 mt-1"
                                                         />
-                                                    )}
+                                                    ))}
                                                 </div>
                                                 <div className="opacity-0 group-hover:opacity-100 flex items-center gap-1 transition-opacity">
                                                     <button onClick={() => updateLink(link.id, { is_active: !link.is_active })} className={`p-1.5 rounded-md ${link.is_active ? 'text-green-500 bg-green-50' : 'text-gray-300'}`}><CheckCircle2 className="w-3.5 h-3.5" /></button>
@@ -954,11 +1056,40 @@ export default function BioBuilder() {
                     <span className="font-bold text-sm">Design & Style</span>
                 </div>
 
-                <div className="overflow-y-auto flex-1 p-6 space-y-8 no-scrollbar">
+                <div className="flex-1 overflow-y-auto p-6 space-y-3">
+                    {/* Templates Section */}
+                    <Section
+                        title="Templates"
+                        isOpen={activeRightSection === 'templates'}
+                        onToggle={() => setActiveRightSection(activeRightSection === 'templates' ? null : 'templates')}
+                        icon={<LayoutTemplate className="w-4 h-4" />}
+                    >
+                        <div className="grid grid-cols-2 gap-2 p-2">
+                            {TEMPLATES.map(t => {
+                                const isLocked = !isPremium && t.id !== 'minimal';
+                                return (
+                                    <button
+                                        key={t.id}
+                                        disabled={isLocked}
+                                        onClick={() => applyTemplate(t)}
+                                        className={`relative h-16 rounded-xl border text-left transition-all group overflow-hidden ${isLocked ? 'opacity-60 cursor-not-allowed border-gray-100' : 'border-gray-200 hover:border-blue-300 hover:scale-[1.02] shadow-sm'}`}
+                                        style={{ background: t.color }}
+                                    >
+                                        <div className="absolute inset-0 p-3 flex flex-col justify-between">
+                                            <span className={`text-[10px] font-bold ${['#0f172a', '#1e293b', '#6366f1'].includes(t.color) ? 'text-white' : 'text-gray-900'}`}>{t.name}</span>
+                                            {isLocked && <Lock className={`w-3 h-3 ${['#0f172a', '#1e293b', '#6366f1'].includes(t.color) ? 'text-white/50' : 'text-gray-400'}`} />}
+                                        </div>
+                                    </button>
+                                )
+                            })}
+                        </div>
+                    </Section>
+
+                    {/* General Styles Section */}
                     <div>
                         <h4 className="font-bold text-xs mb-4 flex items-center justify-between">
                             General Styles
-                            <button title="Reset" className="transition-colors hover:text-blue-500">
+                            <button title="Reset" className="transition-colors hover:text-blue-500" onClick={(e) => { e.stopPropagation(); /* Reset logic could go here */ }}>
                                 <RotateCcw className="w-3 h-3 text-gray-400" />
                             </button>
                         </h4>
@@ -1000,9 +1131,14 @@ export default function BioBuilder() {
 
                     <div className="h-px bg-gray-100 dark:bg-gray-800"></div>
 
-                    <div>
-                        <h4 className="font-bold text-xs mb-4">Header Styles</h4>
-                        <div className="space-y-5">
+                    {/* Header Styles Section */}
+                    <Section
+                        title="Header Styles"
+                        isOpen={activeRightSection === 'header'}
+                        onToggle={() => setActiveRightSection(activeRightSection === 'header' ? null : 'header')}
+                        icon={<LayoutTemplate className="w-4 h-4" />}
+                    >
+                        <div className="space-y-5 p-4">
                             <Slider
                                 label="Profile Picture Shadow"
                                 value={bioPage.theme?.profileShadow || 0}
@@ -1071,54 +1207,74 @@ export default function BioBuilder() {
                                 </button>
                             </div>
                         </div>
-                    </div>
+                    </Section>
 
-                    <div className="h-px bg-gray-100 dark:bg-gray-800"></div>
-
-                    <div>
-                        <h4 className="font-bold text-xs mb-4">Button Shape</h4>
-                        <div className="flex gap-2">
-                            {['rounded-lg', 'rounded-full', 'rounded-none'].map(style => (
-                                <button
-                                    key={style}
-                                    onClick={() => updateTheme('buttonStyle', style)}
-                                    className={`flex-1 h-10 border-2 transition-all ${style} ${bioPage.theme?.buttonStyle === style ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}`}
-                                ></button>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="h-px bg-gray-100 dark:bg-gray-800"></div>
-
-                    <div>
-                        <h4 className="font-bold text-xs mb-4">Page Features</h4>
-                        <div className="space-y-4">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                    <CheckCircle2 className="w-4 h-4 text-blue-500" />
-                                    <label className="text-[11px] font-bold text-gray-500">Verified Badge</label>
-                                </div>
-                                <button
-                                    onClick={() => updateTheme('isVerified', !bioPage.theme?.isVerified)}
-                                    className={`w-8 h-4 rounded-full transition-all relative ${bioPage.theme?.isVerified ? 'bg-blue-500' : 'bg-gray-200'}`}
-                                >
-                                    <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${bioPage.theme?.isVerified ? 'right-0.5' : 'left-0.5'}`}></div>
-                                </button>
-                            </div>
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                    <Search className="w-4 h-4 text-gray-500" />
-                                    <label className="text-[11px] font-bold text-gray-500">Enable Search</label>
-                                </div>
-                                <button
-                                    onClick={() => updateTheme('showSearch', !bioPage.theme?.showSearch)}
-                                    className={`w-8 h-4 rounded-full transition-all relative ${bioPage.theme?.showSearch ? 'bg-blue-500' : 'bg-gray-200'}`}
-                                >
-                                    <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${bioPage.theme?.showSearch ? 'right-0.5' : 'left-0.5'}`}></div>
-                                </button>
+                    {/* Button Shape Section */}
+                    <Section
+                        title="Button Shape"
+                        isOpen={activeRightSection === 'buttons'}
+                        onToggle={() => setActiveRightSection(activeRightSection === 'buttons' ? null : 'buttons')}
+                        icon={<MousePointerClick className="w-4 h-4" />}
+                    >
+                        <div className="p-4">
+                            <div className="flex gap-2">
+                                {['rounded-lg', 'rounded-full', 'rounded-none'].map(style => (
+                                    <button
+                                        key={style}
+                                        onClick={() => updateTheme('buttonStyle', style)}
+                                        className={`flex-1 h-10 border-2 transition-all ${style} ${bioPage.theme?.buttonStyle === style ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}`}
+                                    ></button>
+                                ))}
                             </div>
                         </div>
-                    </div>
+                    </Section>
+
+                    {/* Branding Section */}
+                    <Section
+                        title="Footer Branding"
+                        isOpen={activeRightSection === 'branding'}
+                        onToggle={() => setActiveRightSection(activeRightSection === 'branding' ? null : 'branding')}
+                        icon={<Stamp className="w-4 h-4" />}
+                    >
+                        <div className="p-4 space-y-4">
+                            <div className="flex items-center justify-between">
+                                <label className="text-[11px] font-bold text-gray-500">Custom Logo</label>
+                                {bioPage.theme?.userBranding?.type === 'image' && (
+                                    <button
+                                        onClick={() => updateTheme('userBranding', { type: 'default' })}
+                                        className="text-red-500 hover:bg-red-50 p-1 rounded-md transition-colors"
+                                        title="Remove Logo"
+                                    >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                )}
+                            </div>
+
+                            <div className="flex gap-2">
+                                <div className="flex-1 bg-gray-50 dark:bg-gray-800 rounded-xl p-3 flex items-center justify-center border border-dashed border-gray-200 dark:border-gray-700 min-h-[60px]">
+                                    {bioPage.theme?.userBranding?.type === 'image' && bioPage.theme.userBranding.image ? (
+                                        <img src={bioPage.theme.userBranding.image} className="max-h-8 object-contain" />
+                                    ) : (
+                                        <span className="text-[10px] text-gray-400 font-medium text-center">No logo uploaded</span>
+                                    )}
+                                </div>
+                                <label className="cursor-pointer bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center w-12 transition-colors border border-blue-100 dark:border-blue-800">
+                                    <Upload className="w-5 h-5" />
+                                    <input type="file" className="hidden" accept="image/*" onChange={handleBrandingUpload} />
+                                </label>
+                            </div>
+
+                            {bioPage.theme?.userBranding?.type === 'image' && (
+                                <Slider
+                                    label="Logo Height"
+                                    value={bioPage.theme.userBranding.height || 24}
+                                    min={16}
+                                    max={64}
+                                    onChange={(v) => updateTheme('userBranding', { ...bioPage.theme?.userBranding, height: v })}
+                                />
+                            )}
+                        </div>
+                    </Section>
                 </div>
             </div>
 
@@ -1153,20 +1309,27 @@ export default function BioBuilder() {
                     <div className="grid grid-cols-3 gap-3 p-6 max-h-[60vh] overflow-y-auto no-scrollbar">
                         {PLATFORMS.map(p => {
                             const isAdded = !!bioPage.theme?.socials?.[p.id];
+                            const isLocked = !isPremium && !['youtube', 'email', 'website'].includes(p.id);
+
                             return (
                                 <button
                                     key={p.id}
-                                    disabled={isAdded}
+                                    disabled={isAdded || isLocked}
                                     onClick={() => {
                                         updateTheme('socials', { ...(bioPage.theme?.socials || {}), [p.id]: '' });
                                         setShowPlatformSelector(false);
                                     }}
-                                    className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all ${isAdded ? 'opacity-30' : 'hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20'}`}
+                                    className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all relative overflow-hidden ${isAdded ? 'opacity-30' : (isLocked ? 'opacity-60 cursor-not-allowed border-gray-100 bg-gray-50' : 'hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20')}`}
                                 >
                                     <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
                                         {p.icon}
                                     </div>
                                     <span className="text-[10px] font-bold">{p.name}</span>
+                                    {isLocked && (
+                                        <div className="absolute top-2 right-2 text-gray-400">
+                                            <Lock className="w-3 h-3" />
+                                        </div>
+                                    )}
                                 </button>
                             );
                         })}
@@ -1189,21 +1352,30 @@ export default function BioBuilder() {
                     </AlertDialogHeader>
 
                     <div className="grid grid-cols-2 gap-3 p-6 max-h-[60vh] overflow-y-auto no-scrollbar">
-                        {BLOCK_TYPES.map(type => (
-                            <button
-                                key={type.id}
-                                onClick={() => handleAddLink(type.id as any)}
-                                className="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 border-gray-50 dark:border-gray-800 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all text-center group"
-                            >
-                                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl group-hover:bg-blue-100 dark:group-hover:bg-blue-900/40 text-gray-500 group-hover:text-blue-600 transition-colors">
-                                    {type.icon}
-                                </div>
-                                <div className="space-y-0.5">
-                                    <div className="text-[11px] font-black">{type.name}</div>
-                                    <div className="text-[9px] text-gray-400 font-bold">{type.desc}</div>
-                                </div>
-                            </button>
-                        ))}
+                        {BLOCK_TYPES.map(type => {
+                            const isLocked = !isPremium && type.id !== 'link';
+                            return (
+                                <button
+                                    key={type.id}
+                                    disabled={isLocked}
+                                    onClick={() => handleAddLink(type.id as any)}
+                                    className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all text-center group relative overflow-hidden ${isLocked ? 'border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed' : 'border-gray-50 dark:border-gray-800 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20'}`}
+                                >
+                                    <div className={`p-3 rounded-xl transition-colors ${isLocked ? 'bg-gray-100 text-gray-400' : 'bg-gray-50 dark:bg-gray-800 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/40 text-gray-500 group-hover:text-blue-600'}`}>
+                                        {type.icon}
+                                    </div>
+                                    <div className="space-y-0.5">
+                                        <div className="text-[11px] font-black">{type.name}</div>
+                                        <div className="text-[9px] text-gray-400 font-bold">{type.desc}</div>
+                                    </div>
+                                    {isLocked && (
+                                        <div className="absolute top-3 right-3 text-gray-400">
+                                            <Lock className="w-3.5 h-3.5" />
+                                        </div>
+                                    )}
+                                </button>
+                            );
+                        })}
                     </div>
 
                     <AlertDialogFooter className="p-4 bg-gray-50 dark:bg-gray-800/50">
@@ -1258,7 +1430,7 @@ function ColorPicker({ label, value, onChange }: ColorPickerProps) {
         <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-gray-500">{label}</span>
             <div className="relative group">
-                <div className="w-8 h-8 rounded-full border border-gray-200 shadow-sm overflow-hidden relative cursor-pointer active:scale-95 transition-transform" style={{ backgroundColor: value }}>
+                <div className="w-6 h-6 rounded-full border border-gray-200 shadow-sm overflow-hidden relative cursor-pointer active:scale-95 transition-transform" style={{ backgroundColor: value }}>
                     <input
                         type="color"
                         value={value}

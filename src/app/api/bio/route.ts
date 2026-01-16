@@ -53,9 +53,10 @@ export async function POST(req: NextRequest) {
             }
         }
 
-        if (!isPremium && user.role !== 'admin') {
-            return NextResponse.json({ error: "Premium required" }, { status: 403 });
-        }
+        // REMOVED STRICT PREMIUM CHECK
+        // if (!isPremium && user.role !== 'admin') {
+        //     return NextResponse.json({ error: "Premium required" }, { status: 403 });
+        // }
 
         const body = await req.json();
         const { id, title, description, avatar_url, theme, slug, team_id } = body;
@@ -72,7 +73,16 @@ export async function POST(req: NextRequest) {
                 team_id: team_id || null
             });
         } else {
+            // Free plan limit check
+            if (!isPremium && user.role !== 'admin') {
+                const existingPages = await db.getBioPages(user.id);
+                if (existingPages.length >= 1) {
+                    return NextResponse.json({ error: "Free plan is limited to 1 bio page. Upgrade to create more." }, { status: 403 });
+                }
+            }
+
             // Create new page
+
             // Default slug to username + random if not provided or if already exists
             const baseSlug = (slug || user.username || user.email?.split('@')[0] || 'page').toLowerCase().replace(/[^a-z0-9]/g, '-');
             let finalSlug = baseSlug;
