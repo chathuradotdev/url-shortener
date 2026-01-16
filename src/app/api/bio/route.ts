@@ -88,9 +88,9 @@ export async function POST(req: NextRequest) {
             bioPage = await db.createBioPage({
                 user_id: user.id,
                 slug: finalSlug,
-                title: title || user.username || "My Page",
-                description: description || "Welcome to my page!",
-                avatar_url: avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${finalSlug}`,
+                title: title !== undefined ? title : (user.username || "My Page"),
+                description: description || "",
+                avatar_url: avatar_url || undefined, // Don't auto-generate, let user add if they want
                 theme: theme || {
                     backgroundColor: "#ffffff",
                     textColor: "#000000",

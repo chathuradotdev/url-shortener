@@ -26,6 +26,9 @@ export interface User {
     card_brand?: string | null;
     card_last_four?: string | null;
     billing_country?: string | null;
+    company_branding_type?: 'default' | 'text' | 'image' | null;
+    company_branding_text?: string | null;
+    company_branding_image?: string | null;
 }
 
 // Custom Domain Interface

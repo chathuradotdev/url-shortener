@@ -16,9 +16,14 @@ interface BioRendererProps {
     links: BioLink[];
     variant?: 'public' | 'preview';
     allPages?: BioPage[];
+    userBranding?: {
+        type: 'default' | 'text' | 'image';
+        text?: string | null;
+        image?: string | null;
+    };
 }
 
-export default function BioRenderer({ bioPage, links, variant = 'public', allPages = [] }: BioRendererProps) {
+export default function BioRenderer({ bioPage, links, variant = 'public', allPages = [], userBranding }: BioRendererProps) {
     const [showShare, setShowShare] = useState(false);
     const [showMenu, setShowMenu] = useState(false);
     const [viewMode, setViewMode] = useState<'share' | 'qr'>('share');
@@ -249,8 +254,8 @@ export default function BioRenderer({ bioPage, links, variant = 'public', allPag
                                             }
                                         }}
                                         className={`flex items-center gap-4 p-4 rounded-2xl transition-all hover:scale-[1.02] active:scale-[0.98] ${page.slug === bioPage.slug
-                                                ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/25 ring-2 ring-blue-400/20'
-                                                : 'bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 border border-transparent hover:border-blue-500/20'
+                                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/25 ring-2 ring-blue-400/20'
+                                            : 'bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 border border-transparent hover:border-blue-500/20'
                                             }`}
                                     >
                                         <div className="w-10 h-10 rounded-full overflow-hidden bg-white/20 border border-white/10 shrink-0">
@@ -359,9 +364,9 @@ export default function BioRenderer({ bioPage, links, variant = 'public', allPag
                     {/* Content Container */}
                     <div className={`w-full flex flex-col items-center px-6 pb-12 relative flex-grow max-w-md mx-auto z-10 ${(headerImage || headerColor) ? 'pt-12' : ''}`}>
 
-                        {/* Avatar with Custom Styles */}
-                        <div className="relative group mb-4">
-                            {bioPage.avatar_url ? (
+                        {/* Avatar with Custom Styles - Only show if avatar_url exists */}
+                        {bioPage.avatar_url && (
+                            <div className="relative group mb-4">
                                 <div className="relative">
                                     <img
                                         src={bioPage.avatar_url}
@@ -381,27 +386,24 @@ export default function BioRenderer({ bioPage, links, variant = 'public', allPag
                                         </div>
                                     )}
                                 </div>
-                            ) : (
-                                <div
-                                    className="w-24 h-24 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-3xl font-black text-gray-300 shadow-lg"
-                                    style={{
-                                        border: `${profileBorder}px solid #fff`,
-                                    }}
-                                >
-                                    {bioPage.title?.charAt(0) || '?'}
-                                </div>
-                            )}
-                        </div>
+                            </div>
+                        )}
 
-                        {/* Title & Description */}
-                        <div className="text-center px-4 w-full mb-6">
-                            <h1 className="text-xl font-bold mb-3 text-center" style={{ color: textColor }}>
-                                {bioPage.title || 'Your Name'}
-                            </h1>
-                            <p className="text-xs opacity-70 mb-2 max-w-[240px] leading-relaxed font-medium mx-auto" style={{ color: textColor }}>
-                                {bioPage.description || 'Welcome to my page.'}
-                            </p>
-                        </div>
+                        {/* Title & Description - Only show if they have content */}
+                        {(bioPage.title || bioPage.description) && (
+                            <div className="text-center px-4 w-full mb-6">
+                                {bioPage.title && (
+                                    <h1 className="text-xl font-bold mb-3 text-center" style={{ color: textColor }}>
+                                        {bioPage.title}
+                                    </h1>
+                                )}
+                                {bioPage.description && (
+                                    <p className="text-xs opacity-70 mb-2 max-w-[240px] leading-relaxed font-medium mx-auto" style={{ color: textColor }}>
+                                        {bioPage.description}
+                                    </p>
+                                )}
+                            </div>
+                        )}
 
                         {/* Social Icons with Dynamic Size */}
                         {Object.keys(socials).some(key => socials[key]) && (
@@ -584,10 +586,34 @@ export default function BioRenderer({ bioPage, links, variant = 'public', allPag
 
                     {/* Footer Branding */}
                     <div className="mt-8 mb-4 flex flex-col items-center gap-1 opacity-40 hover:opacity-100 transition-opacity relative z-10">
-                        <span className="text-[9px] font-bold tracking-widest uppercase">Made With</span>
-                        <div className="flex items-center gap-1 font-black text-sm tracking-tight">
-                            <Globe className="w-3 h-3" /> liinks.co
-                        </div>
+                        {!userBranding || userBranding.type === 'default' ? (
+                            <>
+                                <span className="text-[9px] font-bold tracking-widest uppercase">Made With</span>
+                                <div className="flex items-center gap-1 font-black text-sm tracking-tight">
+                                    <Globe className="w-3 h-3" /> liinks.co
+                                </div>
+                            </>
+                        ) : userBranding.type === 'text' && userBranding.text ? (
+                            <span className="text-[10px] font-bold tracking-wide text-center px-4">
+                                {userBranding.text}
+                            </span>
+                        ) : userBranding.type === 'image' && userBranding.image ? (
+                            <div className="flex items-center justify-center">
+                                <img
+                                    src={userBranding.image}
+                                    alt="Company branding"
+                                    className="max-h-10 object-contain"
+                                    style={{ maxWidth: '200px' }}
+                                />
+                            </div>
+                        ) : (
+                            <>
+                                <span className="text-[9px] font-bold tracking-widest uppercase">Made With</span>
+                                <div className="flex items-center gap-1 font-black text-sm tracking-tight">
+                                    <Globe className="w-3 h-3" /> liinks.co
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>

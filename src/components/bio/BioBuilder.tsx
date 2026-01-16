@@ -10,7 +10,7 @@ import {
     Globe, Github, Youtube, Music, Link as LinkIcon, Type, X,
     ChevronRight, CheckCircle2, ChevronDown, ChevronUp, GripVertical,
     Smartphone, Monitor, Save, RotateCcw, Copy, BarChart3, TrendingUp, MousePointerClick,
-    Linkedin, Facebook, Mail, Upload, Music2, Mic, FormInput, AlignLeft, Headphones, Search
+    Linkedin, Facebook, Mail, Upload, Music2, Mic, FormInput, AlignLeft, Headphones, Search, Image as ImageIcon
 } from "lucide-react";
 import {
     AlertDialog,
@@ -290,8 +290,8 @@ export default function BioBuilder() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    title: "New Page",
-                    description: "Welcome to my new bio page!",
+                    title: "",
+                    description: "",
                     theme: {
                         backgroundColor: "#ffffff",
                         textColor: "#000000",
@@ -774,17 +774,19 @@ export default function BioBuilder() {
                                 title="Header"
                                 isOpen={activeSection === 'header'}
                                 onToggle={() => setActiveSection(activeSection === 'header' ? 'blocks' : 'header')}
-                                icon={<div className="w-4 h-4 rounded-full bg-gray-200 overflow-hidden"><img src={bioPage.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${bioPage.slug}`} className="w-full h-full" /></div>}
+                                icon={<div className="w-4 h-4 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
+                                    {bioPage.avatar_url ? <img src={bioPage.avatar_url} className="w-full h-full object-cover" /> : <ImageIcon className="w-2.5 h-2.5 text-gray-500" />}
+                                </div>}
                             >
                                 <div className="space-y-3 p-3">
                                     <div className="space-y-1">
-                                        <label className="text-[10px] font-bold uppercase text-gray-400">Profile Image</label>
+                                        <label className="text-[10px] font-bold uppercase text-gray-400">Profile Image <span className="text-gray-300">(Optional)</span></label>
                                         <div className="flex gap-2">
                                             <input
                                                 value={bioPage.avatar_url || ''}
                                                 onChange={e => setBioPage({ ...bioPage, avatar_url: e.target.value })}
                                                 className="flex-1 text-xs p-2 bg-gray-50 dark:bg-gray-800 rounded-lg border-none text-blue-500"
-                                                placeholder="https://"
+                                                placeholder="Leave blank to hide"
                                             />
                                             <label className="cursor-pointer bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 p-2 rounded-lg transition-colors flex items-center justify-center min-w-[32px]">
                                                 <Upload className="w-4 h-4 text-gray-500" />
@@ -793,20 +795,21 @@ export default function BioBuilder() {
                                         </div>
                                     </div>
                                     <div className="space-y-1">
-                                        <label className="text-[10px] font-bold uppercase text-gray-400">Headline</label>
+                                        <label className="text-[10px] font-bold uppercase text-gray-400">Headline <span className="text-gray-300">(Optional)</span></label>
                                         <input
                                             value={bioPage.title || ''}
                                             onChange={e => setBioPage({ ...bioPage, title: e.target.value })}
                                             className="w-full text-sm p-2 bg-gray-50 dark:bg-gray-800 rounded-lg border-none font-bold"
+                                            placeholder="Your name or title"
                                         />
                                     </div>
                                     <div className="space-y-1">
-                                        <label className="text-[10px] font-bold uppercase text-gray-400">Bio Description</label>
+                                        <label className="text-[10px] font-bold uppercase text-gray-400">Bio Description <span className="text-gray-300">(Optional)</span></label>
                                         <textarea
                                             value={bioPage.description || ''}
                                             onChange={e => setBioPage({ ...bioPage, description: e.target.value })}
                                             className="w-full text-xs p-2 bg-gray-50 dark:bg-gray-800 rounded-lg border-none min-h-[80px]"
-                                            placeholder="Tell your story..."
+                                            placeholder="Leave blank to hide"
                                         />
                                     </div>
                                 </div>

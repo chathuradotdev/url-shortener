@@ -5,6 +5,7 @@ import { createClient } from "@supabase/supabase-js";
 import ProfileForm from "./ProfileForm";
 import PasswordForm from "./PasswordForm";
 import LoginHistory from "./LoginHistory";
+import BrandingForm from "./BrandingForm";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export const dynamic = 'force-dynamic';
@@ -101,6 +102,11 @@ export default async function ProfilePage() {
                         <PasswordForm />
                     </div>
                 )}
+
+                <div className="mt-8 bg-white dark:bg-gray-800 shadow rounded-2xl p-8">
+                    <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Company Branding</h2>
+                    <BrandingForm user={user} />
+                </div>
 
                 <LoginHistory loginHistory={loginHistory || []} />
 
