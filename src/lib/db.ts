@@ -151,7 +151,8 @@ export interface BioLink {
     position: number;
     is_active: boolean;
     clicks?: number;
-    type?: 'link' | 'youtube' | 'spotify' | 'header' | 'text' | 'audio' | 'instagram' | 'form' | 'countdown' | 'file';
+    type?: 'link' | 'youtube' | 'spotify' | 'header' | 'text' | 'audio' | 'instagram' | 'form' | 'countdown' | 'file' | 'poll';
+    settings?: any;
     animation?: string;
     created_at: string;
 }
@@ -389,6 +390,33 @@ class SupabaseDB {
             await supabase.from('bio_links').update({ clicks: (data.clicks || 0) + 1 }).eq('id', id);
         }
     }
+
+    async votePoll(linkId: string, optionId: string, ip: string): Promise<{ success: boolean, error?: string }> {
+        const { error } = await supabase
+            .from('poll_votes')
+            .insert([{ link_id: linkId, option_id: optionId, voter_ip: ip }]);
+
+        if (error) {
+            if (error.code === '23505') return { success: false, error: 'already_voted' };
+            return { success: false, error: error.message };
+        }
+        return { success: true };
+    }
+
+    async getPollVotes(linkId: string): Promise<Record<string, number>> {
+        const { data, error } = await supabase
+            .from('poll_votes')
+            .select('option_id')
+            .eq('link_id', linkId);
+
+        if (error || !data) return {};
+
+        const counts: Record<string, number> = {};
+        data.forEach((row: any) => {
+            counts[row.option_id] = (counts[row.option_id] || 0) + 1;
+        });
+        return counts;
+    }
     async createBioLead(lead: Omit<BioLead, 'id' | 'created_at'>): Promise<BioLead> {
         const { data, error } = await supabase
             .from('bio_leads')
@@ -412,6 +440,16 @@ class SupabaseDB {
 
         if (error) throw error;
         return data as BioLead[];
+    }
+
+    async deleteBioLead(leadId: string, userId: string): Promise<void> {
+        const { error } = await supabase
+            .from('bio_leads')
+            .delete()
+            .eq('id', leadId)
+            .eq('user_id', userId);
+
+        if (error) throw error;
     }
 
     // --- User Methods ---

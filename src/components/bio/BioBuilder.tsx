@@ -4,6 +4,7 @@ import React, { useState, useEffect, ReactNode, MouseEvent } from "react";
 import { BioPage, BioLink } from "@/lib/db";
 import BioPreview from "./BioPreview";
 import BioLeadsList from "./BioLeadsList";
+import PollBlockEditor from "./PollBlockEditor";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -12,7 +13,7 @@ import {
     Globe, Github, Youtube, Music, Link as LinkIcon, Type, X,
     ChevronRight, CheckCircle2, ChevronDown, ChevronUp, GripVertical,
     Smartphone, Monitor, Save, RotateCcw, Copy, BarChart3, TrendingUp, MousePointerClick,
-    Linkedin, Facebook, Mail, Upload, Music2, Mic, FormInput, AlignLeft, Headphones, Search, Image as ImageIcon, Timer, Inbox, Settings2, Trash2, Stamp, Lock, Crown
+    Linkedin, Facebook, Mail, Upload, Music2, Mic, FormInput, AlignLeft, Headphones, Search, Image as ImageIcon, Timer, Inbox, Settings2, Trash2, Stamp, Lock, Crown, Video
 } from "lucide-react";
 import {
     AlertDialog,
@@ -70,9 +71,11 @@ const BLOCK_TYPES = [
     { id: 'text', name: 'Text Block', icon: <AlignLeft className="w-4 h-4" />, desc: 'Heading or paragraph text' },
     { id: 'audio', name: 'Audio Embed', icon: <Music2 className="w-4 h-4" />, desc: 'Spotify or Apple Music' },
     { id: 'file', name: 'File Upload', icon: <Upload className="w-4 h-4" />, desc: 'Share downloadable files' },
+    { id: 'video', name: 'Video Embed', icon: <Video className="w-4 h-4" />, desc: 'YouTube / TikTok / Vimeo' },
     // { id: 'instagram', name: 'Insta Sync', icon: <Instagram className="w-4 h-4" />, desc: 'Embed Instagram posts' }, // Temporarily disabled
     { id: 'form', name: 'Custom Form', icon: <FormInput className="w-4 h-4" />, desc: 'Collect emails or data' },
     { id: 'countdown', name: 'Countdown', icon: <Timer className="w-4 h-4" />, desc: 'Event timer' },
+    { id: 'poll', name: 'Poll / Vote', icon: <BarChart3 className="w-4 h-4" />, desc: 'Interactive voting' },
 ];
 export default function BioBuilder() {
     const { data: session } = useSession();
@@ -501,9 +504,10 @@ export default function BioBuilder() {
         }
 
         const newLink = {
-            title: type === 'text' ? "Heading" : (type === 'form' ? "Get in Touch" : (type === 'countdown' ? "Event Launch" : (type === 'file' ? "Download File" : "New Block"))),
-            url: type === 'text' ? "" : (type === 'countdown' ? new Date(Date.now() + 86400000).toISOString() : (type === 'file' ? "" : "https://")),
+            title: type === 'text' ? "Heading" : (type === 'form' ? "Get in Touch" : (type === 'countdown' ? "Event Launch" : (type === 'file' ? "Download File" : (type === 'poll' ? "Is this helpful?" : "New Block")))),
+            url: type === 'text' || type === 'poll' ? "" : (type === 'countdown' ? new Date(Date.now() + 86400000).toISOString() : (type === 'file' ? "" : "https://")),
             type: type,
+            settings: type === 'poll' ? { options: [{ id: 'opt1', text: 'Yes' }, { id: 'opt2', text: 'No' }] } : undefined,
             position: links.length
         };
 
@@ -765,26 +769,41 @@ export default function BioBuilder() {
                     ) : (
                         <>
                             {/* Page URL & Actions Row */}
-                            <div className="flex items-center justify-between mb-2 px-1">
-                                <button
-                                    onClick={() => {
-                                        const url = `${baseUrl}/${bioPage.slug}`;
-                                        navigator.clipboard.writeText(url);
-                                        toast.success("URL copied to clipboard!");
-                                    }}
-                                    className="flex items-center gap-2 group hover:bg-blue-50 dark:hover:bg-blue-900/20 px-2 py-1.5 rounded-lg transition-all"
-                                >
-                                    <Copy className="w-3.5 h-3.5 text-gray-400 group-hover:text-blue-500" />
-                                    <span className="text-xs font-bold text-gray-700 dark:text-gray-300 group-hover:text-blue-600">
-                                        {baseUrl ? baseUrl.replace(/^https?:\/\//, '') : ''}/{bioPage.slug}
-                                    </span>
-                                </button>
+                            <div className="flex items-center gap-3 mb-4 p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm">
+                                <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 overflow-hidden flex items-center justify-center border border-gray-100 dark:border-gray-700 flex-shrink-0">
+                                    {bioPage.avatar_url ? (
+                                        <img src={bioPage.avatar_url} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <span className="text-lg">✨</span>
+                                    )}
+                                </div>
+
+                                <div className="flex-1 min-w-0">
+                                    <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Your Page URL</div>
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={() => {
+                                                const url = `${baseUrl}/${bioPage.slug}`;
+                                                navigator.clipboard.writeText(url);
+                                                toast.success("URL copied!");
+                                            }}
+                                            className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline truncate"
+                                        >
+                                            {baseUrl ? baseUrl.replace(/^https?:\/\//, '') : ''}/{bioPage.slug}
+                                        </button>
+                                        <Copy className="w-3 h-3 text-gray-400 cursor-pointer hover:text-blue-500" onClick={() => {
+                                            const url = `${baseUrl}/${bioPage.slug}`;
+                                            navigator.clipboard.writeText(url);
+                                            toast.success("URL copied!");
+                                        }} />
+                                    </div>
+                                </div>
 
                                 <button
                                     onClick={() => setShowShareMenu(!showShareMenu)}
-                                    className="w-7 h-7 flex items-center justify-center rounded-lg border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-gray-500"
+                                    className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-500"
                                 >
-                                    <Share2 className="w-3.5 h-3.5" />
+                                    <Share2 className="w-4 h-4" />
                                 </button>
                             </div>
                             <div className="h-px bg-gray-100 dark:bg-gray-800 mb-4 mx-1"></div>
@@ -1046,7 +1065,7 @@ export default function BioBuilder() {
                                                             onChange={(e) => updateLink(link.id, { url: new Date(e.target.value).toISOString() })}
                                                             className="block w-full text-[10px] bg-transparent border-none p-0 focus:ring-0 text-gray-400 mt-1"
                                                         />
-                                                    ) : (link.type !== 'text' && link.type !== 'form' && link.type !== 'file' && (
+                                                    ) : (link.type !== 'text' && link.type !== 'form' && link.type !== 'file' && link.type !== 'poll' && (
                                                         <input
                                                             value={link.url}
                                                             placeholder={link.type === 'audio' ? 'Spotify or Apple Music link' : 'https://...'}
@@ -1088,6 +1107,10 @@ export default function BioBuilder() {
                                                                 </label>
                                                             )}
                                                         </div>
+                                                    )}
+
+                                                    {link.type === 'poll' && (
+                                                        <PollBlockEditor link={link} updateLink={updateLink} />
                                                     )}
                                                 </div>
                                                 <div className="opacity-0 group-hover:opacity-100 flex items-center gap-1 transition-opacity">

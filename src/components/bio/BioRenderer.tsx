@@ -11,6 +11,8 @@ import {
 import QrCodeDisplay from "../QrCodeDisplay";
 import CountdownWidget from "./CountdownWidget";
 import ContactFormWidget from "./ContactFormWidget";
+import PollWidget from "./PollWidget";
+import VideoWidget from "./VideoWidget";
 import { toast } from "sonner";
 
 interface BioRendererProps {
@@ -497,14 +499,8 @@ export default function BioRenderer({ bioPage, links, variant = 'public', allPag
                                     );
                                 }
 
-                                if (link.type === 'youtube') {
-                                    const videoId = link.url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/)?.[2];
-                                    if (!videoId) return null;
-                                    return (
-                                        <div key={link.id} className="w-full rounded-2xl overflow-hidden shadow-lg transform hover:scale-[1.02] transition-all">
-                                            <iframe width="100%" height="180" src={`https://www.youtube.com/embed/${videoId}`} title={link.title} frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
-                                        </div>
-                                    );
+                                if (link.type === 'video' || link.type === 'youtube') {
+                                    return <VideoWidget key={link.id} link={link} />;
                                 }
 
                                 if (link.type === 'spotify' || (link.type === 'audio' && link.url.includes('spotify'))) {
@@ -545,6 +541,16 @@ export default function BioRenderer({ bioPage, links, variant = 'public', allPag
                                             theme={theme}
                                             bioPageId={bioPage.id}
                                             glassEffect={glassEffect}
+                                        />
+                                    );
+                                }
+
+                                if (link.type === 'poll') {
+                                    return (
+                                        <PollWidget
+                                            key={link.id}
+                                            link={link}
+                                            theme={theme}
                                         />
                                     );
                                 }

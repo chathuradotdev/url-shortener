@@ -78,3 +78,28 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: (error as Error).message || 'Internal Server Error' }, { status: 500 });
     }
 }
+
+export async function DELETE(req: NextRequest) {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user?.email) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const leadId = searchParams.get('leadId');
+
+    if (!leadId) {
+        return NextResponse.json({ error: "Lead ID is required" }, { status: 400 });
+    }
+
+    try {
+        const user = await db.findUserByEmail(session.user.email);
+        if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
+
+        await db.deleteBioLead(leadId, user.id);
+
+        return NextResponse.json({ success: true });
+    } catch (e: any) {
+        return NextResponse.json({ error: e.message }, { status: 500 });
+    }
+}

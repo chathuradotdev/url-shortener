@@ -18,8 +18,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         description: bioPage.description || `Check out my links at ${displayTitle}`,
         openGraph: bioPage.avatar_url ? {
             images: [bioPage.avatar_url]
-        } : undefined
+        } : undefined,
+        icons: bioPage.avatar_url ? {
+            icon: bioPage.avatar_url,
+            shortcut: bioPage.avatar_url,
+            apple: bioPage.avatar_url,
+        } : undefined,
     };
+};
 }
 
 export default async function BioPage({ params }: Props) {
