@@ -95,6 +95,7 @@ export default function PricingContentInteractive() {
                 description: "Quick links, no signup",
                 color: "gray",
                 popular: false,
+                trial: undefined,
                 features: [
                     { name: "Instant URL Shortening", included: true },
                     { name: "QR Code Generation", included: true },
@@ -113,6 +114,7 @@ export default function PricingContentInteractive() {
                 color: "purple",
                 popular: true,
                 badge: "Popular",
+                trial: undefined,
                 features: [
                     { name: "1 Custom Bio Page", included: true, highlight: true },
                     { name: "Unlimited Links", included: true },
@@ -133,6 +135,7 @@ export default function PricingContentInteractive() {
                 description: "Full link management",
                 color: "blue",
                 popular: false,
+                trial: undefined,
                 features: [
                     { name: "Everything in Free", included: true },
                     { name: "Dashboard", included: true },
@@ -182,6 +185,7 @@ export default function PricingContentInteractive() {
                 description: "For large organizations",
                 color: "slate",
                 popular: false,
+                trial: undefined,
                 features: [
                     { name: "Everything in Professional", included: true },
                     { name: "Multiple team members", included: true },
@@ -298,7 +302,7 @@ export default function PricingContentInteractive() {
                                         <span className="text-gray-500 ml-2 text-sm">/ {billingCycle === 'monthly' ? 'month' : 'year'}</span>
                                     )}
                                 </div>
-                                {billingCycle === 'annual' && typeof plan.price === 'number' && plan.price > 0 && (
+                                {billingCycle === 'annual' && typeof plan.price === 'number' && plan.price > 0 && typeof plan.annualPrice === 'number' && (
                                     <p className="text-xs text-green-600 font-semibold mt-1">
                                         ${(plan.annualPrice / 12).toFixed(2)}/month (save 20%)
                                     </p>
@@ -325,7 +329,7 @@ export default function PricingContentInteractive() {
                                             </svg>
                                             <span className={cn(
                                                 feature.included ? "text-gray-900" : "text-gray-500",
-                                                feature.highlight && "font-semibold"
+                                                'highlight' in feature && feature.highlight && "font-semibold"
                                             )}>
                                                 {feature.name}
                                             </span>
