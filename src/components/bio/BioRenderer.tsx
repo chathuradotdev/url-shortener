@@ -476,7 +476,7 @@ export default function BioRenderer({ bioPage, links, variant = 'public', allPag
                                         }
                                         return (
                                             <div key={link.id} className="w-full shadow-xl rounded-[2rem] overflow-hidden bg-white dark:bg-gray-800 border-4 border-white/10">
-                                                <iframe src={`https://www.instagram.com/p/${instaMatch[1]}/embed`} width="100%" height="480" frameBorder="0" scrolling="no" allowtransparency="true" />
+                                                <iframe src={`https://www.instagram.com/p/${instaMatch[1]}/embed`} width="100%" height="480" frameBorder="0" scrolling="no" {...({ allowtransparency: "true" } as any)} />
                                             </div>
                                         );
                                     })}
