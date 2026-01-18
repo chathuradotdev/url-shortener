@@ -69,6 +69,7 @@ const BLOCK_TYPES = [
     { id: 'link', name: 'URL Button', icon: <LinkIcon className="w-4 h-4" />, desc: 'Standard link to any URL' },
     { id: 'text', name: 'Text Block', icon: <AlignLeft className="w-4 h-4" />, desc: 'Heading or paragraph text' },
     { id: 'audio', name: 'Audio Embed', icon: <Music2 className="w-4 h-4" />, desc: 'Spotify or Apple Music' },
+    { id: 'file', name: 'File Upload', icon: <Upload className="w-4 h-4" />, desc: 'Share downloadable files' },
     // { id: 'instagram', name: 'Insta Sync', icon: <Instagram className="w-4 h-4" />, desc: 'Embed Instagram posts' }, // Temporarily disabled
     { id: 'form', name: 'Custom Form', icon: <FormInput className="w-4 h-4" />, desc: 'Collect emails or data' },
     { id: 'countdown', name: 'Countdown', icon: <Timer className="w-4 h-4" />, desc: 'Event timer' },
@@ -375,17 +376,15 @@ export default function BioBuilder() {
     };
 
     const applyTemplate = (template: any) => {
-        if (confirm("Apply this template? Current style changes will be overwritten.")) {
-            setBioPage(prev => ({
-                ...prev,
-                theme: {
-                    ...prev.theme,
-                    ...template.theme,
-                    socials: prev.theme?.socials || {}
-                }
-            }));
-            toast.success(`Applied ${template.name} template`);
-        }
+        setBioPage(prev => ({
+            ...prev,
+            theme: {
+                ...(prev.theme || {}),
+                ...template.theme,
+                socials: prev.theme?.socials || {}
+            }
+        }));
+        toast.success(`Applied ${template.name}`);
     };
 
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -413,33 +412,46 @@ export default function BioBuilder() {
         }
     };
 
-    const performUpload = async (file: File, previousUrl?: string) => {
+    const uploadFile = async (file: File, previousUrl?: string) => {
         const formData = new FormData();
         formData.append('file', file);
-        if (previousUrl) {
-            formData.append('previousUrl', previousUrl);
+        if (previousUrl) formData.append('previousUrl', previousUrl);
+
+        const res = await fetch("/api/upload", { method: "POST", body: formData });
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.error || "Upload failed");
         }
+        return await res.json();
+    };
 
+    const performUpload = async (file: File, previousUrl?: string) => {
         const loadingToast = toast.loading("Uploading image...");
-
         try {
-            const res = await fetch("/api/upload", {
-                method: "POST",
-                body: formData
-            });
-
-            if (!res.ok) {
-                const err = await res.json();
-                throw new Error(err.error || "Upload failed");
-            }
-
-            const data = await res.json();
+            const data = await uploadFile(file, previousUrl);
             setBioPage(prev => ({ ...prev, avatar_url: data.url }));
             toast.success(previousUrl ? "Image replaced successfully!" : "Image uploaded!");
         } catch (error: any) {
             toast.error(error.message);
         } finally {
             toast.dismiss(loadingToast);
+        }
+    };
+
+    const handleBlockFileUpload = async (blockId: string, e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files?.[0]) return;
+        const file = e.target.files[0];
+
+        const loadingToast = toast.loading("Uploading file...");
+        try {
+            const data = await uploadFile(file);
+            updateLink(blockId, { url: data.url, title: file.name });
+            toast.success("File uploaded!");
+        } catch (error: any) {
+            toast.error(error.message);
+        } finally {
+            toast.dismiss(loadingToast);
+            if (e.target) e.target.value = '';
         }
     };
 
@@ -489,8 +501,8 @@ export default function BioBuilder() {
         }
 
         const newLink = {
-            title: type === 'text' ? "Heading" : (type === 'form' ? "Get in Touch" : (type === 'countdown' ? "Event Launch" : "New Block")),
-            url: type === 'text' ? "" : (type === 'countdown' ? new Date(Date.now() + 86400000).toISOString() : "https://"),
+            title: type === 'text' ? "Heading" : (type === 'form' ? "Get in Touch" : (type === 'countdown' ? "Event Launch" : (type === 'file' ? "Download File" : "New Block"))),
+            url: type === 'text' ? "" : (type === 'countdown' ? new Date(Date.now() + 86400000).toISOString() : (type === 'file' ? "" : "https://")),
             type: type,
             position: links.length
         };
@@ -541,7 +553,7 @@ export default function BioBuilder() {
         <div className="flex h-[calc(100vh-64px)] overflow-hidden bg-gray-50 dark:bg-black">
 
             {/* LEFT COLUMN: Content Editor */}
-            <div className="w-[380px] flex-shrink-0 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex flex-col z-20 shadow-xl overflow-hidden">
+            <div className="w-[480px] flex-shrink-0 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex flex-col z-20 shadow-xl overflow-hidden">
                 <div className="h-14 border-b border-gray-100 dark:border-gray-800 flex items-center px-4 justify-between bg-white dark:bg-gray-900 z-10">
                     <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
                         <button
@@ -569,9 +581,11 @@ export default function BioBuilder() {
                                 onClick={() => setShowPageSelector(!showPageSelector)}
                                 className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-gray-800 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-all border border-gray-100 dark:border-gray-700"
                             >
-                                <Smartphone className="w-3.5 h-3.5 text-blue-500" />
-                                <span className="text-[11px] font-black">{bioPage.slug || 'Select Page'}</span>
-                                <ChevronDown className={`w-3 h-3 transition-transform ${showPageSelector ? 'rotate-180' : ''}`} />
+                                <Smartphone className="w-3.5 h-3.5" />
+                                <span className="text-[10px] font-black truncate max-w-[100px]">
+                                    {bioPage.title || bioPage.slug || 'Select Page'}
+                                </span>
+                                <ChevronDown className="w-3 h-3 text-gray-400" />
                             </button>
 
                             {showPageSelector && (
@@ -750,6 +764,31 @@ export default function BioBuilder() {
                         <BioLeadsList bioPageId={bioPage.id || ''} />
                     ) : (
                         <>
+                            {/* Page URL & Actions Row */}
+                            <div className="flex items-center justify-between mb-2 px-1">
+                                <button
+                                    onClick={() => {
+                                        const url = `${baseUrl}/${bioPage.slug}`;
+                                        navigator.clipboard.writeText(url);
+                                        toast.success("URL copied to clipboard!");
+                                    }}
+                                    className="flex items-center gap-2 group hover:bg-blue-50 dark:hover:bg-blue-900/20 px-2 py-1.5 rounded-lg transition-all"
+                                >
+                                    <Copy className="w-3.5 h-3.5 text-gray-400 group-hover:text-blue-500" />
+                                    <span className="text-xs font-bold text-gray-700 dark:text-gray-300 group-hover:text-blue-600">
+                                        {baseUrl ? baseUrl.replace(/^https?:\/\//, '') : ''}/{bioPage.slug}
+                                    </span>
+                                </button>
+
+                                <button
+                                    onClick={() => setShowShareMenu(!showShareMenu)}
+                                    className="w-7 h-7 flex items-center justify-center rounded-lg border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-gray-500"
+                                >
+                                    <Share2 className="w-3.5 h-3.5" />
+                                </button>
+                            </div>
+                            <div className="h-px bg-gray-100 dark:bg-gray-800 mb-4 mx-1"></div>
+
                             <Section
                                 title="Templates"
                                 isOpen={activeSection === 'templates'}
@@ -975,7 +1014,8 @@ export default function BioBuilder() {
                                                             link.type === 'instagram' ? <Instagram className="w-4 h-4" /> :
                                                                 link.type === 'form' ? <FormInput className="w-4 h-4" /> :
                                                                     link.type === 'countdown' ? <Timer className="w-4 h-4" /> :
-                                                                        <LinkIcon className="w-4 h-4" />}
+                                                                        link.type === 'file' ? <Upload className="w-4 h-4" /> :
+                                                                            <LinkIcon className="w-4 h-4" />}
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <input
@@ -1006,7 +1046,7 @@ export default function BioBuilder() {
                                                             onChange={(e) => updateLink(link.id, { url: new Date(e.target.value).toISOString() })}
                                                             className="block w-full text-[10px] bg-transparent border-none p-0 focus:ring-0 text-gray-400 mt-1"
                                                         />
-                                                    ) : (link.type !== 'text' && link.type !== 'form' && (
+                                                    ) : (link.type !== 'text' && link.type !== 'form' && link.type !== 'file' && (
                                                         <input
                                                             value={link.url}
                                                             placeholder={link.type === 'audio' ? 'Spotify or Apple Music link' : 'https://...'}
@@ -1014,6 +1054,41 @@ export default function BioBuilder() {
                                                             className="block w-full text-[10px] bg-transparent border-none p-0 focus:ring-0 text-gray-400 mt-1"
                                                         />
                                                     ))}
+
+                                                    {link.type === 'file' && (
+                                                        <div className="mt-2 text-xs">
+                                                            {link.url ? (
+                                                                <div className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-700/50 border border-gray-100 dark:border-gray-700 rounded-lg group/file">
+                                                                    <div className="p-1.5 bg-white dark:bg-gray-800 rounded border border-gray-100 dark:border-gray-700">
+                                                                        <Upload className="w-3 h-3 text-blue-500" />
+                                                                    </div>
+                                                                    <div className="flex-1 min-w-0 pr-2">
+                                                                        <div className="font-bold truncate text-gray-700 dark:text-gray-200">{link.title || 'Attached File'}</div>
+                                                                        <div className="text-[10px] text-gray-400 truncate">{link.url.split('/').pop()}</div>
+                                                                    </div>
+                                                                    <button
+                                                                        onClick={() => updateLink(link.id, { url: '' })}
+                                                                        className="p-1.5 hover:bg-white dark:hover:bg-gray-600 rounded text-gray-400 hover:text-red-500 transition-colors"
+                                                                        title="Remove file"
+                                                                    >
+                                                                        <X className="w-3.5 h-3.5" />
+                                                                    </button>
+                                                                </div>
+                                                            ) : (
+                                                                <label className="flex flex-col items-center justify-center gap-2 w-full p-4 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-all cursor-pointer group/upload">
+                                                                    <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-full group-hover/upload:bg-white dark:group-hover/upload:bg-gray-700 transition-colors">
+                                                                        <Upload className="w-4 h-4 text-gray-400 group-hover/upload:text-blue-500 transition-colors" />
+                                                                    </div>
+                                                                    <div className="text-[10px] font-bold text-gray-400 group-hover/upload:text-blue-500">Click to upload file</div>
+                                                                    <input
+                                                                        type="file"
+                                                                        className="hidden"
+                                                                        onChange={(e) => handleBlockFileUpload(link.id, e)}
+                                                                    />
+                                                                </label>
+                                                            )}
+                                                        </div>
+                                                    )}
                                                 </div>
                                                 <div className="opacity-0 group-hover:opacity-100 flex items-center gap-1 transition-opacity">
                                                     <button onClick={() => updateLink(link.id, { is_active: !link.is_active })} className={`p-1.5 rounded-md ${link.is_active ? 'text-green-500 bg-green-50' : 'text-gray-300'}`}><CheckCircle2 className="w-3.5 h-3.5" /></button>
@@ -1034,10 +1109,10 @@ export default function BioBuilder() {
                         <Save className="w-3 h-3" /> Save Changes
                     </button>
                 </div>
-            </div>
+            </div >
 
             {/* CENTER COLUMN: Live Preview */}
-            <div className="flex-1 relative flex flex-col items-center justify-center bg-[#F3F4F6] dark:bg-[#000000] overflow-hidden">
+            < div className="flex-1 relative flex flex-col items-center justify-center bg-[#F3F4F6] dark:bg-[#000000] overflow-hidden" >
                 <div className="absolute top-6 flex bg-white dark:bg-gray-800 rounded-full p-1 shadow-sm border border-gray-200 dark:border-gray-700 z-10">
                     <button onClick={() => setPreviewMode('mobile')} className={`p-2 rounded-full transition-all ${previewMode === 'mobile' ? 'bg-gray-100 dark:bg-gray-600 text-blue-500' : 'text-gray-400'}`}><Smartphone className="w-4 h-4" /></button>
                     <button onClick={() => setPreviewMode('desktop')} className={`p-2 rounded-full transition-all ${previewMode === 'desktop' ? 'bg-gray-100 dark:bg-gray-600 text-blue-500' : 'text-gray-400'}`}><Monitor className="w-4 h-4" /></button>
@@ -1048,42 +1123,16 @@ export default function BioBuilder() {
                         <BioPreview bioPage={bioPage} links={links} allPages={allPages} />
                     </div>
                 </div>
-            </div>
+            </div >
 
             {/* RIGHT COLUMN: Styles & Design */}
-            <div className="w-[320px] flex-shrink-0 bg-white dark:bg-gray-900 border-l border-gray-200 dark:border-gray-800 flex flex-col z-20 shadow-xl overflow-hidden">
+            < div className="w-[320px] flex-shrink-0 bg-white dark:bg-gray-900 border-l border-gray-200 dark:border-gray-800 flex flex-col z-20 shadow-xl overflow-hidden" >
                 <div className="h-14 border-b border-gray-100 dark:border-gray-800 flex items-center px-4 bg-white dark:bg-gray-900 z-10">
                     <span className="font-bold text-sm">Design & Style</span>
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-6 space-y-3">
-                    {/* Templates Section */}
-                    <Section
-                        title="Templates"
-                        isOpen={activeRightSection === 'templates'}
-                        onToggle={() => setActiveRightSection(activeRightSection === 'templates' ? null : 'templates')}
-                        icon={<LayoutTemplate className="w-4 h-4" />}
-                    >
-                        <div className="grid grid-cols-2 gap-2 p-2">
-                            {TEMPLATES.map(t => {
-                                const isLocked = !isPremium && t.id !== 'minimal';
-                                return (
-                                    <button
-                                        key={t.id}
-                                        disabled={isLocked}
-                                        onClick={() => applyTemplate(t)}
-                                        className={`relative h-16 rounded-xl border text-left transition-all group overflow-hidden ${isLocked ? 'opacity-60 cursor-not-allowed border-gray-100' : 'border-gray-200 hover:border-blue-300 hover:scale-[1.02] shadow-sm'}`}
-                                        style={{ background: t.color }}
-                                    >
-                                        <div className="absolute inset-0 p-3 flex flex-col justify-between">
-                                            <span className={`text-[10px] font-bold ${['#0f172a', '#1e293b', '#6366f1'].includes(t.color) ? 'text-white' : 'text-gray-900'}`}>{t.name}</span>
-                                            {isLocked && <Lock className={`w-3 h-3 ${['#0f172a', '#1e293b', '#6366f1'].includes(t.color) ? 'text-white/50' : 'text-gray-400'}`} />}
-                                        </div>
-                                    </button>
-                                )
-                            })}
-                        </div>
-                    </Section>
+
 
                     {/* General Styles Section */}
                     <div>
@@ -1276,10 +1325,10 @@ export default function BioBuilder() {
                         </div>
                     </Section>
                 </div>
-            </div>
+            </div >
 
             {/* Image Replacement Confirmation Dialog */}
-            <AlertDialog open={showReplaceDialog} onOpenChange={setShowReplaceDialog}>
+            < AlertDialog open={showReplaceDialog} onOpenChange={setShowReplaceDialog} >
                 <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle>Replace profile image?</AlertDialogTitle>
@@ -1294,10 +1343,10 @@ export default function BioBuilder() {
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
-            </AlertDialog>
+            </AlertDialog >
 
             {/* Platform Selector Dialog */}
-            <AlertDialog open={showPlatformSelector} onOpenChange={setShowPlatformSelector}>
+            < AlertDialog open={showPlatformSelector} onOpenChange={setShowPlatformSelector} >
                 <AlertDialogContent className="sm:max-w-[420px] rounded-[2rem] p-0 overflow-hidden">
                     <AlertDialogHeader className="p-6 pb-2">
                         <AlertDialogTitle className="text-xl font-black">Add Social</AlertDialogTitle>
@@ -1339,10 +1388,10 @@ export default function BioBuilder() {
                         <AlertDialogCancel className="w-full rounded-xl font-bold text-xs">Close</AlertDialogCancel>
                     </AlertDialogFooter>
                 </AlertDialogContent>
-            </AlertDialog>
+            </AlertDialog >
 
             {/* Block Type Selector Dialog */}
-            <AlertDialog open={showBlockSelector} onOpenChange={setShowBlockSelector}>
+            < AlertDialog open={showBlockSelector} onOpenChange={setShowBlockSelector} >
                 <AlertDialogContent className="sm:max-w-[420px] rounded-[2rem] p-0 overflow-hidden">
                     <AlertDialogHeader className="p-6 pb-2">
                         <AlertDialogTitle className="text-xl font-black">Add Block</AlertDialogTitle>
@@ -1382,7 +1431,7 @@ export default function BioBuilder() {
                         <AlertDialogCancel className="w-full rounded-xl font-bold text-xs">Cancel</AlertDialogCancel>
                     </AlertDialogFooter>
                 </AlertDialogContent>
-            </AlertDialog>
+            </AlertDialog >
         </div >
     );
 }

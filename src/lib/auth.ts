@@ -28,7 +28,13 @@ export const authOptions: NextAuthOptions = {
                     return null;
                 }
 
-                const user = await db.findUserByEmail(credentials.email);
+                let user;
+                try {
+                    user = await db.findUserByEmail(credentials.email);
+                } catch (e) {
+                    console.error("Auth Error (findUserByEmail):", e);
+                    return null;
+                }
 
                 if (!user || !user.password_hash) {
                     return null;
@@ -98,7 +104,12 @@ export const authOptions: NextAuthOptions = {
 
                 if (account?.provider === 'google') {
                     // For Google, we must lookup by email as user.id is Google's ID
-                    dbUser = await db.findUserByEmail(user.email!);
+                    try {
+                        dbUser = await db.findUserByEmail(user.email!);
+                    } catch (e) {
+                        console.error("JWT Error (findUserByEmail):", e);
+                        dbUser = null;
+                    }
 
                     if (!dbUser) {
                         try {
@@ -113,7 +124,12 @@ export const authOptions: NextAuthOptions = {
                     }
                 } else {
                     // For Credentials, user.id is already our DB UUID (from authorize)
-                    dbUser = await db.findUserById(user.id);
+                    try {
+                        dbUser = await db.findUserById(user.id);
+                    } catch (e) {
+                        console.error("JWT Error (findUserById):", e);
+                        dbUser = null;
+                    }
                 }
 
                 if (dbUser) {
@@ -173,7 +189,12 @@ export const authOptions: NextAuthOptions = {
                 // Let's rely on finding the user by email if ID lookup fails or is ambiguous.
                 // Or safely, just look up by email.
                 if (user.email) {
-                    const dbUser = await db.findUserByEmail(user.email);
+                    let dbUser;
+                    try {
+                        dbUser = await db.findUserByEmail(user.email);
+                    } catch (e) {
+                        console.error("SignIn Event Error:", e);
+                    }
                     if (dbUser) {
                         try {
                             const { headers } = await import("next/headers");
