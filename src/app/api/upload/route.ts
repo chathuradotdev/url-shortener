@@ -18,14 +18,26 @@ export async function POST(req: NextRequest) {
         }
 
         // Validate file type
-        const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        const validTypes = [
+            'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+            'application/pdf',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/vnd.ms-excel',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'application/vnd.ms-powerpoint',
+            'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+            'text/plain',
+            'text/csv'
+        ];
+
         if (!validTypes.includes(file.type)) {
-            return NextResponse.json({ error: "Only image files (JPEG, PNG, GIF, WEBP) are allowed" }, { status: 400 });
+            return NextResponse.json({ error: "File type not allowed. Supported: Images, PDF, Word, Excel, PowerPoint" }, { status: 400 });
         }
 
-        // Limit file size (e.g., 5MB)
-        if (file.size > 5 * 1024 * 1024) {
-            return NextResponse.json({ error: "File size exceeds 5MB limit" }, { status: 400 });
+        // Limit file size (10MB)
+        if (file.size > 10 * 1024 * 1024) {
+            return NextResponse.json({ error: "File size exceeds 10MB limit" }, { status: 400 });
         }
 
         const buffer = Buffer.from(await file.arrayBuffer());
