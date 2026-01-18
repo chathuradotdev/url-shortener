@@ -72,6 +72,187 @@ const EXAMPLES = [
     }
 ];
 
+// Bio Claim Form Component
+function BioClaimForm() {
+    const [slug, setSlug] = useState("");
+    const [isChecking, setIsChecking] = useState(false);
+    const [availability, setAvailability] = useState<{
+        available: boolean;
+        message: string;
+        error?: string;
+    } | null>(null);
+    const [domain, setDomain] = useState("");
+
+    useEffect(() => {
+        // Get the current domain
+        if (typeof window !== 'undefined') {
+            setDomain(window.location.hostname);
+        }
+    }, []);
+
+    const handleCheckAvailability = async () => {
+        if (!slug.trim()) {
+            setAvailability({
+                available: false,
+                message: "",
+                error: "Please enter a username"
+            });
+            return;
+        }
+
+        setIsChecking(true);
+        setAvailability(null);
+
+        try {
+            const response = await fetch('/api/bio/check-availability', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ slug: slug.trim() })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                setAvailability({
+                    available: data.available,
+                    message: data.message,
+                    error: data.error
+                });
+            } else {
+                setAvailability({
+                    available: false,
+                    message: "",
+                    error: data.error || "Failed to check availability"
+                });
+            }
+        } catch (error) {
+            setAvailability({
+                available: false,
+                message: "",
+                error: "Network error. Please try again."
+            });
+        } finally {
+            setIsChecking(false);
+        }
+    };
+
+    const handleClaim = () => {
+        if (availability?.available) {
+            // Redirect to registration with the slug as a query parameter
+            window.location.href = `/register?bioSlug=${slug.trim().toLowerCase()}`;
+        }
+    };
+
+    const handleKeyPress = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            handleCheckAvailability();
+        }
+    };
+
+    return (
+        <div className="max-w-2xl">
+            <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl p-8 border-2 border-gray-100 dark:border-gray-800">
+                <h3 className="text-2xl font-black text-gray-900 dark:text-white mb-6">Claim Your Bio Link</h3>
+
+                <div className="space-y-4">
+                    {/* Input with domain prefix */}
+                    <div className="flex items-stretch gap-2">
+                        <div className="flex-1 relative">
+                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 font-mono text-sm pointer-events-none">
+                                {domain || 'yoursite.com'}/
+                            </div>
+                            <input
+                                type="text"
+                                value={slug}
+                                onChange={(e) => {
+                                    setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ''));
+                                    setAvailability(null);
+                                }}
+                                onKeyPress={handleKeyPress}
+                                placeholder="steve"
+                                className="w-full pl-[140px] pr-4 py-4 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-2xl font-mono text-lg focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 transition-colors text-gray-900 dark:text-white placeholder:text-gray-400"
+                                disabled={isChecking}
+                            />
+                        </div>
+                        <button
+                            onClick={handleCheckAvailability}
+                            disabled={isChecking || !slug.trim()}
+                            className="px-8 py-4 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white rounded-2xl font-black transition-all hover:scale-105 active:scale-95 shadow-lg disabled:cursor-not-allowed disabled:hover:scale-100"
+                        >
+                            {isChecking ? (
+                                <div className="flex items-center gap-2">
+                                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                    Checking...
+                                </div>
+                            ) : (
+                                'Check'
+                            )}
+                        </button>
+                    </div>
+
+                    {/* Availability feedback */}
+                    <AnimatePresence mode="wait">
+                        {availability && (
+                            <motion.div
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                className={cn(
+                                    "p-4 rounded-xl border-2 flex items-start gap-3",
+                                    availability.available
+                                        ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800"
+                                        : "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800"
+                                )}
+                            >
+                                {availability.available ? (
+                                    <CheckCircle2 className="w-6 h-6 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
+                                ) : (
+                                    <div className="w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                        <div className="w-5 h-5 rounded-full border-2 border-red-600 dark:border-red-400 flex items-center justify-center">
+                                            <span className="text-red-600 dark:text-red-400 text-xs font-black">✕</span>
+                                        </div>
+                                    </div>
+                                )}
+                                <div className="flex-1">
+                                    <p className={cn(
+                                        "font-bold text-sm",
+                                        availability.available
+                                            ? "text-green-800 dark:text-green-200"
+                                            : "text-red-800 dark:text-red-200"
+                                    )}>
+                                        {availability.error || availability.message}
+                                    </p>
+                                    {availability.available && (
+                                        <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                                            Your link will be: <span className="font-mono font-bold">{domain || 'yoursite.com'}/{slug}</span>
+                                        </p>
+                                    )}
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                    {/* Claim button */}
+                    {availability?.available && (
+                        <motion.button
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            onClick={handleClaim}
+                            className="w-full px-8 py-5 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 text-white rounded-2xl font-black text-lg transition-all hover:scale-105 active:scale-95 shadow-2xl flex items-center justify-center gap-2"
+                        >
+                            Claim & Subscribe for $3/month <ArrowRight className="w-6 h-6" />
+                        </motion.button>
+                    )}
+                </div>
+
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-6 text-center">
+                    Only letters, numbers, hyphens, and underscores allowed • 3-30 characters
+                </p>
+            </div>
+        </div>
+    );
+}
+
 export default function BioFeaturesPage() {
     const [mockLinks, setMockLinks] = useState<{ id: number; title: string; color: string }[]>([]);
     const [isAdding, setIsAdding] = useState(false);
@@ -115,13 +296,7 @@ export default function BioFeaturesPage() {
                             One elegant interface for everything you create. Transform your bio into a high-converting hub with colorful designs and interactive links.
                         </p>
 
-                        <div className="flex flex-wrap gap-4">
-                            <Link href="/register">
-                                <button className="px-8 py-4 bg-gray-900 dark:bg-white dark:text-gray-900 text-white rounded-2xl font-black transition-all hover:scale-105 shadow-2xl active:scale-95 flex items-center gap-2">
-                                    Claim Your Link <ArrowRight className="w-5 h-5" />
-                                </button>
-                            </Link>
-                        </div>
+                        <BioClaimForm />
                     </motion.div>
 
                     {/* Interactive "Link Builder" Demo */}

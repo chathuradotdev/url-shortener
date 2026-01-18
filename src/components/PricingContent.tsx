@@ -91,59 +91,88 @@ export default function PricingPageContent() {
             <div className="bg-gradient-to-br from-blue-50 via-white to-purple-50 py-20 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-7xl mx-auto text-center">
                     <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6">Powerful Plans for Everyone</h1>
-                    <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-10">Whether you're a casual user or a power user, we have the right plan for you. Compare our Guest and Registered plans below.</p>
+                    <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-10">From quick links to full digital identity - choose the plan that fits your needs. Start free or unlock premium features.</p>
                     <div className="flex items-center justify-center space-x-4 mb-8">
                         <span className={`text-sm font-medium ${billingCycle === 'monthly' ? 'text-gray-900' : 'text-gray-500'}`}>Monthly</span>
                         <button onClick={() => setBillingCycle(billingCycle === 'monthly' ? 'annual' : 'monthly')} className="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 bg-blue-600" role="switch" aria-checked={billingCycle === 'annual'}>
                             <span aria-hidden="true" className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${billingCycle === 'annual' ? 'translate-x-5' : 'translate-x-0'}`} />
                         </button>
-                        <span className={`text-sm font-medium ${billingCycle === 'annual' ? 'text-gray-900' : 'text-gray-500'}`}>Annual <span className="text-green-600 font-bold ml-1">(10% OFF)</span></span>
+                        <span className={`text-sm font-medium ${billingCycle === 'annual' ? 'text-gray-900' : 'text-gray-500'}`}>Annual <span className="text-green-600 font-bold ml-1">(20% OFF)</span></span>
                     </div>
                 </div>
             </div>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {/* Guest Plan */}
                     <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow duration-300">
-                        <div className="p-8 bg-gray-50 border-b border-gray-100">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-2">Guest User</h2>
-                            <p className="text-gray-600">Perfect for quick, one-off links.</p>
-                            <div className="mt-4"><span className="text-4xl font-extrabold text-gray-900">Free</span><span className="text-gray-500 ml-2">/ forever</span></div>
+                        <div className="p-6 bg-gray-50 border-b border-gray-100">
+                            <h2 className="text-xl font-bold text-gray-900 mb-2">Free</h2>
+                            <p className="text-sm text-gray-600">Quick links, no signup</p>
+                            <div className="mt-4"><span className="text-3xl font-extrabold text-gray-900">$0</span><span className="text-gray-500 ml-2 text-sm">/ forever</span></div>
                         </div>
-                        <div className="p-8">
-                            <ul className="space-y-4">
-                                <li className="flex items-start"><svg className="w-6 h-6 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg><span className="text-gray-700">Instant URL Shortening</span></li>
-                                <li className="flex items-start"><svg className="w-6 h-6 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg><span className="text-gray-700">Unlimited Redirects</span></li>
-                                <li className="flex items-start"><svg className="w-6 h-6 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg><span className="text-gray-700">QR Code Generation</span></li>
-                                <li className="flex items-start opacity-50"><svg className="w-6 h-6 text-gray-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg><span className="text-gray-500">Link Management Dashboard</span></li>
-                                <li className="flex items-start opacity-50"><svg className="w-6 h-6 text-gray-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg><span className="text-gray-500">Detailed Analytics</span></li>
-                                <li className="flex items-start opacity-50"><svg className="w-6 h-6 text-gray-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg><span className="text-gray-500">Edit/Delete Links</span></li>
+                        <div className="p-6">
+                            <ul className="space-y-3">
+                                <li className="flex items-start text-sm"><svg className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg><span className="text-gray-700">Instant URL Shortening</span></li>
+                                <li className="flex items-start text-sm"><svg className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg><span className="text-gray-700">QR Code Generation</span></li>
+                                <li className="flex items-start text-sm"><svg className="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg><span className="text-gray-700">Basic Analytics</span></li>
+                                <li className="flex items-start text-sm opacity-50"><svg className="w-5 h-5 text-gray-400 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg><span className="text-gray-500">Link Management</span></li>
+                                <li className="flex items-start text-sm opacity-50"><svg className="w-5 h-5 text-gray-400 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg><span className="text-gray-500">Bio Pages</span></li>
                             </ul>
-                            <div className="mt-8"><Link href="/" className="block w-full bg-white border border-gray-300 text-gray-700 font-bold py-3 px-4 rounded-xl text-center hover:bg-gray-50 transition-colors">Start Shortening Now</Link></div>
+                            <div className="mt-6"><Link href="/" className="block w-full bg-white border border-gray-300 text-gray-700 font-semibold py-2.5 px-4 rounded-xl text-center text-sm hover:bg-gray-50 transition-colors">Start Free</Link></div>
+                        </div>
+                    </div>
+
+                    {/* Bio Page Plan - NEW */}
+                    <div className="bg-white rounded-2xl shadow-lg border-2 border-purple-200 overflow-hidden hover:shadow-xl transition-shadow duration-300 relative">
+                        <div className="absolute top-0 right-0 bg-purple-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg uppercase tracking-wider">Popular</div>
+                        <div className="p-6 bg-gradient-to-br from-purple-50 to-pink-50 border-b border-purple-100">
+                            <h2 className="text-xl font-bold text-gray-900 mb-2">Bio Page</h2>
+                            <p className="text-sm text-gray-600">Your digital identity</p>
+                            <div className="mt-4 flex items-baseline">
+                                <span className="text-3xl font-extrabold text-gray-900">{billingCycle === 'monthly' ? '$3' : '$28.80'}</span>
+                                <span className="text-gray-500 ml-2 text-sm">/ {billingCycle === 'monthly' ? 'month' : 'year'}</span>
+                            </div>
+                            {billingCycle === 'annual' && <p className="text-xs text-green-600 font-semibold mt-1">$2.40/month (save 20%)</p>}
+                        </div>
+                        <div className="p-6">
+                            <ul className="space-y-3">
+                                <li className="flex items-start text-sm"><svg className="w-5 h-5 text-purple-500 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg><span className="text-gray-900 font-medium">1 Custom Bio Page</span></li>
+                                <li className="flex items-start text-sm"><svg className="w-5 h-5 text-purple-500 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg><span className="text-gray-900">Unlimited Links</span></li>
+                                <li className="flex items-start text-sm"><svg className="w-5 h-5 text-purple-500 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg><span className="text-gray-900">Custom Themes</span></li>
+                                <li className="flex items-start text-sm"><svg className="w-5 h-5 text-purple-500 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg><span className="text-gray-900">Social Media Icons</span></li>
+                                <li className="flex items-start text-sm"><svg className="w-5 h-5 text-purple-500 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg><span className="text-gray-900">Analytics Dashboard</span></li>
+                                <li className="flex items-start text-sm"><svg className="w-5 h-5 text-purple-500 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg><span className="text-gray-900">Lead Collection Forms</span></li>
+                                <li className="flex items-start text-sm"><svg className="w-5 h-5 text-purple-500 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg><span className="text-gray-900">Custom Widgets</span></li>
+                            </ul>
+                            <div className="mt-6 space-y-3">
+                                <button onClick={() => setShowBioSample(true)} className="block w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold py-2.5 px-4 rounded-xl text-center text-sm hover:from-purple-600 hover:to-pink-600 shadow-md hover:shadow-lg transition-all">See Sample & Subscribe</button>
+                                <Link href="/bio/features" className="block w-full bg-white border-2 border-purple-200 text-purple-600 font-semibold py-2.5 px-4 rounded-xl text-center text-sm hover:bg-purple-50 transition-all">Learn More About Features</Link>
+                                <p className="text-xs text-center text-gray-500">Perfect for creators & influencers</p>
+                            </div>
                         </div>
                     </div>
 
                     {/* Registered Plan */}
-                    <div className="bg-white rounded-2xl shadow-xl border-2 border-blue-100 overflow-hidden hover:border-blue-500 transition-colors duration-300">
-                        <div className="p-8 bg-blue-50 border-b border-blue-100">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-2">Registered User</h2>
-                            <p className="text-gray-600">Unlock the full potential of your links.</p>
-                            <div className="mt-4"><span className="text-4xl font-extrabold text-gray-900">Free</span><span className="text-gray-500 ml-2">/ forever</span></div>
+                    <div className="bg-white rounded-2xl shadow-lg border-2 border-blue-100 overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                        <div className="p-6 bg-blue-50 border-b border-blue-100">
+                            <h2 className="text-xl font-bold text-gray-900 mb-2">Registered</h2>
+                            <p className="text-sm text-gray-600">Full link management</p>
+                            <div className="mt-4"><span className="text-3xl font-extrabold text-gray-900">$0</span><span className="text-gray-500 ml-2 text-sm">/ forever</span></div>
                         </div>
-                        <div className="p-8">
-                            <ul className="space-y-4">
-                                {["Everything in Guest", "Comprehensive Dashboard", "Advanced Analytics", "Link Management", "Persistent History", "UTM Builder"].map((feat, i) => (
-                                    <li key={i} className="flex items-start"><svg className="w-6 h-6 text-blue-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg><span className="text-gray-900 font-medium">{feat}</span></li>
+                        <div className="p-6">
+                            <ul className="space-y-3">
+                                {["Everything in Free", "Dashboard", "Advanced Analytics", "Link Management", "History", "UTM Builder"].map((feat, i) => (
+                                    <li key={i} className="flex items-start text-sm"><svg className="w-5 h-5 text-blue-500 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg><span className="text-gray-900 font-medium">{feat}</span></li>
                                 ))}
                             </ul>
-                            <div className="mt-8">
+                            <div className="mt-6">
                                 {isPaidSubscriber || isTrialUser ? (
-                                    <span className="block w-full bg-gray-50 text-gray-400 font-bold py-3 px-4 rounded-xl text-center border border-gray-200">Free Tier Account</span>
+                                    <span className="block w-full bg-gray-50 text-gray-400 font-semibold py-2.5 px-4 rounded-xl text-center text-sm border border-gray-200">Free Account</span>
                                 ) : session ? (
-                                    <span className="block w-full bg-gray-50 text-gray-400 font-bold py-3 px-4 rounded-xl text-center border border-gray-200">Current Plan</span>
+                                    <span className="block w-full bg-gray-50 text-gray-400 font-semibold py-2.5 px-4 rounded-xl text-center text-sm border border-gray-200">Current Plan</span>
                                 ) : (
-                                    <Link href="/register" className="block w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-xl text-center hover:bg-blue-700 shadow-md hover:shadow-lg transition-all">Create Free Account</Link>
+                                    <Link href="/register" className="block w-full bg-blue-600 text-white font-semibold py-2.5 px-4 rounded-xl text-center text-sm hover:bg-blue-700 shadow-md hover:shadow-lg transition-all">Create Account</Link>
                                 )}
                             </div>
                         </div>
@@ -162,19 +191,40 @@ export default function PricingPageContent() {
                             )}
                             <p className="text-gray-600">Power tools for advanced users.</p>
                             <div className="mt-4 flex items-baseline">
-                                <span className="text-4xl font-extrabold text-gray-900">{billingCycle === 'monthly' ? '$1' : '$10.80'}</span>
+                                <span className="text-4xl font-extrabold text-gray-900">{billingCycle === 'monthly' ? '$19' : '$182.40'}</span>
                                 <span className="text-gray-500 ml-2">/ {billingCycle === 'monthly' ? 'month' : 'year'}</span>
                             </div>
-                            {billingCycle === 'annual' && <p className="text-xs text-green-600 font-semibold mt-1">$0.90 / month (billed annually)</p>}
+                            {billingCycle === 'annual' && <p className="text-xs text-green-600 font-semibold mt-1">$15.20 / month (save 20%)</p>}
                         </div>
                         <div className="p-8">
                             <ul className="space-y-4">
                                 <li className="flex items-start"><svg className="w-6 h-6 text-amber-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg><span className="text-gray-900 font-medium">Everything in Registered</span></li>
+
+                                {/* Branded Domains */}
                                 <li className="flex items-start"><svg className="w-6 h-6 text-amber-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg><span className="text-gray-900 font-medium">Branded Domains</span><p className="text-sm text-gray-500 ml-auto pl-4">link.yourbrand.com</p></li>
-                                <li className="flex items-start"><svg className="w-6 h-6 text-amber-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg><span className="text-gray-900 font-medium">Bulk URL Upload</span><p className="text-sm text-gray-500 ml-auto pl-4">CSV Upload</p></li>
-                                <li className="flex items-start"><svg className="w-6 h-6 text-amber-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg><span className="text-gray-900 font-medium">Smart Targeting</span><p className="text-sm text-gray-500 ml-auto pl-4">Geo & Time</p></li>
-                                <li className="flex items-start"><svg className="w-6 h-6 text-amber-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg><span className="text-gray-900 font-medium">Social Previews</span><p className="text-sm text-gray-500 ml-auto pl-4">Custom Metadata</p></li>
-                                <li className="flex items-start"><svg className="w-6 h-6 text-amber-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg><span className="text-gray-900 font-medium">Mobile Deep Linking</span><p className="text-sm text-gray-500 ml-auto pl-4">iOS & Android</p></li>
+
+                                {/* Smart Targeting */}
+                                <li className="flex items-start"><svg className="w-6 h-6 text-amber-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg><span className="text-gray-900 font-medium">Smart Targeting</span><p className="text-sm text-gray-500 ml-auto pl-4">Geo & Time Based</p></li>
+
+                                {/* Link Rotation / A/B Testing */}
+                                <li className="flex items-start"><svg className="w-6 h-6 text-amber-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg><span className="text-gray-900 font-medium">Link Rotation</span><p className="text-sm text-gray-500 ml-auto pl-4">A/B Testing</p></li>
+
+                                {/* Link Expiration */}
+                                <li className="flex items-start"><svg className="w-6 h-6 text-amber-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg><span className="text-gray-900 font-medium">Link Expiration</span><p className="text-sm text-gray-500 ml-auto pl-4">Auto-Redirect</p></li>
+
+                                {/* Burn After Reading */}
+                                <li className="flex items-start"><svg className="w-6 h-6 text-amber-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" /></svg><span className="text-gray-900 font-medium">Burn After Reading</span><p className="text-sm text-gray-500 ml-auto pl-4">Self-Destruct</p></li>
+
+                                {/* Social Media Previews */}
+                                <li className="flex items-start"><svg className="w-6 h-6 text-amber-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg><span className="text-gray-900 font-medium">Social Previews</span><p className="text-sm text-gray-500 ml-auto pl-4">Custom OG Tags</p></li>
+
+                                {/* Mobile Deep Linking */}
+                                <li className="flex items-start"><svg className="w-6 h-6 text-amber-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg><span className="text-gray-900 font-medium">Deep Links</span><p className="text-sm text-gray-500 ml-auto pl-4">iOS & Android</p></li>
+
+                                {/* Interim Pages */}
+                                <li className="flex items-start"><svg className="w-6 h-6 text-amber-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" /></svg><span className="text-gray-900 font-medium">Interim Pages</span><p className="text-sm text-gray-500 ml-auto pl-4">Splash Screens</p></li>
+
+                                {/* Custom Bio Pages */}
                                 <li className="flex items-start group relative">
                                     <svg className="w-6 h-6 text-amber-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                                     <div className="flex-1">
@@ -185,7 +235,12 @@ export default function PricingPageContent() {
                                         <p className="text-sm text-gray-500">Link-in-Bio</p>
                                     </div>
                                 </li>
-                                <li className="flex items-start"><svg className="w-6 h-6 text-amber-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg><span className="text-gray-900 font-medium">Permanent Redirect (301)</span></li>
+
+                                {/* Bulk Upload */}
+                                <li className="flex items-start"><svg className="w-6 h-6 text-amber-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg><span className="text-gray-900 font-medium">Bulk URL Upload</span><p className="text-sm text-gray-500 ml-auto pl-4">CSV Import</p></li>
+
+                                {/* 301 Redirects */}
+                                <li className="flex items-start"><svg className="w-6 h-6 text-amber-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 9l3 3m0 0l-3 3m3-3H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg><span className="text-gray-900 font-medium">Permanent Redirect</span><p className="text-sm text-gray-500 ml-auto pl-4">301 Status</p></li>
                             </ul>
                             <div className="mt-8">
                                 <button
@@ -205,6 +260,76 @@ export default function PricingPageContent() {
                                 </p>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Premium Features Spotlight */}
+            <div className="bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 py-20">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center mb-16">
+                        <h2 className="text-4xl font-bold text-gray-900 mb-4">Premium Features Spotlight</h2>
+                        <p className="text-xl text-gray-600 max-w-3xl mx-auto">Unlock advanced capabilities designed for power users, marketers, and businesses.</p>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {[
+                            {
+                                title: "Smart Targeting",
+                                desc: "Route visitors to different destinations based on their location or time of day. Perfect for global campaigns.",
+                                icon: "M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
+                                color: "from-blue-500 to-cyan-500"
+                            },
+                            {
+                                title: "Link Rotation",
+                                desc: "A/B test multiple destinations with weighted or sequential distribution. Optimize your conversion rates.",
+                                icon: "M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15",
+                                color: "from-purple-500 to-pink-500"
+                            },
+                            {
+                                title: "Burn After Reading",
+                                desc: "Create self-destructing links that expire after a set number of visits. Ideal for exclusive content.",
+                                icon: "M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z",
+                                color: "from-red-500 to-orange-500"
+                            },
+                            {
+                                title: "Link Expiration",
+                                desc: "Set expiration dates with automatic redirects to fallback URLs. Keep your links fresh and relevant.",
+                                icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z",
+                                color: "from-green-500 to-emerald-500"
+                            },
+                            {
+                                title: "Social Previews",
+                                desc: "Customize Open Graph tags for stunning social media previews. Control how your links appear when shared.",
+                                icon: "M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z",
+                                color: "from-indigo-500 to-blue-500"
+                            },
+                            {
+                                title: "Deep Links",
+                                desc: "Seamlessly redirect mobile users to iOS or Android apps. Enhance mobile user experience.",
+                                icon: "M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z",
+                                color: "from-teal-500 to-cyan-500"
+                            },
+                            {
+                                title: "Interim Pages",
+                                desc: "Display custom splash screens before redirecting. Perfect for disclaimers or promotional messages.",
+                                icon: "M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01",
+                                color: "from-yellow-500 to-amber-500"
+                            },
+                            {
+                                title: "Branded Domains",
+                                desc: "Use your own custom domain for short links. Build trust and strengthen your brand identity.",
+                                icon: "M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
+                                color: "from-rose-500 to-pink-500"
+                            }
+                        ].map((feature, i) => (
+                            <div key={i} className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100">
+                                <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-4 shadow-md`}>
+                                    <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={feature.icon} /></svg>
+                                </div>
+                                <h3 className="text-lg font-bold text-gray-900 mb-2">{feature.title}</h3>
+                                <p className="text-sm text-gray-600 leading-relaxed">{feature.desc}</p>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </div>

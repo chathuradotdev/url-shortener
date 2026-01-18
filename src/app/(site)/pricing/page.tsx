@@ -3,7 +3,7 @@ import PricingPageContent from "@/components/PricingContent";
 
 export const metadata: Metadata = {
     title: "Pricing - Powerful URL Shortening Tools",
-    description: "Explore our powerful pricing plans including QR code generation, advanced analytics, and link management for free.",
+    description: "Explore our pricing plans with premium features: Smart Targeting, Link Rotation (A/B Testing), Burn After Reading, Custom Social Previews, Deep Links, Branded Domains, and more.",
     alternates: {
         canonical: "/pricing",
     },
