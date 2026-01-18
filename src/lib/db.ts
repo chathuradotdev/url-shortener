@@ -151,7 +151,7 @@ export interface BioLink {
     position: number;
     is_active: boolean;
     clicks?: number;
-    type?: 'link' | 'youtube' | 'spotify' | 'header' | 'text' | 'audio' | 'instagram' | 'form' | 'countdown';
+    type?: 'link' | 'youtube' | 'spotify' | 'header' | 'text' | 'audio' | 'instagram' | 'form' | 'countdown' | 'file';
     animation?: string;
     created_at: string;
 }
