@@ -25,7 +25,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             apple: bioPage.avatar_url,
         } : undefined,
     };
-};
 }
 
 export default async function BioPage({ params }: Props) {
