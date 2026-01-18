@@ -13,6 +13,7 @@ import CountdownWidget from "./CountdownWidget";
 import ContactFormWidget from "./ContactFormWidget";
 import PollWidget from "./PollWidget";
 import VideoWidget from "./VideoWidget";
+import FAQWidget from "./FAQWidget";
 import { toast } from "sonner";
 
 interface BioRendererProps {
@@ -430,8 +431,8 @@ export default function BioRenderer({ bioPage, links, variant = 'public', allPag
                             </div>
                         )}
 
-                        {/* Instagram Feed Section (Priority) - Temporarily Disabled */}
-                        {false && links.filter(l => l.type === 'instagram' && l.is_active !== false).length > 0 && (
+                        {/* Instagram Feed Section (Priority) */}
+                        {links.filter(l => l.type === 'instagram' && l.is_active !== false).length > 0 && (
                             <div className="w-full flex flex-col gap-4 mb-8 px-2">
                                 <div className="flex items-center gap-2 px-4 mb-1">
                                     <div className="p-1.5 bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] rounded-lg text-white">
@@ -475,7 +476,7 @@ export default function BioRenderer({ bioPage, links, variant = 'public', allPag
                                         }
                                         return (
                                             <div key={link.id} className="w-full shadow-xl rounded-[2rem] overflow-hidden bg-white dark:bg-gray-800 border-4 border-white/10">
-                                                <iframe src={`https://www.instagram.com/p/${instaMatch[1]}/embed`} width="100%" height="480" frameBorder="0" scrolling="no" allowTransparency={true} />
+                                                <iframe src={`https://www.instagram.com/p/${instaMatch[1]}/embed`} width="100%" height="480" frameBorder="0" scrolling="no" allowtransparency="true" />
                                             </div>
                                         );
                                     })}
@@ -548,6 +549,16 @@ export default function BioRenderer({ bioPage, links, variant = 'public', allPag
                                 if (link.type === 'poll') {
                                     return (
                                         <PollWidget
+                                            key={link.id}
+                                            link={link}
+                                            theme={theme}
+                                        />
+                                    );
+                                }
+
+                                if (link.type === 'faq') {
+                                    return (
+                                        <FAQWidget
                                             key={link.id}
                                             link={link}
                                             theme={theme}

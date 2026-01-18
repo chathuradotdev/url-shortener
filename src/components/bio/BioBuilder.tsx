@@ -5,6 +5,7 @@ import { BioPage, BioLink } from "@/lib/db";
 import BioPreview from "./BioPreview";
 import BioLeadsList from "./BioLeadsList";
 import PollBlockEditor from "./PollBlockEditor";
+import FAQBlockEditor from "./FAQBlockEditor";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -13,7 +14,7 @@ import {
     Globe, Github, Youtube, Music, Link as LinkIcon, Type, X,
     ChevronRight, CheckCircle2, ChevronDown, ChevronUp, GripVertical,
     Smartphone, Monitor, Save, RotateCcw, Copy, BarChart3, TrendingUp, MousePointerClick,
-    Linkedin, Facebook, Mail, Upload, Music2, Mic, FormInput, AlignLeft, Headphones, Search, Image as ImageIcon, Timer, Inbox, Settings2, Trash2, Stamp, Lock, Crown, Video
+    Linkedin, Facebook, Mail, Upload, Music2, Mic, FormInput, AlignLeft, Headphones, Search, Image as ImageIcon, Timer, Inbox, Settings2, Trash2, Stamp, Lock, Crown, Video, HelpCircle
 } from "lucide-react";
 import {
     AlertDialog,
@@ -67,15 +68,16 @@ const LINK_ANIMATIONS = [
 ];
 
 const BLOCK_TYPES = [
-    { id: 'link', name: 'URL Button', icon: <LinkIcon className="w-4 h-4" />, desc: 'Standard link to any URL' },
-    { id: 'text', name: 'Text Block', icon: <AlignLeft className="w-4 h-4" />, desc: 'Heading or paragraph text' },
-    { id: 'audio', name: 'Audio Embed', icon: <Music2 className="w-4 h-4" />, desc: 'Spotify or Apple Music' },
-    { id: 'file', name: 'File Upload', icon: <Upload className="w-4 h-4" />, desc: 'Share downloadable files' },
-    { id: 'video', name: 'Video Embed', icon: <Video className="w-4 h-4" />, desc: 'YouTube / TikTok / Vimeo' },
-    // { id: 'instagram', name: 'Insta Sync', icon: <Instagram className="w-4 h-4" />, desc: 'Embed Instagram posts' }, // Temporarily disabled
-    { id: 'form', name: 'Custom Form', icon: <FormInput className="w-4 h-4" />, desc: 'Collect emails or data' },
-    { id: 'countdown', name: 'Countdown', icon: <Timer className="w-4 h-4" />, desc: 'Event timer' },
-    { id: 'poll', name: 'Poll / Vote', icon: <BarChart3 className="w-4 h-4" />, desc: 'Interactive voting' },
+    { id: 'link', name: 'URL Button', icon: <LinkIcon className="w-5 h-5" />, desc: 'Opens a web page to the specified URL.' },
+    { id: 'text', name: 'Text Block', icon: <AlignLeft className="w-5 h-5" />, desc: "Tell your page's story with a text section." },
+    { id: 'audio', name: 'Audio Embed', icon: <Music2 className="w-5 h-5" />, desc: 'Embed Spotify, Apple Music and more...' },
+    { id: 'file', name: 'File Upload', icon: <Upload className="w-5 h-5" />, desc: 'Opens an uploaded file (PDF, image, audio, etc.)' },
+    { id: 'video', name: 'Video Embed', icon: <Video className="w-5 h-5" />, desc: 'Embed YouTube, Vimeo, and more...' },
+    { id: 'instagram', name: 'Instagram', icon: <Instagram className="w-5 h-5" />, desc: 'Embed posts or profile.' },
+    { id: 'form', name: 'Custom Form', icon: <FormInput className="w-5 h-5" />, desc: 'Create a custom form to collect data.' },
+    { id: 'countdown', name: 'Countdown', icon: <Timer className="w-5 h-5" />, desc: 'Create a countdown timer for events.' },
+    { id: 'poll', name: 'Poll / Vote', icon: <BarChart3 className="w-5 h-5" />, desc: 'Engage visitors with interactive voting.' },
+    { id: 'faq', name: 'FAQ Accordion', icon: <HelpCircle className="w-5 h-5" />, desc: 'Add collapsible Q&A sections.' },
 ];
 export default function BioBuilder() {
     const { data: session } = useSession();
@@ -1034,7 +1036,10 @@ export default function BioBuilder() {
                                                                 link.type === 'form' ? <FormInput className="w-4 h-4" /> :
                                                                     link.type === 'countdown' ? <Timer className="w-4 h-4" /> :
                                                                         link.type === 'file' ? <Upload className="w-4 h-4" /> :
-                                                                            <LinkIcon className="w-4 h-4" />}
+                                                                            link.type === 'poll' ? <BarChart3 className="w-4 h-4" /> :
+                                                                                link.type === 'faq' ? <HelpCircle className="w-4 h-4" /> :
+                                                                                    link.type === 'video' ? <Video className="w-4 h-4" /> :
+                                                                                        <LinkIcon className="w-4 h-4" />}
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <input
@@ -1065,7 +1070,7 @@ export default function BioBuilder() {
                                                             onChange={(e) => updateLink(link.id, { url: new Date(e.target.value).toISOString() })}
                                                             className="block w-full text-[10px] bg-transparent border-none p-0 focus:ring-0 text-gray-400 mt-1"
                                                         />
-                                                    ) : (link.type !== 'text' && link.type !== 'form' && link.type !== 'file' && link.type !== 'poll' && (
+                                                    ) : (link.type !== 'text' && link.type !== 'form' && link.type !== 'file' && link.type !== 'poll' && link.type !== 'faq' && (
                                                         <input
                                                             value={link.url}
                                                             placeholder={link.type === 'audio' ? 'Spotify or Apple Music link' : 'https://...'}
@@ -1111,6 +1116,10 @@ export default function BioBuilder() {
 
                                                     {link.type === 'poll' && (
                                                         <PollBlockEditor link={link} updateLink={updateLink} />
+                                                    )}
+
+                                                    {link.type === 'faq' && (
+                                                        <FAQBlockEditor link={link} updateLink={updateLink} />
                                                     )}
                                                 </div>
                                                 <div className="opacity-0 group-hover:opacity-100 flex items-center gap-1 transition-opacity">
@@ -1411,19 +1420,17 @@ export default function BioBuilder() {
                         <AlertDialogCancel className="w-full rounded-xl font-bold text-xs">Close</AlertDialogCancel>
                     </AlertDialogFooter>
                 </AlertDialogContent>
-            </AlertDialog >
+            </AlertDialog>
 
             {/* Block Type Selector Dialog */}
-            < AlertDialog open={showBlockSelector} onOpenChange={setShowBlockSelector} >
-                <AlertDialogContent className="sm:max-w-[420px] rounded-[2rem] p-0 overflow-hidden">
-                    <AlertDialogHeader className="p-6 pb-2">
-                        <AlertDialogTitle className="text-xl font-black">Add Block</AlertDialogTitle>
-                        <AlertDialogDescription className="text-xs font-bold text-gray-400">
-                            Select the type of content you want to add
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
+            <AlertDialog open={showBlockSelector} onOpenChange={setShowBlockSelector}>
+                <AlertDialogContent className="sm:max-w-2xl rounded-[2rem] p-0 overflow-hidden bg-white dark:bg-gray-900 border-none shadow-2xl">
+                    <div className="p-6 pb-2 text-center">
+                        <AlertDialogTitle className="text-xl font-black mb-1">New Block</AlertDialogTitle>
+                        <AlertDialogDescription className="hidden">Select a block type</AlertDialogDescription>
+                    </div>
 
-                    <div className="grid grid-cols-2 gap-3 p-6 max-h-[60vh] overflow-y-auto no-scrollbar">
+                    <div className="grid grid-cols-3 gap-3 p-6 pt-2 max-h-[70vh] overflow-y-auto no-scrollbar">
                         {BLOCK_TYPES.map(type => {
                             const isLocked = !isPremium && type.id !== 'link';
                             return (
@@ -1431,18 +1438,24 @@ export default function BioBuilder() {
                                     key={type.id}
                                     disabled={isLocked}
                                     onClick={() => handleAddLink(type.id as any)}
-                                    className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all text-center group relative overflow-hidden ${isLocked ? 'border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed' : 'border-gray-50 dark:border-gray-800 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20'}`}
+                                    className={`flex flex-col items-center gap-2 p-4 rounded-xl border transition-all text-center group relative overflow-hidden h-full ${isLocked
+                                        ? 'border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed'
+                                        : 'border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 hover:border-blue-500 hover:ring-1 hover:ring-blue-500 hover:shadow-lg'
+                                        }`}
                                 >
-                                    <div className={`p-3 rounded-xl transition-colors ${isLocked ? 'bg-gray-100 text-gray-400' : 'bg-gray-50 dark:bg-gray-800 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/40 text-gray-500 group-hover:text-blue-600'}`}>
+                                    <div className={`p-2 rounded-lg transition-colors mb-0.5 ${isLocked
+                                        ? 'text-gray-400'
+                                        : 'text-gray-700 dark:text-gray-200 group-hover:text-blue-600'
+                                        }`}>
                                         {type.icon}
                                     </div>
-                                    <div className="space-y-0.5">
-                                        <div className="text-[11px] font-black">{type.name}</div>
-                                        <div className="text-[9px] text-gray-400 font-bold">{type.desc}</div>
+                                    <div className="space-y-1">
+                                        <div className="text-xs font-bold text-gray-900 dark:text-gray-100">{type.name}</div>
+                                        <div className="text-[10px] text-gray-500 font-medium leading-tight px-1">{type.desc}</div>
                                     </div>
                                     {isLocked && (
-                                        <div className="absolute top-3 right-3 text-gray-400">
-                                            <Lock className="w-3.5 h-3.5" />
+                                        <div className="absolute top-2 right-2 text-gray-400">
+                                            <Lock className="w-3 h-3" />
                                         </div>
                                     )}
                                 </button>
@@ -1450,12 +1463,12 @@ export default function BioBuilder() {
                         })}
                     </div>
 
-                    <AlertDialogFooter className="p-4 bg-gray-50 dark:bg-gray-800/50">
-                        <AlertDialogCancel className="w-full rounded-xl font-bold text-xs">Cancel</AlertDialogCancel>
-                    </AlertDialogFooter>
+                    <div className="p-4 flex justify-center pb-6">
+                        <AlertDialogCancel className="rounded-full px-6 h-8 font-bold text-[10px] border-gray-200 hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800 uppercase tracking-widest">Close</AlertDialogCancel>
+                    </div>
                 </AlertDialogContent>
-            </AlertDialog >
-        </div >
+            </AlertDialog>
+        </div>
     );
 }
 
