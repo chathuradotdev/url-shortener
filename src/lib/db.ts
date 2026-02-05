@@ -675,6 +675,15 @@ class SupabaseDB {
 
     // --- Custom Domain Methods ---
 
+    async findCustomDomain(domain: string): Promise<CustomDomain | null> {
+        const { data } = await supabase
+            .from('custom_domains')
+            .select('*')
+            .eq('domain', domain)
+            .maybeSingle();
+        return data as CustomDomain | null;
+    }
+
     async addCustomDomain(userId: string, domain: string, teamId?: string | null): Promise<CustomDomain> {
         const { data, error } = await supabase
             .from('custom_domains')

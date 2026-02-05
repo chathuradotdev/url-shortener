@@ -14,30 +14,30 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-    metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
+    metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://linkjet.co"),
     manifest: "/manifest.json",
     title: {
-        default: "URL Shortener - Shorten Your Links Instantly",
-        template: "%s | URL Shortener",
+        default: "LinkJet - Shorten Your Links Instantly",
+        template: "%s | LinkJet",
     },
     description: "The complete link platform. Smart Targeting, Bio Pages, Custom Social Previews, and Advanced Analytics.",
     keywords: ["url shortener", "link shortener", "qr code generator", "link management", "analytics", "free url shortener", "smart targeting", "bio pages", "custom social preview"],
-    authors: [{ name: "URL Shortener Team" }],
-    creator: "URL Shortener Team",
-    publisher: "URL Shortener",
+    authors: [{ name: "LinkJet Team" }],
+    creator: "LinkJet Team",
+    publisher: "LinkJet",
     openGraph: {
         type: "website",
         locale: "en_US",
         url: "/",
-        title: "URL Shortener - Shorten Your Links Instantly",
+        title: "LinkJet - Shorten Your Links Instantly",
         description: "The complete link platform. Smart Targeting, Bio Pages, Custom Social Previews, and Advanced Analytics.",
-        siteName: "URL Shortener",
+        siteName: "LinkJet",
     },
     twitter: {
         card: "summary_large_image",
-        title: "URL Shortener - Shorten Your Links Instantly",
+        title: "LinkJet - Shorten Your Links Instantly",
         description: "The complete link platform. Smart Targeting, Bio Pages, Custom Social Previews, and Advanced Analytics.",
-        creator: "@urlshortener",
+        creator: "@linkjet",
     },
     robots: {
         index: true,

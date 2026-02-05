@@ -546,7 +546,7 @@ export default function ShortenerForm() {
                                         />
                                         <input
                                             type="url"
-                                            placeholder="Custom Image URL (e.g. https://example.com/image.png)"
+                                            placeholder="Custom Image URL (e.g. https://linkjet.co/image.png)"
                                             value={socialImage}
                                             onChange={(e) => setSocialImage(e.target.value)}
                                             className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"

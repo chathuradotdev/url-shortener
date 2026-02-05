@@ -144,7 +144,7 @@ export async function POST(req: Request) {
         });
 
         // Construct the full short URL
-        const baseUrl = domain ? `https://${domain}` : (process.env.NEXTAUTH_URL || "http://localhost:3000");
+        const baseUrl = domain ? `https://${domain}` : (process.env.NEXTAUTH_URL || "https://linkjet.co");
         const shortUrl = `${baseUrl}/${shortCode}`;
 
         return NextResponse.json({

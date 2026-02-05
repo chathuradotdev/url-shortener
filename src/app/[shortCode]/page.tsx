@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: { params: Promise<{ shortCode
             title: url.social_title,
             description: url.social_description || "Click to see more",
             images: url.social_image ? [{ url: url.social_image }] : [],
-            url: `https://your-domain.com/${shortCode}`,
+            url: `https://linkjet.co/${shortCode}`,
             type: 'website',
         },
         twitter: {
@@ -58,20 +58,18 @@ export default async function ShortCodePage({
     }
 
     // Also handle localhost in dev
-    if (!host.includes("localhost") && host !== systemHost && !host.endsWith(".vercel.app")) {
-        // It's likely a custom domain
-        // However, if your system domain IS on vercel.app, we need to be careful.
-        // The safest way is: if user explicitly requested a branded domain, the DB will have it.
-        // We pass the host to DB. If it's the system host, we SHOULD pass null?
-        // Let's pass the host if it seems "custom".
-
-        // Simplified Logic: 
-        // If the host is NOT the system host, treat it as a potential custom domain.
-        // CAUTION: "www" subdomain might be system host too.
-
-        // Let's rely on exact match for simplicity for now.
-        if (host !== systemHost) {
-            domain = host;
+    // Check if the host is a registered custom domain in our system
+    // We only treat it as a custom domain if it's explicitly registered in our database.
+    // Otherwise, we treat it as a request to the main system (domain = null).
+    if (!host.includes("localhost") && host !== systemHost && !host.endsWith(".vercel.app") && host !== "linkjet.co") {
+        try {
+            const customDomain = await db.findCustomDomain(host);
+            if (customDomain) {
+                domain = host;
+            }
+        } catch (error) {
+            console.error("Error ensuring custom domain:", error);
+            // Fallback to null domain (system) in case of error
         }
     }
 
