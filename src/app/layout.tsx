@@ -1,12 +1,21 @@
 import { Providers } from "@/components/Providers";
 import "./globals.css";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 
 const inter = Inter({ subsets: ["latin"] });
 
+export const viewport: Viewport = {
+    themeColor: "#000000",
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+};
+
 export const metadata: Metadata = {
     metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
+    manifest: "/manifest.json",
     title: {
         default: "URL Shortener - Shorten Your Links Instantly",
         template: "%s | URL Shortener",
@@ -40,6 +49,11 @@ export const metadata: Metadata = {
             "max-image-preview": "large",
             "max-snippet": -1,
         },
+    },
+    appleWebApp: {
+        capable: true,
+        statusBarStyle: "default",
+        title: "LinkJet",
     },
 };
 
