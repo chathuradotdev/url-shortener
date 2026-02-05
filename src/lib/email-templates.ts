@@ -190,3 +190,54 @@ ${stackTrace}
 </html>
   `;
 }
+
+export function getVerificationEmailHtml(code: string) {
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify Your Account</title>
+</head>
+<body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f4f5; margin: 0; padding: 0;">
+  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; overflow: hidden; margin-top: 40px; border: 1px solid #e5e7eb;">
+    
+    <!-- Header -->
+    <div style="background: linear-gradient(to right, #2563eb, #9333ea); padding: 30px 40px; text-align: left;">
+        <!-- Logo Text/Icon -->
+        <div style="display: flex; align-items: center; color: white; font-weight: bold; font-size: 24px;">
+            <span style="font-size: 24px; margin-right: 10px;">⚡</span> LinkJet.co
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div style="padding: 40px 40px;">
+      <h1 style="color: #111827; margin-top: 0; font-size: 32px; font-weight: bold; margin-bottom: 24px;">Please verify your account</h1>
+      
+      <p style="color: #374151; font-size: 16px; line-height: 1.6; margin-bottom: 16px; font-weight: bold;">
+        Hi there,
+      </p>
+      
+      <p style="color: #374151; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
+        Before you can continue using your LinkJet account, we need it verified to make sure it's secure.
+      </p>
+      
+      <p style="color: #374151; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
+        Simply copy and paste the temporary authentication code into the pop-up verification form on the LinkJet website.
+      </p>
+      
+      <div style="margin: 32px 0;">
+        <span style="color: #2563eb; font-size: 36px; font-weight: bold; letter-spacing: 1px;">${code}</span>
+      </div>
+
+      <p style="color: #6b7280; font-size: 14px; line-height: 1.5; margin-bottom: 0;">
+        The code will expire thirty minutes after the request was made.
+      </p>
+    </div>
+    
+  </div>
+</body>
+</html>
+  `;
+}

@@ -53,6 +53,10 @@ export const authOptions: NextAuthOptions = {
                     throw new Error("Your account has been suspended.");
                 }
 
+                if (!user.email_verified) {
+                    throw new Error("Please verify your email address.");
+                }
+
                 return {
                     id: user.id,
                     name: user.username,
@@ -118,9 +122,15 @@ export const authOptions: NextAuthOptions = {
                                 email: user.email!,
                                 image: user.image || undefined,
                             });
+                            // Auto-verify Google users
+                            if (dbUser) await db.verifyUser(dbUser.id);
                         } catch (e) {
                             console.error("Error creating user from Google:", e);
                         }
+                    } else if (!dbUser.email_verified) {
+                        // Trust Google means verified
+                        await db.verifyUser(dbUser.id);
+                        dbUser.email_verified = true;
                     }
                 } else {
                     // For Credentials, user.id is already our DB UUID (from authorize)

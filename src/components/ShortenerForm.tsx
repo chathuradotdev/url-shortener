@@ -576,10 +576,20 @@ export default function ShortenerForm() {
                             </div>
                         )}
 
-                        <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 px-2 mt-1">
-                            <span>e.g. my-campaign</span>
-                            {session && <span>Expiration, Tags & Password (optional)</span>}
-                        </div>
+                        {session ? (
+                            <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 px-2 mt-1">
+                                <span>e.g. my-campaign</span>
+                                <span>Expiration, Tags & Password (optional)</span>
+                            </div>
+                        ) : (
+                            <div className="mt-3 flex justify-center md:justify-end animate-in fade-in slide-in-from-top-1">
+                                <Link href="/register" className="group flex items-center gap-1.5 text-xs font-medium text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors bg-purple-50 dark:bg-purple-900/20 px-3 py-1.5 rounded-full border border-purple-100 dark:border-purple-800/30 hover:shadow-sm">
+                                    <span className="text-lg leading-none">✨</span>
+                                    <span>Create an account to unlock more awesome features</span>
+                                    <span className="group-hover:translate-x-0.5 transition-transform">→</span>
+                                </Link>
+                            </div>
+                        )}
                     </div>
                 </form>
 

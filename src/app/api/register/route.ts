@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import bcrypt from "bcryptjs";
+import { sendEmail } from "@/lib/email";
+import { getVerificationEmailHtml } from "@/lib/email-templates";
+import crypto from "crypto";
 
 import { limiter } from "@/lib/rate-limit";
 
@@ -44,6 +47,20 @@ export async function POST(req: Request) {
             email,
             password_hash: hashedPassword,
             trial_ends_at: trialEndsAt.toISOString(),
+        });
+
+        // Generate Verification Code
+        const verificationCode = crypto.randomInt(100000, 999999).toString();
+        const verificationExpires = new Date();
+        verificationExpires.setMinutes(verificationExpires.getMinutes() + 30); // 30 mins
+
+        await db.setUserVerificationCode(user.id, verificationCode, verificationExpires.toISOString());
+
+        // Send Email
+        await sendEmail({
+            to: email,
+            subject: "Verify your LinkJet account",
+            html: getVerificationEmailHtml(verificationCode),
         });
 
         return NextResponse.json(

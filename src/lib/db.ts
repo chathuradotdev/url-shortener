@@ -29,6 +29,9 @@ export interface User {
     company_branding_type?: 'default' | 'text' | 'image' | null;
     company_branding_text?: string | null;
     company_branding_image?: string | null;
+    email_verified?: boolean;
+    verification_code?: string | null;
+    verification_expires?: string | null;
 }
 
 // Custom Domain Interface
@@ -517,6 +520,28 @@ class SupabaseDB {
         await supabase
             .from('users')
             .update({ reset_token: token, reset_token_expiry: expiry })
+            .eq('id', userId);
+    }
+
+    async setUserVerificationCode(userId: string, code: string, expiry: string): Promise<void> {
+        await supabase
+            .from('users')
+            .update({
+                verification_code: code,
+                verification_expires: expiry,
+                email_verified: false
+            })
+            .eq('id', userId);
+    }
+
+    async verifyUser(userId: string): Promise<void> {
+        await supabase
+            .from('users')
+            .update({
+                email_verified: true,
+                verification_code: null,
+                verification_expires: null
+            })
             .eq('id', userId);
     }
 
