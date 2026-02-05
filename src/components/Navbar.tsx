@@ -27,17 +27,14 @@ export default function Navbar() {
                     {/* Logo Section */}
                     <div className="flex">
                         <div className="flex-shrink-0 flex items-center">
-                            <Link href="/" className="flex items-center space-x-2 group">
-                                <div className="relative w-10 h-10 hover:scale-105 transition-transform duration-200">
+                            <Link href="/" className="flex items-center group">
+                                <div className="relative w-64 h-16 hover:scale-105 transition-transform duration-200">
                                     <img
                                         src="/linkjet-logo.png"
                                         alt="LinkJet.co Logo"
-                                        className="w-full h-full object-contain"
+                                        className="w-full h-full object-contain object-left"
                                     />
                                 </div>
-                                <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent tracking-tight">
-                                    LinkJet.co
-                                </span>
                             </Link>
                         </div>
                     </div>
@@ -120,7 +117,7 @@ export default function Navbar() {
                                     href="/register"
                                     className="text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 px-5 py-2 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md hover:-translate-y-0.5"
                                 >
-                                    Get Started
+                                    Register
                                 </Link>
                             </>
                         )}
@@ -251,7 +248,7 @@ export default function Navbar() {
                                         onClick={() => setIsOpen(false)}
                                         className="block w-full text-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-lg transition-transform shadow-sm active:scale-95"
                                     >
-                                        Get Started
+                                        Register
                                     </Link>
                                 </div>
                             )}
