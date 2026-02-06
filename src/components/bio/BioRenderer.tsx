@@ -118,7 +118,7 @@ export default function BioRenderer({ bioPage, links, variant = 'public', allPag
 
     const handleCopyLink = () => {
         if (typeof navigator !== 'undefined') {
-            navigator.clipboard.writeText(`https://liinks.co/${bioPage.slug}`);
+            navigator.clipboard.writeText(`https://linkjet.co/${bioPage.slug}`);
             setIsCopied(true);
             setTimeout(() => setIsCopied(false), 2000);
         }
@@ -129,7 +129,7 @@ export default function BioRenderer({ bioPage, links, variant = 'public', allPag
         setViewMode('share'); // Reset on close
     };
 
-    const shareUrl = typeof window !== 'undefined' ? window.location.href : `https://liinks.co/${bioPage.slug}`;
+    const shareUrl = typeof window !== 'undefined' ? window.location.href : `https://linkjet.co/${bioPage.slug}`;
 
     // The inner content (The "Phone" screen)
     const content = (
@@ -212,7 +212,7 @@ export default function BioRenderer({ bioPage, links, variant = 'public', allPag
                                 <h3 className="font-bold text-lg mb-6 text-gray-900">Scan QR Code</h3>
 
                                 <QrCodeDisplay
-                                    url={`https://liinks.co/${bioPage.slug}`}
+                                    url={`https://linkjet.co/${bioPage.slug}`}
                                     variant="mobile-sheet"
                                     options={{ width: 400, margin: 1 }}
                                 />
@@ -642,7 +642,7 @@ export default function BioRenderer({ bioPage, links, variant = 'public', allPag
                                 <>
                                     <span className="text-[9px] font-bold tracking-widest uppercase">Made With</span>
                                     <div className="flex items-center gap-1 font-black text-sm tracking-tight">
-                                        <Globe className="w-3 h-3" /> liinks.co
+                                        <Globe className="w-3 h-3" /> linkjet.co
                                     </div>
                                 </>
                             );

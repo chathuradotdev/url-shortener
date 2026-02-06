@@ -639,7 +639,8 @@ export default function BioBuilder() {
                         <div className="relative">
                             <button
                                 onClick={() => setShowShareMenu(!showShareMenu)}
-                                className={`p-1.5 rounded-md transition-all border border-transparent ${showShareMenu ? 'bg-blue-50 text-blue-500 border-blue-100 dark:bg-blue-900/40 dark:border-blue-800' : 'bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-100 dark:hover:border-blue-900'}`}
+                                disabled={!bioPage.slug}
+                                className={`p-1.5 rounded-md transition-all border border-transparent ${showShareMenu ? 'bg-blue-50 text-blue-500 border-blue-100 dark:bg-blue-900/40 dark:border-blue-800' : 'bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-100 dark:hover:border-blue-900'} ${!bioPage.slug ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 title="Share"
                             >
                                 <Share2 className="w-4 h-4" />
@@ -783,21 +784,27 @@ export default function BioBuilder() {
                                 <div className="flex-1 min-w-0">
                                     <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Your Page URL</div>
                                     <div className="flex items-center gap-2">
-                                        <button
-                                            onClick={() => {
-                                                const url = `${baseUrl}/${bioPage.slug}`;
-                                                navigator.clipboard.writeText(url);
-                                                toast.success("URL copied!");
-                                            }}
-                                            className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline truncate"
-                                        >
-                                            {baseUrl ? baseUrl.replace(/^https?:\/\//, '') : ''}/{bioPage.slug}
-                                        </button>
-                                        <Copy className="w-3 h-3 text-gray-400 cursor-pointer hover:text-blue-500" onClick={() => {
-                                            const url = `${baseUrl}/${bioPage.slug}`;
-                                            navigator.clipboard.writeText(url);
-                                            toast.success("URL copied!");
-                                        }} />
+                                        {bioPage.slug ? (
+                                            <>
+                                                <button
+                                                    onClick={() => {
+                                                        const url = `${baseUrl}/${bioPage.slug}`;
+                                                        navigator.clipboard.writeText(url);
+                                                        toast.success("URL copied!");
+                                                    }}
+                                                    className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline truncate"
+                                                >
+                                                    {baseUrl ? baseUrl.replace(/^https?:\/\//, '') : ''}/{bioPage.slug}
+                                                </button>
+                                                <Copy className="w-3 h-3 text-gray-400 cursor-pointer hover:text-blue-500" onClick={() => {
+                                                    const url = `${baseUrl}/${bioPage.slug}`;
+                                                    navigator.clipboard.writeText(url);
+                                                    toast.success("URL copied!");
+                                                }} />
+                                            </>
+                                        ) : (
+                                            <span className="text-xs text-gray-400 italic">No page URL available</span>
+                                        )}
                                     </div>
                                 </div>
 
