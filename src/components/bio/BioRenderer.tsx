@@ -251,7 +251,7 @@ export default function BioRenderer({ bioPage, links, variant = 'public', allPag
                                 allPages.map((page) => (
                                     <a
                                         key={page.id}
-                                        href={variant === 'public' ? `/bio/${page.slug}` : '#'}
+                                        href={variant === 'public' ? `/${page.slug}` : '#'}
                                         onClick={(e) => {
                                             if (variant === 'preview') {
                                                 e.preventDefault();

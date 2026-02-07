@@ -1,33 +1,54 @@
 import { db } from "@/lib/db";
 import { redirect, notFound, permanentRedirect } from "next/navigation";
 import { headers } from "next/headers";
+import BioRenderer from "@/components/bio/BioRenderer";
 
 export async function generateMetadata({ params }: { params: Promise<{ shortCode: string }> }) {
     const { shortCode } = await params;
+
+    // Check for Short URL first
     const url = await db.findUrlByShortCode(shortCode);
 
-    if (!url || !url.social_title) {
+    if (url && url.social_title) {
         return {
-            title: "Shortened URL",
+            title: url.social_title,
+            description: url.social_description || "Click to see more",
+            openGraph: {
+                title: url.social_title,
+                description: url.social_description || "Click to see more",
+                images: url.social_image ? [{ url: url.social_image }] : [],
+                url: `https://linkjet.co/${shortCode}`,
+                type: 'website',
+            },
+            twitter: {
+                card: 'summary_large_image',
+                title: url.social_title,
+                description: url.social_description || "Click to see more",
+                images: url.social_image ? [url.social_image] : [],
+            },
+        };
+    }
+
+    // Fallback to Bio Page Metadata
+    const bioPage = await db.getBioPageBySlug(shortCode);
+    if (bioPage) {
+        const displayTitle = bioPage.title || bioPage.slug;
+        return {
+            title: `${displayTitle} | Link in Bio`,
+            description: bioPage.description || `Check out my links at ${displayTitle}`,
+            openGraph: bioPage.avatar_url ? {
+                images: [bioPage.avatar_url]
+            } : undefined,
+            icons: bioPage.avatar_url ? {
+                icon: bioPage.avatar_url,
+                shortcut: bioPage.avatar_url,
+                apple: bioPage.avatar_url,
+            } : undefined,
         };
     }
 
     return {
-        title: url.social_title,
-        description: url.social_description || "Click to see more",
-        openGraph: {
-            title: url.social_title,
-            description: url.social_description || "Click to see more",
-            images: url.social_image ? [{ url: url.social_image }] : [],
-            url: `https://linkjet.co/${shortCode}`,
-            type: 'website',
-        },
-        twitter: {
-            card: 'summary_large_image',
-            title: url.social_title,
-            description: url.social_description || "Click to see more",
-            images: url.social_image ? [url.social_image] : [],
-        },
+        title: "LinkJet - Url Shortener",
     };
 }
 
@@ -41,9 +62,6 @@ export default async function ShortCodePage({
     const host = headersList.get("host") || "";
 
     // Determine if this is a custom domain
-    // We compare against the system domain (e.g. from env or hardcoded default)
-    // If NEXT_PUBLIC_APP_URL is "https://myapp.com", hostname is "myapp.com"
-
     let domain: string | null = null;
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "";
     let systemHost = "";
@@ -53,14 +71,9 @@ export default async function ShortCodePage({
             systemHost = new URL(appUrl).host;
         }
     } catch (e) {
-        // fallback if env is just a domain or invalid
         systemHost = appUrl;
     }
 
-    // Also handle localhost in dev
-    // Check if the host is a registered custom domain in our system
-    // We only treat it as a custom domain if it's explicitly registered in our database.
-    // Otherwise, we treat it as a request to the main system (domain = null).
     if (!host.includes("localhost") && host !== systemHost && !host.endsWith(".vercel.app") && host !== "linkjet.co") {
         try {
             const customDomain = await db.findCustomDomain(host);
@@ -69,20 +82,42 @@ export default async function ShortCodePage({
             }
         } catch (error) {
             console.error("Error ensuring custom domain:", error);
-            // Fallback to null domain (system) in case of error
         }
     }
 
     const url = await db.findUrlByShortCode(shortCode, domain);
 
+    // If NO Short URL found, check for Bio Page
     if (!url) {
-        // Try to find a bio page
         const bioPage = await db.getBioPageBySlug(shortCode);
+
         if (bioPage) {
-            redirect(`/bio/${shortCode}`);
+            // Render Bio Page Logic
+            const links = await db.getBioLinks(bioPage.id);
+            const user = await db.findUserById(bioPage.user_id);
+
+            // Track View (Fire and forget)
+            db.incrementBioPageViews(bioPage.id).catch(console.error);
+
+            return (
+                <main className="min-h-screen">
+                    <BioRenderer
+                        bioPage={bioPage}
+                        links={links}
+                        userBranding={{
+                            type: user?.company_branding_type || 'default',
+                            text: user?.company_branding_text,
+                            image: user?.company_branding_image
+                        }}
+                    />
+                </main>
+            );
         }
+
         notFound();
     }
+
+    // --- Short URL Logic Below ---
 
     if (url.status === 'removed') {
         return (
@@ -137,7 +172,6 @@ export default async function ShortCodePage({
     }
 
     // Analytics Tracking
-    // headersList is already defined above
     const userAgent = headersList.get("user-agent") || "Unknown";
     const referer = headersList.get("referer") || "Direct";
     const ip = headersList.get("x-forwarded-for") || "Unknown";
@@ -168,7 +202,6 @@ export default async function ShortCodePage({
     let targetUrl = url.original_url;
 
     if (url.targeting_enabled && url.geo_targeting) {
-        // Cast to Record<string, string> if TS complains, or rely on loose types from DB helper
         const geoRules = url.geo_targeting as Record<string, string>;
         if (country !== "Unknown" && geoRules[country]) {
             targetUrl = geoRules[country];
@@ -181,16 +214,11 @@ export default async function ShortCodePage({
     if (url.time_targeting && Array.isArray(url.time_targeting) && url.time_targeting.length > 0 && timezone) {
         try {
             const now = new Date();
-            // Get current time in user's timezone
-            const userTimeStr = now.toLocaleTimeString("en-US", { timeZone: timezone, hour12: false, hour: '2-digit', minute: '2-digit' }); // "14:30"
-            const userDay = now.toLocaleDateString("en-US", { timeZone: timezone, weekday: 'short' }); // "Mon"
+            const userTimeStr = now.toLocaleTimeString("en-US", { timeZone: timezone, hour12: false, hour: '2-digit', minute: '2-digit' });
+            const userDay = now.toLocaleDateString("en-US", { timeZone: timezone, weekday: 'short' });
 
-            // Find a matching rule
             const matchedRule = url.time_targeting.find((rule: any) => {
-                // Check Day
                 if (!rule.days.includes(userDay)) return false;
-
-                // Check Time Range
                 if (userTimeStr >= rule.startTime && userTimeStr <= rule.endTime) {
                     return true;
                 }
@@ -209,15 +237,12 @@ export default async function ShortCodePage({
     if (url.rotation_enabled && url.rotation_rules && url.rotation_rules.length > 0) {
         const rules = url.rotation_rules;
         if (url.rotation_mode === 'sequential') {
-            // Sequential / Round Robin
             const index = (url.clicks || 0) % rules.length;
             if (rules[index]?.url) {
                 targetUrl = rules[index].url;
             }
         } else {
-            // Weighted Random (Default for Split Testing)
             const totalWeight = rules.reduce((sum: number, rule: any) => sum + (rule.weight || 0), 0);
-
             if (totalWeight > 0) {
                 let random = Math.random() * totalWeight;
                 for (const rule of rules) {
@@ -239,21 +264,17 @@ export default async function ShortCodePage({
         browser,
         device,
         os,
-        country: country !== "Unknown" ? country : "Unknown", // store the code
+        country: country !== "Unknown" ? country : "Unknown",
         city: "Unknown"
     });
 
-    // Interim Page Logic (Greetings / Warnings)
     if (url.interim_page_enabled) {
         let showInterim = true;
-
-        // Check visit limit if set
         if (url.interim_visit_limit && url.interim_visit_limit > 0) {
             const currentCount = url.interim_visit_count || 0;
             if (currentCount >= url.interim_visit_limit) {
                 showInterim = false;
             } else {
-                // Increment count if showing
                 await db.incrementInterimVisitCount(url.id);
             }
         }
@@ -270,7 +291,6 @@ export default async function ShortCodePage({
         }
     }
 
-    // Deep Linking Logic
     if (device === "Mobile" || device === "Tablet") {
         let deepLink = null;
         if (os === "Android" && url.android_deep_link) {
