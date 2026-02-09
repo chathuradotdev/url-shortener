@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { createCheckoutSession } from "@/app/actions/billing";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { BioLinkClaimModal } from "@/components/BioLinkClaimModal";
 
 function BioSampleModal({ onClose }: { onClose: () => void }) {
     return (
@@ -58,6 +59,8 @@ export default function PricingContentInteractive() {
     const { data: session } = useSession();
     const router = useRouter();
     const [showBioSample, setShowBioSample] = useState(false);
+    const [showClaimModal, setShowClaimModal] = useState(false);
+    const [bioSlug, setBioSlug] = useState("");
     const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
     const [isLoading, setIsLoading] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState<'individual' | 'business'>('individual');
@@ -80,6 +83,22 @@ export default function PricingContentInteractive() {
             toast.error(error.message || "Something went wrong");
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const handleClaimBio = () => {
+        if (!bioSlug) {
+            toast.error("Please enter a username");
+            return;
+        }
+
+        if (session) {
+            setShowClaimModal(true);
+        } else {
+            if (typeof window !== 'undefined') {
+                localStorage.setItem('pending_bio_claim', JSON.stringify({ slug: bioSlug }));
+            }
+            router.push('/register');
         }
     };
 
@@ -337,7 +356,32 @@ export default function PricingContentInteractive() {
                                     ))}
                                 </ul>
 
-                                {plan.ctaAction ? (
+                                {plan.name === 'Bio Page' ? (
+                                    <div className="mt-2 text-left">
+                                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 block">Claim your link</label>
+                                        <div className="flex items-center border border-purple-200 bg-white rounded-xl overflow-hidden focus-within:ring-2 ring-purple-500/50 transition-all shadow-sm mb-3">
+                                            <span className="pl-3 pr-1 text-gray-400 text-sm font-medium h-full flex items-center select-none bg-gray-50/50">linkjet.co/</span>
+                                            <input
+                                                type="text"
+                                                placeholder="yourname"
+                                                className="flex-1 p-2.5 outline-none text-sm font-bold text-gray-900 placeholder-gray-300 w-full min-w-0"
+                                                value={bioSlug}
+                                                onChange={(e) => setBioSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-_]/g, ''))}
+                                                onKeyDown={(e) => e.key === 'Enter' && handleClaimBio()}
+                                            />
+                                        </div>
+                                        <button
+                                            onClick={handleClaimBio}
+                                            disabled={!bioSlug}
+                                            className="block w-full font-bold py-3 px-4 rounded-xl text-center text-sm shadow-md hover:shadow-lg transition-all bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 disabled:opacity-70 disabled:grayscale"
+                                        >
+                                            {bioSlug ? `Claim ${bioSlug}` : 'Enter Username'}
+                                        </button>
+                                        <button onClick={() => setShowBioSample(true)} className="w-full text-center text-xs text-purple-600 font-bold mt-3 hover:underline">
+                                            See Sample Profile
+                                        </button>
+                                    </div>
+                                ) : plan.ctaAction ? (
                                     <button
                                         onClick={plan.ctaAction}
                                         disabled={plan.disabled || isLoading}
@@ -401,6 +445,7 @@ export default function PricingContentInteractive() {
             </div>
 
             {showBioSample && <BioSampleModal onClose={() => setShowBioSample(false)} />}
+            {showClaimModal && <BioLinkClaimModal defaultSlug={bioSlug} onClose={() => setShowClaimModal(false)} />}
         </div>
     );
 }

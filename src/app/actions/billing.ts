@@ -7,7 +7,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
-export async function createCheckoutSession(variantId?: string) {
+export async function createCheckoutSession(variantId?: string, redirectUrl?: string, customData?: Record<string, any>) {
     const session = await getServerSession(authOptions);
 
     if (!session || !session.user) {
@@ -38,11 +38,12 @@ export async function createCheckoutSession(variantId?: string) {
                 checkoutData: {
                     email: session.user.email ?? undefined,
                     custom: {
-                        user_id: session.user.id
+                        user_id: session.user.id,
+                        ...(customData || {})
                     }
                 },
                 productOptions: {
-                    redirectUrl: `${process.env.NEXTAUTH_URL}/dashboard?checkout=success`,
+                    redirectUrl: redirectUrl || `${process.env.NEXTAUTH_URL}/dashboard?checkout=success`,
                     receiptButtonText: 'Go to Dashboard',
                     receiptThankYouNote: 'Thanks for upgrading to Pro!'
                 }

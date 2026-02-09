@@ -8,6 +8,8 @@ import UrlList from "@/components/UrlList";
 import GuestLinkClaimer from "@/components/GuestLinkClaimer";
 import CheckoutSuccessToast from "@/components/CheckoutSuccessToast";
 
+import { BioClaimCheck } from "@/components/dashboard/BioClaimCheck";
+
 export const dynamic = 'force-dynamic';
 
 export default async function Dashboard({
@@ -76,6 +78,7 @@ export default async function Dashboard({
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-12">
             <GuestLinkClaimer />
+            <BioClaimCheck />
             <CheckoutSuccessToast />
             <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header */}

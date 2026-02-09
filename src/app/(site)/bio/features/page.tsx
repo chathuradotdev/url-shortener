@@ -138,8 +138,12 @@ function BioClaimForm() {
 
     const handleClaim = () => {
         if (availability?.available) {
-            // Redirect to registration with the slug as a query parameter
-            window.location.href = `/register?bioSlug=${slug.trim().toLowerCase()}`;
+            // Save pending claim to localStorage
+            if (typeof window !== 'undefined') {
+                localStorage.setItem('pending_bio_claim', JSON.stringify({ slug: slug.trim().toLowerCase() }));
+            }
+            // Redirect to registration
+            window.location.href = `/register`;
         }
     };
 
