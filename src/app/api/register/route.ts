@@ -65,9 +65,18 @@ export async function POST(req: Request) {
             try {
                 const imagePath = path.join(process.cwd(), 'public', 'email', 'verify-hero.png');
                 if (fs.existsSync(imagePath)) {
-                    const imageBuffer = fs.readFileSync(imagePath);
-                    const base64Image = imageBuffer.toString('base64');
-                    heroImageSrc = `data:image/png;base64,${base64Image}`;
+                    const stats = fs.statSync(imagePath);
+                    // Gmail clips messages > 102KB. If image is too large, don't embed it.
+                    // Using 80KB limit to leave room for HTML and other content.
+                    if (stats.size < 80 * 1024) {
+                        const imageBuffer = fs.readFileSync(imagePath);
+                        const base64Image = imageBuffer.toString('base64');
+                        heroImageSrc = `data:image/png;base64,${base64Image}`;
+                    } else {
+                        console.warn(`[Email] verify-hero.png is too large (${Math.round(stats.size / 1024)}KB) to embed. Using placeholder.`);
+                        // Fallback to a placeholder that works in Gmail
+                        heroImageSrc = 'https://placehold.co/600x200/png?text=Verify+Account';
+                    }
                 }
             } catch (e) {
                 console.error("Failed to load verify image for embedding:", e);

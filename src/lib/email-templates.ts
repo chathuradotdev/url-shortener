@@ -215,7 +215,7 @@ export function getVerificationEmailHtml(code: string, heroImageSrc?: string) {
 </head>
 <body style="font-family: 'Google Sans', Roboto, sans-serif, Arial; background-color: #e6e9ed; margin: 0; padding: 0; -webkit-font-smoothing: antialiased;">
   <div style="width: 100%; background-color: #e6e9ed; padding: 20px 0;">
-    <div style="max-width: 600px; margin: 0 auto;">
+    <div style="max-width: 660px; margin: 0 auto;">
       
       <!-- Top Link -->
       <div style="text-align: center; padding-bottom: 20px;">
@@ -228,7 +228,7 @@ export function getVerificationEmailHtml(code: string, heroImageSrc?: string) {
       <div style="background-color: #ffffff; padding: 48px; box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);">
         
         <!-- Header Text -->
-        <h1 style="color: #3c4043; font-size: 24px; font-weight: 400; margin: 0 0 32px 0;">LinkJet Security</h1>
+        <h1 style="color: #3c4043; font-size: 24px; font-weight: 400; margin: 0 0 32px 0;">Verify your Account</h1>
         
         <!-- Hero Image -->
         <div style="margin-bottom: 32px;">
