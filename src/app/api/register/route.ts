@@ -4,6 +4,8 @@ import bcrypt from "bcryptjs";
 import { sendEmail } from "@/lib/email";
 import { getVerificationEmailHtml } from "@/lib/email-templates";
 import crypto from "crypto";
+import fs from 'fs';
+import path from 'path';
 
 import { limiter } from "@/lib/rate-limit";
 
@@ -57,10 +59,25 @@ export async function POST(req: Request) {
         await db.setUserVerificationCode(user.id, verificationCode, verificationExpires.toISOString());
 
         // Send Email
+        let heroImageSrc: string | undefined = undefined;
+        // In development, embed image as base64 so it shows up in local mail clients/previews
+        if (process.env.NODE_ENV === 'development' || !process.env.NEXT_PUBLIC_APP_URL) {
+            try {
+                const imagePath = path.join(process.cwd(), 'public', 'email', 'verify-hero.png');
+                if (fs.existsSync(imagePath)) {
+                    const imageBuffer = fs.readFileSync(imagePath);
+                    const base64Image = imageBuffer.toString('base64');
+                    heroImageSrc = `data:image/png;base64,${base64Image}`;
+                }
+            } catch (e) {
+                console.error("Failed to load verify image for embedding:", e);
+            }
+        }
+
         await sendEmail({
             to: email,
             subject: "Verify your LinkJet account",
-            html: getVerificationEmailHtml(verificationCode),
+            html: getVerificationEmailHtml(verificationCode, heroImageSrc),
         });
 
         return NextResponse.json(

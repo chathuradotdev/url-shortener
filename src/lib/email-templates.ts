@@ -191,7 +191,10 @@ ${stackTrace}
   `;
 }
 
-export function getVerificationEmailHtml(code: string) {
+export function getVerificationEmailHtml(code: string, heroImageSrc?: string) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  const heroImage = heroImageSrc || `${appUrl}/email/verify-hero.png`;
+
   return `
 <!DOCTYPE html>
 <html>
@@ -199,43 +202,150 @@ export function getVerificationEmailHtml(code: string) {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Verify Your Account</title>
+  <style>
+    @media only screen and (max-width: 600px) {
+      .content {
+        padding: 20px !important;
+      }
+      .header {
+        padding: 20px !important;
+      }
+    }
+  </style>
 </head>
-<body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f4f5; margin: 0; padding: 0;">
-  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; overflow: hidden; margin-top: 40px; border: 1px solid #e5e7eb;">
-    
-    <!-- Header -->
-    <div style="background: linear-gradient(to right, #2563eb, #9333ea); padding: 30px 40px; text-align: left;">
-        <!-- Logo Text/Icon -->
-        <div style="display: flex; align-items: center; color: white; font-weight: bold; font-size: 24px;">
-            <span style="font-size: 24px; margin-right: 10px;">⚡</span> LinkJet.co
-        </div>
-    </div>
-
-    <!-- Content -->
-    <div style="padding: 40px 40px;">
-      <h1 style="color: #111827; margin-top: 0; font-size: 32px; font-weight: bold; margin-bottom: 24px;">Please verify your account</h1>
+<body style="font-family: 'Google Sans', Roboto, sans-serif, Arial; background-color: #e6e9ed; margin: 0; padding: 0; -webkit-font-smoothing: antialiased;">
+  <div style="width: 100%; background-color: #e6e9ed; padding: 20px 0;">
+    <div style="max-width: 600px; margin: 0 auto;">
       
-      <p style="color: #374151; font-size: 16px; line-height: 1.6; margin-bottom: 16px; font-weight: bold;">
-        Hi there,
-      </p>
-      
-      <p style="color: #374151; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
-        Before you can continue using your LinkJet account, we need it verified to make sure it's secure.
-      </p>
-      
-      <p style="color: #374151; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
-        Simply copy and paste the temporary authentication code into the pop-up verification form on the LinkJet website.
-      </p>
-      
-      <div style="margin: 32px 0;">
-        <span style="color: #2563eb; font-size: 36px; font-weight: bold; letter-spacing: 1px;">${code}</span>
+      <!-- Top Link -->
+      <div style="text-align: center; padding-bottom: 20px;">
+        <p style="font-size: 12px; color: #5f6368; margin: 0;">
+          Email not displaying correctly? <a href="#" style="color: #444746; text-decoration: underline;">View it online</a>
+        </p>
       </div>
 
-      <p style="color: #6b7280; font-size: 14px; line-height: 1.5; margin-bottom: 0;">
-        The code will expire thirty minutes after the request was made.
-      </p>
+      <!-- Main Card -->
+      <div style="background-color: #ffffff; padding: 48px; box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);">
+        
+        <!-- Header Text -->
+        <h1 style="color: #3c4043; font-size: 24px; font-weight: 400; margin: 0 0 32px 0;">LinkJet Security</h1>
+        
+        <!-- Hero Image -->
+        <div style="margin-bottom: 32px;">
+           <img src="${heroImage}" alt="Verify Account" style="width: 100%; height: auto; border: 1px solid #e8eaed; display: block;" />
+        </div>
+
+        <!-- Body Content -->
+        <p style="color: #3c4043; font-size: 16px; line-height: 24px; margin: 0 0 24px 0;">
+          Hi there! We received a request to create a new LinkJet account. To ensure your account is secure, we need to verify your email address.
+        </p>
+
+        <p style="color: #3c4043; font-size: 16px; line-height: 24px; margin: 0 0 24px 0;">
+          Please use the following verification code to complete your registration:
+        </p>
+
+        <!-- Code Box -->
+        <div style="background-color: #f1f3f4; border-radius: 8px; padding: 24px; text-align: center; margin-bottom: 32px;">
+            <span style="font-family: 'Google Sans Mono', monospace; font-size: 32px; font-weight: 700; letter-spacing: 4px; color: #1a73e8;">${code}</span>
+        </div>
+
+        <p style="color: #5f6368; font-size: 14px; line-height: 20px; margin: 0;">
+          If you didn't request this code, you can safely ignore this email. Someone might have typed your email address by mistake.
+        </p>
+
+      </div>
+
+      <!-- Footer -->
+      <div style="padding: 24px 0; text-align: center;">
+        <p style="color: #5f6368; font-size: 12px; line-height: 16px; margin: 0;">
+          © ${new Date().getFullYear()} LinkJet LLC<br>
+          1600 Amphitheatre Parkway, Mountain View, CA 94043, USA
+        </p>
+      </div>
+
     </div>
-    
+  </div>
+</body>
+</html>
+  `;
+}
+
+export function getWelcomeEmailHtml(name: string, profileUrl: string, heroImageSrc?: string) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  const heroImage = heroImageSrc || `${appUrl}/email/welcome-hero.png`;
+
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome to LinkJet</title>
+  <style>
+    @media only screen and (max-width: 600px) {
+      .content {
+        padding: 20px !important;
+      }
+      .header {
+        padding: 20px !important;
+      }
+    }
+  </style>
+</head>
+<body style="font-family: 'Google Sans', Roboto, sans-serif, Arial; background-color: #e6e9ed; margin: 0; padding: 0; -webkit-font-smoothing: antialiased;">
+  <div style="width: 100%; background-color: #e6e9ed; padding: 20px 0;">
+    <div style="max-width: 600px; margin: 0 auto;">
+      
+      <!-- Top Link -->
+      <div style="text-align: center; padding-bottom: 20px;">
+        <p style="font-size: 12px; color: #5f6368; margin: 0;">
+          Email not displaying correctly? <a href="#" style="color: #444746; text-decoration: underline;">View it online</a>
+        </p>
+      </div>
+
+      <!-- Main Card -->
+      <div style="background-color: #ffffff; padding: 48px; box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);">
+        
+        <!-- Header Text -->
+        <h1 style="color: #3c4043; font-size: 24px; font-weight: 400; margin: 0 0 32px 0;">LinkJet Developer Program</h1>
+        
+        <!-- Hero Image -->
+        <div style="margin-bottom: 32px;">
+           <img src="${heroImage}" alt="Welcome to LinkJet" style="width: 100%; height: auto; border: 1px solid #e8eaed; display: block;" />
+        </div>
+
+        <!-- Body Content -->
+        <p style="color: #3c4043; font-size: 16px; line-height: 24px; margin: 0 0 24px 0;">
+          Hello ${name}! We're excited to have you as part of the LinkJet Developer Program! 🎉
+        </p>
+
+        <p style="color: #3c4043; font-size: 16px; line-height: 24px; margin: 0 0 24px 0;">
+          Now that you're in, you'll be able to make the most out of LinkJet for Developers and 
+          access useful training, exclusive features, and thriving communities to accelerate your coding journey.
+        </p>
+
+        <p style="color: #3c4043; font-size: 16px; line-height: 24px; margin: 0 0 32px 0;">
+          To enhance your feed and stay updated on the topics you're most interested in – don't forget to personalize your profile today!
+        </p>
+
+        <!-- CTA Button -->
+        <div style="margin-bottom: 16px;">
+          <a href="${profileUrl}" style="background-color: #1a73e8; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 4px; font-size: 16px; font-weight: 500; display: inline-block;">
+            Personalize your profile
+          </a>
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div style="padding: 24px 0; text-align: center;">
+        <p style="color: #5f6368; font-size: 12px; line-height: 16px; margin: 0;">
+          © ${new Date().getFullYear()} LinkJet LLC<br>
+          1600 Amphitheatre Parkway, Mountain View, CA 94043, USA
+        </p>
+      </div>
+
+    </div>
   </div>
 </body>
 </html>
