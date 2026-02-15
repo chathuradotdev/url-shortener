@@ -64,33 +64,10 @@ export async function POST(req: Request) {
             const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
             const profileUrl = `${appUrl}/dashboard/settings`;
 
-            let heroImageSrc: string | undefined = undefined;
-            // In development, embed image as base64 so it shows up in local mail clients/previews
-            // checking simple "localhost" string or NODE_ENV
-            if (process.env.NODE_ENV === 'development' || !process.env.NEXT_PUBLIC_APP_URL) {
-                try {
-                    const imagePath = path.join(process.cwd(), 'public', 'email', 'welcome-hero.png');
-                    if (fs.existsSync(imagePath)) {
-                        const stats = fs.statSync(imagePath);
-                        // Gmail clips messages > 102KB. If image is too large, don't embed it.
-                        if (stats.size < 80 * 1024) {
-                            const imageBuffer = fs.readFileSync(imagePath);
-                            const base64Image = imageBuffer.toString('base64');
-                            heroImageSrc = `data:image/png;base64,${base64Image}`;
-                        } else {
-                            console.warn(`[Email] welcome-hero.png is too large (${Math.round(stats.size / 1024)}KB) to embed. Using placeholder.`);
-                            heroImageSrc = 'https://placehold.co/600x200/png?text=Welcome+to+LinkJet';
-                        }
-                    }
-                } catch (e) {
-                    console.error("Failed to load welcome image for embedding:", e);
-                }
-            }
-
             await sendEmail({
                 to: email,
                 subject: "Welcome to LinkJet!",
-                html: getWelcomeEmailHtml(user.username || "User", profileUrl, heroImageSrc),
+                html: getWelcomeEmailHtml(user.username || "User", profileUrl),
             });
         } catch (emailError) {
             console.error("Failed to send welcome email:", emailError);

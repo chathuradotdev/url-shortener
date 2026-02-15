@@ -55,6 +55,9 @@ export const metadata: Metadata = {
         statusBarStyle: "default",
         title: "LinkJet",
     },
+    other: {
+        "google-adsense-account": "ca-pub-7001868234911670",
+    },
 };
 
 export default function RootLayout({
