@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Logo } from "./Logo";
 
 export default function Footer() {
     return (
@@ -7,14 +8,7 @@ export default function Footer() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                     <div className="col-span-1 md:col-span-2">
                         <Link href="/" className="flex items-center space-x-2 group mb-4">
-                            <div className="w-7 h-7 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center transform group-hover:scale-110 transition-transform duration-200">
-                                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                                </svg>
-                            </div>
-                            <span className="text-lg font-bold bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent">
-                                ShortLink
-                            </span>
+                            <Logo showText={true} />
                         </Link>
                         <p className="text-gray-500 text-sm leading-relaxed max-w-xs">
                             Making the web more accessible, one short link at a time. Secure, fast, and reliable URL shortening for everyone.
@@ -61,7 +55,7 @@ export default function Footer() {
 
                 <div className="mt-12 pt-8 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center">
                     <p className="text-base text-gray-400 text-center md:text-left">
-                        &copy; {new Date().getFullYear()} ShortLink. All rights reserved.
+                        &copy; {new Date().getFullYear()} LinkJet.co. All rights reserved.
                     </p>
                     <div className="flex space-x-6 mt-4 md:mt-0">
                         <a href="#" className="text-gray-400 hover:text-blue-500 transition-colors">

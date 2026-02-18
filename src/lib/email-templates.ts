@@ -301,8 +301,25 @@ export function getWelcomeEmailHtml(name: string, profileUrl: string, heroImageS
     <div class="container" style="width: 90%; max-width: 1200px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); border: 1px solid #e5e7eb;">
       
       <!-- Header / Logo -->
-      <div style="text-align: center; padding: 32px 0 24px;">
-        <h2 style="font-size: 26px; font-weight: 800; color: #1e293b; margin: 0; background: linear-gradient(to right, #2563eb, #db2777); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">LinkJet</h2>
+      <!-- Header / Logo -->
+      <div style="text-align: center; padding: 40px 0 32px; background-color: #ffffff;">
+        <table align="center" border="0" cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="vertical-align: middle; padding-right: 12px;">
+              <!-- Fixed SVG Paper Plane Icon (Base64 Encoded) -->
+              <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSIjMjU2M0VCIj48cGF0aCBkPSJNMiAxMmwyMC05LTkgMjAtMi05LTktMnoiLz48L3N2Zz4=" 
+                   alt="LinkJet Logo" 
+                   width="32" 
+                   height="32" 
+                   style="display: block; border: 0;" />
+            </td>
+            <td style="vertical-align: middle;">
+              <span style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 28px; font-weight: 800; line-height: 1; letter-spacing: -0.5px;">
+                <span style="color: #1e293b;">Link</span><span style="color: #2563eb;">Jet</span><span style="color: #94a3b8; font-weight: 400; font-size: 24px;">.co</span>
+              </span>
+            </td>
+          </tr>
+        </table>
       </div>
 
       <!-- Colorful Bio Page Mockup Section -->

@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { Logo } from "@/components/Logo";
 import WorkspaceSelector from "@/components/WorkspaceSelector";
 
 export default function Navbar() {
@@ -28,12 +29,8 @@ export default function Navbar() {
                     <div className="flex">
                         <div className="flex-shrink-0 flex items-center">
                             <Link href="/" className="flex items-center group">
-                                <div className="relative w-64 h-16 hover:scale-105 transition-transform duration-200">
-                                    <img
-                                        src="/linkjet-logo.png"
-                                        alt="LinkJet.co Logo"
-                                        className="w-full h-full object-contain object-left"
-                                    />
+                                <div className="hover:scale-105 transition-transform duration-200 py-2">
+                                    <Logo showText={true} />
                                 </div>
                             </Link>
                         </div>
