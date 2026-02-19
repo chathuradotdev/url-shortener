@@ -271,7 +271,7 @@ export function getVerificationEmailHtml(code: string, heroImageSrc?: string) {
 }
 
 export function getWelcomeEmailHtml(name: string, profileUrl: string, heroImageSrc?: string) {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  const appUrl = 'https://linkjet.co';
 
   return `
 <!DOCTYPE html>
@@ -293,14 +293,17 @@ export function getWelcomeEmailHtml(name: string, profileUrl: string, heroImageS
         width: 100% !important;
         padding: 10px !important;
       }
+      .dashboard-preview {
+        height: auto !important;
+        min-height: 200px;
+      }
     }
   </style>
 </head>
 <body style="font-family: 'Google Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f0f2f5; margin: 0; padding: 0; -webkit-font-smoothing: antialiased;">
   <div style="width: 100%; background-color: #f0f2f5; padding: 40px 0;">
-    <div class="container" style="width: 90%; max-width: 1200px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); border: 1px solid #e5e7eb;">
+    <div class="container" style="width: 90%; max-width: 800px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); border: 1px solid #e5e7eb;">
       
-      <!-- Header / Logo -->
       <!-- Header / Logo -->
       <div style="text-align: center; padding: 40px 0 32px; background-color: #ffffff;">
         <table align="center" border="0" cellpadding="0" cellspacing="0">
@@ -322,77 +325,77 @@ export function getWelcomeEmailHtml(name: string, profileUrl: string, heroImageS
         </table>
       </div>
 
-      <!-- Colorful Bio Page Mockup Section -->
-      <div style="background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); padding: 60px 0; text-align: center; margin-bottom: 32px;">
-        <h1 style="color: #ffffff; font-size: 32px; font-weight: 800; margin: 0 0 12px 0; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">Showcase Who You Are</h1>
-        <p style="color: rgba(255,255,255,0.95); font-size: 18px; margin: 0 0 40px 0;">Build your stunning Bio Page in minutes.</p>
+      <!-- Feature Highlight / Dashboard Preview Section -->
+      <div style="background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%); padding: 20px 0 40px 0; text-align: center; border-bottom: 1px dashed #e2e8f0;">
+        <h1 style="color: #1e293b; font-size: 28px; font-weight: 800; margin: 0 0 16px 0; letter-spacing: -0.5px;">Your New Command Center</h1>
+        <p style="color: #64748b; font-size: 16px; margin: 0 0 40px 0; max-width: 600px; margin-left: auto; margin-right: auto; line-height: 1.5;">
+           Track clicks, manage links, and build bio pages all in one place.
+        </p>
         
-        <!-- Phone Frame (Refined) -->
-        <div style="display: inline-block; position: relative; width: 260px; background: #1e293b; border-radius: 40px; padding: 12px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.4); border: 4px solid #334155;">
+        <!-- Dashboard CSS Mockup -->
+        <div class="dashboard-preview" style="display: inline-block; position: relative; width: 90%; max-width: 500px; background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1); overflow: hidden; text-align: left;">
+            <!-- Fake Browser Header -->
+            <div style="background: #f1f5f9; padding: 10px 16px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center;">
+                <div style="display: flex; gap: 6px;">
+                    <div style="width: 10px; height: 10px; border-radius: 50%; background: #ef4444;"></div>
+                    <div style="width: 10px; height: 10px; border-radius: 50%; background: #f59e0b;"></div>
+                    <div style="width: 10px; height: 10px; border-radius: 50%; background: #22c55e;"></div>
+                </div>
+            </div>
             
-            <!-- Side Buttons -->
-            <div style="position: absolute; right: -6px; top: 80px; height: 40px; width: 6px; background: #475569; border-top-right-radius: 4px; border-bottom-right-radius: 4px;"></div>
-            <div style="position: absolute; left: -6px; top: 70px; height: 25px; width: 6px; background: #475569; border-top-left-radius: 4px; border-bottom-left-radius: 4px;"></div>
-            <div style="position: absolute; left: -6px; top: 110px; height: 40px; width: 6px; background: #475569; border-top-left-radius: 4px; border-bottom-left-radius: 4px;"></div>
-
-            <!-- Phone Screen -->
-            <div style="background: #ffffff; border-radius: 30px; overflow: hidden; height: 450px; position: relative; text-align: center; box-shadow: inset 0 0 0 2px rgba(0,0,0,0.1);">
-                
-                <!-- Status Bar (Simple Dot) -->
-                <div style="height: 20px; width: 100%; display: flex; justify-content: center; align-items: center; padding-top: 8px;">
-                     <div style="width: 60px; height: 16px; background: #f1f5f9; border-radius: 10px;"></div>
-                </div>
-
-                <!-- Cover Image -->
-                <div style="height: 120px; background: linear-gradient(to right, #8B5CF6, #EC4899); margin-top: 10px;"></div>
-                
-                <!-- Profile Pic -->
-                <div style="margin-top: -50px; margin-bottom: 12px; display: flex; justify-content: center; position: relative;">
-                    <div style="width: 90px; height: 90px; background: #fff; border-radius: 50%; padding: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                        <div style="width: 100%; height: 100%; background: linear-gradient(45deg, #3B82F6 0%, #2DD4BF 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 28px;">
-                            🚀
-                        </div>
+            <!-- Dashboard Content -->
+            <div style="padding: 20px;">
+                <!-- Stats Row -->
+                <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                    <div style="flex: 1; background: #eff6ff; padding: 12px; border-radius: 8px;">
+                        <div style="font-size: 10px; color: #3b82f6; font-weight: 700; text-transform: uppercase;">Total Clicks</div>
+                        <div style="font-size: 20px; color: #1e3a8a; font-weight: 800;">12,450</div>
+                    </div>
+                    <div style="flex: 1; background: #fdf2f8; padding: 12px; border-radius: 8px;">
+                         <div style="font-size: 10px; color: #db2777; font-weight: 700; text-transform: uppercase;">Bio Views</div>
+                         <div style="font-size: 20px; color: #831843; font-weight: 800;">5,200</div>
                     </div>
                 </div>
                 
-                <!-- Name -->
-                <div style="font-size: 18px; font-weight: 800; color: #1e293b; margin-bottom: 4px;">Alex Creator</div>
-                <div style="font-size: 13px; color: #64748b; margin-bottom: 24px;">@alexcreator</div>
-                
-                <!-- Links -->
-                <div style="padding: 0 24px;">
-                    <div style="background: white; border: 2px solid #e2e8f0; padding: 12px 0; border-radius: 50px; margin-bottom: 12px; font-size: 13px; font-weight: 700; color: #1e293b; box-shadow: 0 2px 5px rgba(0,0,0,0.05); text-align: center;">
-                        🎵 New Release
-                    </div>
-                    <div style="background: linear-gradient(90deg, #F59E0B 0%, #EA580C 100%); padding: 14px 0; border-radius: 50px; margin-bottom: 12px; font-size: 13px; font-weight: 700; color: white; box-shadow: 0 4px 10px rgba(234, 88, 12, 0.3); text-align: center;">
-                        🔥 Exclusive Merch
-                    </div>
-                    <div style="background: white; border: 2px solid #e2e8f0; padding: 12px 0; border-radius: 50px; margin-bottom: 12px; font-size: 13px; font-weight: 700; color: #1e293b; box-shadow: 0 2px 5px rgba(0,0,0,0.05); text-align: center;">
-                        📸 Photography
-                    </div>
+                <!-- Chart Area (Simple Bars) -->
+                <div style="background: #ffffff; border: 1px solid #f1f5f9; border-radius: 8px; padding: 15px; height: 100px; display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 20px;">
+                     <div style="width: 12%; height: 40%; background: #cbd5e1; border-radius: 4px;"></div>
+                     <div style="width: 12%; height: 60%; background: #cbd5e1; border-radius: 4px;"></div>
+                     <div style="width: 12%; height: 30%; background: #cbd5e1; border-radius: 4px;"></div>
+                     <div style="width: 12%; height: 80%; background: #3b82f6; border-radius: 4px;"></div>
+                     <div style="width: 12%; height: 50%; background: #cbd5e1; border-radius: 4px;"></div>
+                     <div style="width: 12%; height: 70%; background: #cbd5e1; border-radius: 4px;"></div>
                 </div>
                 
+                 <!-- Link Item -->
+                 <div style="display: flex; align-items: center; gap: 10px; border-top: 1px solid #f1f5f9; padding-top: 15px;">
+                      <div style="width: 32px; height: 32px; background: #e0e7ff; border-radius: 6px; display: flex; align-items: center; justify-content: center;">🔗</div>
+                      <div style="flex: 1;">
+                          <div style="height: 10px; width: 60%; background: #e2e8f0; border-radius: 4px; margin-bottom: 4px;"></div>
+                          <div style="height: 8px; width: 40%; background: #f1f5f9; border-radius: 4px;"></div>
+                      </div>
+                 </div>
             </div>
         </div>
       </div>
 
       <!-- Main Content -->
       <div style="padding: 0 40px 40px;">
-        <p style="color: #334155; font-size: 17px; line-height: 28px; margin: 0 0 24px 0; text-align: center;">
+        <p style="color: #334155; font-size: 17px; line-height: 28px; margin: 32px 0 24px 0; text-align: center;">
           Hi <strong>${name}</strong>,<br>
-          Your audience is waiting. Create your first page today!
+          We're thrilled to have you! LinkJet is designed to help you organize and grow your online presence.
         </p>
 
         <!-- CTA Button -->
         <div style="text-align: center; margin-bottom: 48px;">
-          <a href="${profileUrl}" style="background: linear-gradient(to right, #2563eb, #4f46e5); color: #ffffff; text-decoration: none; padding: 16px 36px; border-radius: 50px; font-size: 16px; font-weight: 700; display: inline-block; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); letter-spacing: 0.5px;">
-            Get Started Now
+          <a href="${appUrl}/dashboard" style="background: linear-gradient(to right, #2563eb, #4f46e5); color: #ffffff; text-decoration: none; padding: 16px 36px; border-radius: 50px; font-size: 16px; font-weight: 700; display: inline-block; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); letter-spacing: 0.5px;">
+            Go to Dashboard
           </a>
         </div>
 
         <!-- Features Grid -->
         <div style="border-top: 1px dashed #e2e8f0; padding-top: 32px;">
-          <h3 style="color: #0f172a; font-size: 20px; font-weight: 700; margin: 0 0 32px 0; text-align: center;">Power up your workflow</h3>
+          <h3 style="color: #0f172a; font-size: 20px; font-weight: 700; margin: 0 0 32px 0; text-align: center;">Everything you need</h3>
           
           <table width="100%" cellpadding="0" cellspacing="0" border="0">
             <tr>
@@ -435,21 +438,21 @@ export function getWelcomeEmailHtml(name: string, profileUrl: string, heroImageS
       <!-- Footer -->
       <div style="background-color: #f8fafc; padding: 32px 20px; text-align: center; border-top: 1px solid #e2e8f0;">
         <div style="margin-bottom: 16px;">
-          <a href="#" style="display: inline-block; margin: 0 8px; text-decoration: none;">
+          <a href="https://twitter.com/linkjet" style="display: inline-block; margin: 0 8px; text-decoration: none;">
             <img src="https://cdn-icons-png.flaticon.com/512/733/733579.png" width="24" height="24" alt="Twitter" style="opacity: 0.6;">
           </a>
-          <a href="#" style="display: inline-block; margin: 0 8px; text-decoration: none;">
+          <a href="https://instagram.com/linkjet" style="display: inline-block; margin: 0 8px; text-decoration: none;">
             <img src="https://cdn-icons-png.flaticon.com/512/733/733558.png" width="24" height="24" alt="Instagram" style="opacity: 0.6;">
           </a>
-          <a href="#" style="display: inline-block; margin: 0 8px; text-decoration: none;">
+          <a href="https://github.com/linkjet" style="display: inline-block; margin: 0 8px; text-decoration: none;">
             <img src="https://cdn-icons-png.flaticon.com/512/733/733609.png" width="24" height="24" alt="GitHub" style="opacity: 0.6;">
           </a>
         </div>
         <p style="color: #94a3b8; font-size: 12px; margin: 0 0 12px 0;">
-          © ${new Date().getFullYear()} LinkJet. All rights reserved.
+          © ${new Date().getFullYear()} LinkJet.co. All rights reserved.
         </p>
         <p style="color: #94a3b8; font-size: 12px; margin: 0;">
-          <a href="#" style="color: #94a3b8; text-decoration: none;">Unsubscribe</a> • <a href="#" style="color: #94a3b8; text-decoration: none;">Privacy Policy</a>
+          <a href="${appUrl}/unsubscribe" style="color: #94a3b8; text-decoration: none;">Unsubscribe</a> • <a href="${appUrl}/privacy" style="color: #94a3b8; text-decoration: none;">Privacy Policy</a>
         </p>
       </div>
 
