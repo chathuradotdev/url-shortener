@@ -281,182 +281,205 @@ export function getWelcomeEmailHtml(name: string, profileUrl: string, heroImageS
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Welcome to LinkJet</title>
   <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f3f4f6;
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+      color: #333333;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      overflow: hidden;
+    }
+    .logo-bar {
+      padding: 30px 0 20px;
+      text-align: center;
+      background-color: #ffffff;
+    }
+    .hero-section {
+      padding: 0 30px 10px;
+      text-align: center;
+    }
+    .hero-h1 {
+      margin: 0 0 10px;
+      font-size: 26px;
+      font-weight: 800;
+      color: #111827;
+      letter-spacing: -0.5px;
+    }
+    .intro-text {
+      font-size: 16px;
+      margin: 0 0 30px;
+      color: #6b7280;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    .content {
+      padding: 10px 30px 40px;
+    }
+    
+    .steps-container {
+      margin-bottom: 40px;
+    }
+    .step-card {
+      background-color: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: flex-start;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    .step-icon {
+      background-color: #eff6ff;
+      color: #2563eb;
+      border-radius: 10px;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      margin-right: 16px;
+      flex-shrink: 0;
+    }
+    .step-content h3 {
+      margin: 0 0 2px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #111827;
+    }
+    .step-content p {
+      margin: 0;
+      font-size: 13px;
+      color: #6b7280;
+      line-height: 1.4;
+    }
+    .cta-button {
+      display: block;
+      width: 100%;
+      background: linear-gradient(to right, #2563eb, #4f46e5);
+      color: #ffffff !important;
+      text-align: center;
+      padding: 16px 0;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 16px;
+      text-decoration: none;
+      box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+    }
+    .footer {
+      background-color: #f9fafb;
+      padding: 30px;
+      text-align: center;
+      font-size: 12px;
+      color: #9ca3af;
+      border-top: 1px solid #e5e7eb;
+    }
+    .footer a {
+      color: #6b7280;
+      text-decoration: underline;
+    }
+    
     @media only screen and (max-width: 600px) {
-      .content-cell {
-        display: block !important;
-        width: 100% !important;
-        padding-bottom: 20px !important;
-        padding-left: 0 !important;
-        padding-right: 0 !important;
-      }
-      .container {
-        width: 100% !important;
-        padding: 10px !important;
-      }
-      .dashboard-preview {
-        height: auto !important;
-        min-height: 200px;
-      }
+      .logo-bar { padding: 25px 0 15px; }
+      .hero-section { padding: 0 20px 20px; }
+      .hero-h1 { font-size: 24px; }
+      .content { padding: 0 20px 30px; }
     }
   </style>
 </head>
-<body style="font-family: 'Google Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f0f2f5; margin: 0; padding: 0; -webkit-font-smoothing: antialiased;">
-  <div style="width: 100%; background-color: #f0f2f5; padding: 40px 0;">
-    <div class="container" style="width: 90%; max-width: 800px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); border: 1px solid #e5e7eb;">
-      
-      <!-- Header / Logo -->
-      <div style="text-align: center; padding: 40px 0 32px; background-color: #ffffff;">
+<body>
+  <div class="container">
+    
+    <!-- Clean Logo Bar -->
+    <div class="logo-bar">
         <table align="center" border="0" cellpadding="0" cellspacing="0">
-          <tr>
-            <td style="vertical-align: middle; padding-right: 12px;">
-              <!-- Fixed SVG Paper Plane Icon (Base64 Encoded) -->
-              <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSIjMjU2M0VCIj48cGF0aCBkPSJNMiAxMmwyMC05LTkgMjAtMi05LTktMnoiLz48L3N2Zz4=" 
-                   alt="LinkJet Logo" 
-                   width="32" 
-                   height="32" 
-                   style="display: block; border: 0;" />
-            </td>
-            <td style="vertical-align: middle;">
-              <span style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 28px; font-weight: 800; line-height: 1; letter-spacing: -0.5px;">
-                <span style="color: #1e293b;">Link</span><span style="color: #2563eb;">Jet</span><span style="color: #94a3b8; font-weight: 400; font-size: 24px;">.co</span>
-              </span>
-            </td>
-          </tr>
-        </table>
-      </div>
-
-      <!-- Feature Highlight / Dashboard Preview Section -->
-      <div style="background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%); padding: 20px 0 40px 0; text-align: center; border-bottom: 1px dashed #e2e8f0;">
-        <h1 style="color: #1e293b; font-size: 28px; font-weight: 800; margin: 0 0 16px 0; letter-spacing: -0.5px;">Your New Command Center</h1>
-        <p style="color: #64748b; font-size: 16px; margin: 0 0 40px 0; max-width: 600px; margin-left: auto; margin-right: auto; line-height: 1.5;">
-           Track clicks, manage links, and build bio pages all in one place.
-        </p>
-        
-        <!-- Dashboard CSS Mockup -->
-        <div class="dashboard-preview" style="display: inline-block; position: relative; width: 90%; max-width: 500px; background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1); overflow: hidden; text-align: left;">
-            <!-- Fake Browser Header -->
-            <div style="background: #f1f5f9; padding: 10px 16px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center;">
-                <div style="display: flex; gap: 6px;">
-                    <div style="width: 10px; height: 10px; border-radius: 50%; background: #ef4444;"></div>
-                    <div style="width: 10px; height: 10px; border-radius: 50%; background: #f59e0b;"></div>
-                    <div style="width: 10px; height: 10px; border-radius: 50%; background: #22c55e;"></div>
-                </div>
-            </div>
-            
-            <!-- Dashboard Content -->
-            <div style="padding: 20px;">
-                <!-- Stats Row -->
-                <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                    <div style="flex: 1; background: #eff6ff; padding: 12px; border-radius: 8px;">
-                        <div style="font-size: 10px; color: #3b82f6; font-weight: 700; text-transform: uppercase;">Total Clicks</div>
-                        <div style="font-size: 20px; color: #1e3a8a; font-weight: 800;">12,450</div>
-                    </div>
-                    <div style="flex: 1; background: #fdf2f8; padding: 12px; border-radius: 8px;">
-                         <div style="font-size: 10px; color: #db2777; font-weight: 700; text-transform: uppercase;">Bio Views</div>
-                         <div style="font-size: 20px; color: #831843; font-weight: 800;">5,200</div>
-                    </div>
-                </div>
-                
-                <!-- Chart Area (Simple Bars) -->
-                <div style="background: #ffffff; border: 1px solid #f1f5f9; border-radius: 8px; padding: 15px; height: 100px; display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 20px;">
-                     <div style="width: 12%; height: 40%; background: #cbd5e1; border-radius: 4px;"></div>
-                     <div style="width: 12%; height: 60%; background: #cbd5e1; border-radius: 4px;"></div>
-                     <div style="width: 12%; height: 30%; background: #cbd5e1; border-radius: 4px;"></div>
-                     <div style="width: 12%; height: 80%; background: #3b82f6; border-radius: 4px;"></div>
-                     <div style="width: 12%; height: 50%; background: #cbd5e1; border-radius: 4px;"></div>
-                     <div style="width: 12%; height: 70%; background: #cbd5e1; border-radius: 4px;"></div>
-                </div>
-                
-                 <!-- Link Item -->
-                 <div style="display: flex; align-items: center; gap: 10px; border-top: 1px solid #f1f5f9; padding-top: 15px;">
-                      <div style="width: 32px; height: 32px; background: #e0e7ff; border-radius: 6px; display: flex; align-items: center; justify-content: center;">🔗</div>
-                      <div style="flex: 1;">
-                          <div style="height: 10px; width: 60%; background: #e2e8f0; border-radius: 4px; margin-bottom: 4px;"></div>
-                          <div style="height: 8px; width: 40%; background: #f1f5f9; border-radius: 4px;"></div>
-                      </div>
-                 </div>
-            </div>
-        </div>
-      </div>
-
-      <!-- Main Content -->
-      <div style="padding: 0 40px 40px;">
-        <p style="color: #334155; font-size: 17px; line-height: 28px; margin: 32px 0 24px 0; text-align: center;">
-          Hi <strong>${name}</strong>,<br>
-          We're thrilled to have you! LinkJet is designed to help you organize and grow your online presence.
-        </p>
-
-        <!-- CTA Button -->
-        <div style="text-align: center; margin-bottom: 48px;">
-          <a href="${appUrl}/dashboard" style="background: linear-gradient(to right, #2563eb, #4f46e5); color: #ffffff; text-decoration: none; padding: 16px 36px; border-radius: 50px; font-size: 16px; font-weight: 700; display: inline-block; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); letter-spacing: 0.5px;">
-            Go to Dashboard
-          </a>
-        </div>
-
-        <!-- Features Grid -->
-        <div style="border-top: 1px dashed #e2e8f0; padding-top: 32px;">
-          <h3 style="color: #0f172a; font-size: 20px; font-weight: 700; margin: 0 0 32px 0; text-align: center;">Everything you need</h3>
-          
-          <table width="100%" cellpadding="0" cellspacing="0" border="0">
             <tr>
-              <!-- Feature 1 -->
-              <td class="content-cell" width="33%" valign="top" style="padding-right: 8px;">
-                <div style="background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 20px; height: 100%; box-sizing: border-box; text-align: center;">
-                  <div style="font-size: 28px; margin-bottom: 12px; background-color: #ffffff; width: 48px; height: 48px; line-height: 48px; border-radius: 50%; margin-left: auto; margin-right: auto; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">🔗</div>
-                  <h4 style="color: #1e3a8a; font-size: 15px; font-weight: 700; margin: 0 0 8px 0;">Short Links</h4>
-                  <p style="color: #3b82f6; font-size: 13px; line-height: 20px; margin: 0;">
-                    Create branded, trackable short URLs.
-                  </p>
-                </div>
-              </td>
-              <!-- Feature 2 -->
-              <td class="content-cell" width="33%" valign="top" style="padding-left: 8px; padding-right: 8px;">
-                <div style="background-color: #faf5ff; border: 1px solid #e9d5ff; border-radius: 12px; padding: 20px; height: 100%; box-sizing: border-box; text-align: center;">
-                  <div style="font-size: 28px; margin-bottom: 12px; background-color: #ffffff; width: 48px; height: 48px; line-height: 48px; border-radius: 50%; margin-left: auto; margin-right: auto; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">✨</div>
-                  <h4 style="color: #581c87; font-size: 15px; font-weight: 700; margin: 0 0 8px 0;">Bio Pages</h4>
-                  <p style="color: #9333ea; font-size: 13px; line-height: 20px; margin: 0;">
-                    Stunning Link-in-Bio pages in minutes.
-                  </p>
-                </div>
-              </td>
-              <!-- Feature 3 -->
-              <td class="content-cell" width="33%" valign="top" style="padding-left: 8px;">
-                <div style="background-color: #fff1f2; border: 1px solid #fecdd3; border-radius: 12px; padding: 20px; height: 100%; box-sizing: border-box; text-align: center;">
-                  <div style="font-size: 28px; margin-bottom: 12px; background-color: #ffffff; width: 48px; height: 48px; line-height: 48px; border-radius: 50%; margin-left: auto; margin-right: auto; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">🌐</div>
-                  <h4 style="color: #881337; font-size: 15px; font-weight: 700; margin: 0 0 8px 0;">Domains</h4>
-                  <p style="color: #e11d48; font-size: 13px; line-height: 20px; margin: 0;">
-                    Connect your own custom domains.
-                  </p>
-                </div>
-              </td>
+                <td style="padding-right: 8px;">
+                    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzI1NjNlYiIgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIj48cGF0aCBkPSJNMiAxMmwyMC05LTkgMjAtMi05LTktMnoiLz48L3N2Zz4=" width="24" height="24" alt="Logo" style="display: block;">
+                </td>
+                <td style="font-family: 'Segoe UI', sans-serif; font-size: 22px; font-weight: 800; color: #111827; letter-spacing: -0.5px;">
+                    LinkJet<span style="color: #2563eb;">.co</span>
+                </td>
             </tr>
-          </table>
-        </div>
-
-      </div>
-
-      <!-- Footer -->
-      <div style="background-color: #f8fafc; padding: 32px 20px; text-align: center; border-top: 1px solid #e2e8f0;">
-        <div style="margin-bottom: 16px;">
-          <a href="https://twitter.com/linkjet" style="display: inline-block; margin: 0 8px; text-decoration: none;">
-            <img src="https://cdn-icons-png.flaticon.com/512/733/733579.png" width="24" height="24" alt="Twitter" style="opacity: 0.6;">
-          </a>
-          <a href="https://instagram.com/linkjet" style="display: inline-block; margin: 0 8px; text-decoration: none;">
-            <img src="https://cdn-icons-png.flaticon.com/512/733/733558.png" width="24" height="24" alt="Instagram" style="opacity: 0.6;">
-          </a>
-          <a href="https://github.com/linkjet" style="display: inline-block; margin: 0 8px; text-decoration: none;">
-            <img src="https://cdn-icons-png.flaticon.com/512/733/733609.png" width="24" height="24" alt="GitHub" style="opacity: 0.6;">
-          </a>
-        </div>
-        <p style="color: #94a3b8; font-size: 12px; margin: 0 0 12px 0;">
-          © ${new Date().getFullYear()} LinkJet.co. All rights reserved.
-        </p>
-        <p style="color: #94a3b8; font-size: 12px; margin: 0;">
-          <a href="${appUrl}/unsubscribe" style="color: #94a3b8; text-decoration: none;">Unsubscribe</a> • <a href="${appUrl}/privacy" style="color: #94a3b8; text-decoration: none;">Privacy Policy</a>
-        </p>
-      </div>
-
+        </table>
     </div>
+
+    <!-- Hero Section with Greeting -->
+    <div class="hero-section">
+      <h1 class="hero-h1">Hello ${name}!</h1>
+      <p class="intro-text">
+        We're thrilled to have you on board. LinkJet gives you the superpowers to organize your digital presence.
+      </p>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+      <div style="text-align: left; margin-bottom: 20px; font-weight: 700; color: #374151; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">
+        Get started in 3 steps:
+      </div>
+
+      <!-- Checklist Section -->
+      <div class="steps-container">
+        <!-- Step 1 -->
+        <div class="step-card">
+          <div class="step-icon">🔗</div>
+          <div class="step-content">
+            <h3>Create Short Links</h3>
+            <p>Branded, trackable links in seconds.</p>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="step-card">
+          <div class="step-icon">✨</div>
+          <div class="step-content">
+            <h3>Build Bio Pages</h3>
+            <p>One page for all your important links.</p>
+          </div>
+        </div>
+        
+        <!-- Step 3 -->
+        <div class="step-card">
+          <div class="step-icon">📈</div>
+          <div class="step-content">
+            <h3>Track Analytics</h3>
+            <p>Real-time insights on your audience.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Primary CTA -->
+      <a href="${appUrl}/dashboard" class="cta-button">
+        Go to Dashboard
+      </a>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>
+        © ${new Date().getFullYear()} LinkJet.co | An Internet Company
+      </p>
+      <div style="margin-top: 10px;">
+        <a href="${appUrl}/privacy">Privacy Policy</a> • 
+        <a href="${appUrl}/terms">Terms of Service</a> • 
+        <a href="${appUrl}/unsubscribe">Unsubscribe</a>
+      </div>
+      <div style="margin-top: 20px;">
+         <a href="https://twitter.com/linkjet" style="margin: 0 5px; text-decoration: none; font-size: 16px;">🐦</a>
+         <a href="https://instagram.com/linkjet" style="margin: 0 5px; text-decoration: none; font-size: 16px;">📸</a>
+         <a href="https://linkedin.com/company/linkjet" style="margin: 0 5px; text-decoration: none; font-size: 16px;">💼</a>
+      </div>
+    </div>
+
   </div>
 </body>
 </html>

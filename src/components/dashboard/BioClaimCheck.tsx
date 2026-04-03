@@ -27,16 +27,11 @@ export function BioClaimCheck() {
     return (
         <BioLinkClaimModal
             defaultSlug={savedClaim.slug}
-            // For forced/blocking modals, we still need onClose for internal state, 
-            // but the modal itself will hide the close button based on 'forced'.
             onClose={() => {
-                // Even if forced, we might need a way out if we ever let them cancel (e.g. explicitly),
-                // or if the payment succeeds and redirects.
-                // For now, let's keep the logic but the UI won't trigger it easily.
                 setSavedClaim(null);
                 localStorage.removeItem('pending_bio_claim');
             }}
-            forced={true}
+            forced={false}
         />
     );
 }

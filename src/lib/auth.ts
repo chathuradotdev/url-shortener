@@ -3,6 +3,8 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import { db } from "@/lib/db";
 import bcrypt from "bcryptjs";
+import { sendEmail } from "@/lib/email";
+import { getWelcomeEmailHtml } from "@/lib/email-templates";
 
 console.log("Auth options loaded. Secret length:", process.env.NEXTAUTH_SECRET?.length);
 
@@ -117,13 +119,35 @@ export const authOptions: NextAuthOptions = {
 
                     if (!dbUser) {
                         try {
+                            // 7 Day Free Trial for new Google signups
+                            const trialEndsAt = new Date();
+                            trialEndsAt.setDate(trialEndsAt.getDate() + 7);
+
                             dbUser = await db.createUser({
                                 username: user.name || user.email!.split('@')[0],
                                 email: user.email!,
                                 image: user.image || undefined,
+                                trial_ends_at: trialEndsAt.toISOString(),
                             });
+
                             // Auto-verify Google users
-                            if (dbUser) await db.verifyUser(dbUser.id);
+                            if (dbUser) {
+                                await db.verifyUser(dbUser.id);
+
+                                // Send Welcome Email
+                                try {
+                                    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+                                    const profileUrl = `${appUrl}/dashboard/settings`;
+
+                                    await sendEmail({
+                                        to: user.email!,
+                                        subject: "Welcome to LinkJet!",
+                                        html: getWelcomeEmailHtml(dbUser.username || "User", profileUrl),
+                                    });
+                                } catch (emailError) {
+                                    console.error("Failed to send welcome email to Google user:", emailError);
+                                }
+                            }
                         } catch (e) {
                             console.error("Error creating user from Google:", e);
                         }
